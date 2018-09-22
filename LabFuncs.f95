@@ -5,6 +5,7 @@ module LabFuncs
 
 contains
 	
+	
 !================================LabFuncs.f95==========================================!
 ! Contains all functions needed to compute lab dependent and detector dependent effects
 
