@@ -46,14 +46,14 @@ program runMollweide
 	  if (choice.eq.1) then
 		  nucleus = Helium
 		  E_th = 1.2d0
-		  filename_wimp = 'Moll-He-wimp.txt'
-		  filename_nu = 'Moll-He-nu.txt'
+		  filename_wimp = 'data/Moll-He-wimp.txt'
+		  filename_nu = 'data/Moll-He-nu.txt'
 		  Evals = logspace(E_th,E_max,nE_bins)  
 	   elseif (choice.eq.2) then
 		   nucleus = Fluorine
 		   E_th = 3.0d0
-		   filename_wimp = 'Moll-F-wimp.txt'
-		   filename_nu = 'Moll-F-nu.txt'
+		   filename_wimp = 'data/Moll-F-wimp.txt'
+		   filename_nu = 'data/Moll-F-nu.txt'
 		   Evals = logspace(E_th,E_max,nE_bins)
 	   end if
 	   

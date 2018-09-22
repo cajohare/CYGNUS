@@ -35,7 +35,7 @@ program runLimits
   eff_on = 0
   headtail_on = 0
   readout = 1
-  filename = 'CYGNUS100k-ideal.txt'
+  filename = 'data/CYGNUS100k-ideal.txt'
   call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
   
   
@@ -43,7 +43,7 @@ program runLimits
   eff_on = 0
   headtail_on = 0
   readout = 1
-  filename = 'CYGNUS100k-angres.txt'
+  filename = 'data/CYGNUS100k-angres.txt'
   call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
   
   
