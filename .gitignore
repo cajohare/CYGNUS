@@ -1,0 +1,17 @@
+labfuncs.mod
+like.mod
+neutrinofuncs.mod
+params.mod
+util.mod
+wimpfuncs.mod
+LabFuncs.o
+like.o
+neldermead.o
+NeutrinoFuncs.o
+params.o
+util.o
+WIMPFuncs.o
+runLimits.dSYM
+runMollweide.dSYM
+runLimits
+runMollweide
