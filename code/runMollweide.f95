@@ -11,8 +11,6 @@ program runMollweide
   double precision :: th,ph,q_rec(3),JD,x,y
   integer :: expt,np,ti,i,j,k,si,choice
   character(len=100) :: filename_wimp,filename_nu
-  
-  ! Seed rand and random
   call itime(mytime)
   call cpu_time(clock_start)
 
@@ -41,19 +39,22 @@ program runMollweide
   xvals = linspace(-2*sqrt(2.0d0),2*sqrt(2.0d0),2*np)
   yvals = linspace(-sqrt(2.0d0),sqrt(2.0d0),np)
   !----------------------------------------------------------!
+  
+  
+  
   ! DO MOLLWEIDE
   do choice = 1,2
 	  if (choice.eq.1) then
 		  nucleus = Helium
 		  E_th = 1.2d0
-		  filename_wimp = 'data/Moll-He-wimp.txt'
-		  filename_nu = 'data/Moll-He-nu.txt'
+		  filename_wimp = '../data/Moll-He-wimp.txt'
+		  filename_nu = '../data/Moll-He-nu.txt'
 		  Evals = logspace(E_th,E_max,nE_bins)  
 	   elseif (choice.eq.2) then
 		   nucleus = Fluorine
 		   E_th = 3.0d0
-		   filename_wimp = 'data/Moll-F-wimp.txt'
-		   filename_nu = 'data/Moll-F-nu.txt'
+		   filename_wimp = '../data/Moll-F-wimp.txt'
+		   filename_nu = '../data/Moll-F-nu.txt'
 		   Evals = logspace(E_th,E_max,nE_bins)
 	   end if
 	   

@@ -16,7 +16,7 @@ neldermead.o: neldermead.f
 		$(FC) $(FCFLAGS) -c neldermead.f
 
 $(PROGRAMS): $(OBJFILES)
-	$(FC) $(FCFLAGS) $@.f95  -o ../$@ $^
+	$(FC) $(FCFLAGS) $@.f95  -o $@ $^
 
 clean:
 	rm -f *.o *.mod
