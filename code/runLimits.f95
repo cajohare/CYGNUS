@@ -17,9 +17,9 @@ program runLimits
 
 	!----------------------------------------------------------!
 	! Set binning (CONTROLS ACCURACY/EFFICIENCY OF CODE)
-	  nE_bins = 20
-	  nT_bins = 1
-	  nside = 4  
+	  nE_bins = 50
+	  nT_bins = 20
+	  nside = 0  
 	! Mass range for limits
 	  nm = 100
 	  m_min = 0.5d0
@@ -31,24 +31,16 @@ program runLimits
 	!----------------------------------------------------------!
 
 
-	! CYGNUS 1000
+	! CYGNUS 100k
 	  ! Idealised
-	  VolTime = 1000.0*3.0d0
+	  VolTime = 1000.0e2*3.0d0
 	  sig_E = 0.0d0
 	  energy_on = 1
 	  angres_on = 0
 	  eff_on = 0
 	  headtail_on = 0
 	  readout = 1
-	  filename = '../data/CYGNUS1000-ideal.txt'
-	  call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-
-	  ! With angular resolution
-	  angres_on = 1
-	  eff_on = 0
-	  headtail_on = 0
-	  readout = 1
-	  filename = '../data/CYGNUS100k-angres.txt'
+	  filename = '../data/CYGNUS100k-noDirection.txt'
 	  call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 
 

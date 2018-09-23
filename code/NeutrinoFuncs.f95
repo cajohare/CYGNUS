@@ -28,13 +28,14 @@ subroutine BackgroundRecoilDistribution
 	RD_red = 0.0d0
 	
 	! Load all Neutrino RDs	
-	call NeutrinoRD(nTot_bins_full,RD(:,1:n_bg))
+	call NeutrinoRD(nTot_bins_full,RD)
 
 	! Get total rates and rescale RD_bg by them
 	do s = 1,n_bg
 		R_bg(s) = sum(RD(:,s))
 		RD(:,s) = RD(:,s)/R_bg(s)
-	end do		
+	end do	
+
 	
 	! If directional, also smear by angular resolution
 	if (nside.gt.0) then
@@ -57,6 +58,7 @@ subroutine BackgroundRecoilDistribution
 	
 	! Multiply whole thing by Exposure so RD = Num events/R_bg
 	RD_bg = RD_bg*Exposure
+
 end subroutine BackgroundRecoilDistribution
 !---------------------------------------------------------------------------------------------!
 
@@ -78,32 +80,39 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 	if (nside.eq.0) then
 	    do si = 1,n_nu  
 	       E_r1 = E_bin_edges(1)		   
-	       fE_r1 =  eff_HT(1)*NeutrinoRecoilEnergySpectrum(E_r1,E_nu_all(:,si),Flux_all(:,si)) + &
-		   			(1.0-eff_HT(1))*NeutrinoRecoilEnergySpectrum(-1.0d0*E_r1,E_nu_all(:,si),Flux_all(:,si))
+	       fE_r1 =  NeutrinoRecoilEnergySpectrum(E_r1,E_nu_all(:,si),Flux_all(:,si))
 	       do j = 1,nE_bins
 	          E_r2 = E_bin_edges(j+1)
-			  fE_r2 =  eff_HT(j+1)*NeutrinoRecoilEnergySpectrum(E_r2,E_nu_all(:,si),Flux_all(:,si)) + &
-		   			(1.0-eff_HT(j+1))*NeutrinoRecoilEnergySpectrum(-1.0d0*E_r2,E_nu_all(:,si),Flux_all(:,si))
+			  fE_r2 =  NeutrinoRecoilEnergySpectrum(E_r2,E_nu_all(:,si),Flux_all(:,si))
 	          dRdE(j) = (E_r2-E_r1)*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0d0
 	          E_r1 = E_r2
 	          fE_r1 = fE_r2
 	       end do
 		   RD(1:nE_bins,si) = dRdE
 	   
-		   ! Annual modulation correction for Solar neutrinos only
-		   if (si.lt.n_nu-1) then
-				ii = 1
-				do i = 1,nT_bins
-					i1 = ii
-					i2 = i1+nE_bins-1
+		   ! Correct for annual modulation correction
+			ii = 1
+			do i = 1,nT_bins
+				i1 = ii
+				i2 = i1+nE_bins-1
+				if (si.lt.n_nu-1) then
+					! Solar neutrinos:
 					! Flux is scaled by 1/EarthSunDistance^2 but since Flux is already averaged
 					! We need to also divide by Integral(1/R^2) over one year
 					! Integral_inv_EarthSun_sq is defined in params.f95
-					RD(i1:i2,si) = (dRdE/Integral_inv_EarthSun_sq)*(1.0d0/EarthSunDistance(T_bin_centers(i))**2.0d0)
-					ii = i2+1
-				end do
-				RD(:,si) = RD(:,si)/(1.0d0*nT_bins)
-			end if
+					RD(i1:i2,si) = (dRdE/Integral_inv_EarthSun_sq)&
+							*(1.0d0/EarthSunDistance(T_bin_centers(i))**2.0d0)
+				else 
+					! dsnb and atm neutrinos:
+					! Currently am not incorporating any modulation since the
+					! event rate is nonexistent anyway
+					RD(i1:i2,si) = dRdE
+				end if
+				ii = i2+1
+			end do
+
+			
+			RD(:,si) = RD(:,si)/(1.0d0*nT_bins)
 	    end do
 	end if	
 

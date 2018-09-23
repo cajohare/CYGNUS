@@ -131,15 +131,19 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 	end do
 	N_tot_bg = sum(N_exp_bg)
 
+
+
+
 	! MASS SCAN:
 	do im = 1,nm 
 		m_chi = m_vals(im)
+				
 		call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
 		
 		! CROSS SECTION SCAN
 		do j = 1,ns
 			sigma_p = sigma_p_vals(j)
-			if (sum(RD_wimp*sigma_p).gt.0.5d0) then	! Generally need >0.5 events to see DM	
+			if (sum(RD_wimp*sigma_p).gt.0.1d0) then	! Generally need >0.5 events to see DM	
 				N_exp = N_exp_bg + RD_wimp*sigma_p
 				N_obs = N_exp  ! Observed=Expected for Asimov data
 
@@ -158,7 +162,7 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 				  IQUAD,SIMP,VAR,llhood0,IFAULT0)
 				  
 				! Test statistic 
-				D01 = -2.0*(L1-L0)					
+				D01 = -2.0*(L1-L0)		
 				if (D01.ge.9.0d0) then ! Median 3sigma detection -> D = 9
 					! Do interpolation to find discovery limit cross section
 					DL(im) = 10.0d0**(interp1D((/D_prev,D01/),(/log10(s_prev),log10(sigma_p)/),2,9.0d0))
@@ -166,32 +170,13 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 				end if
 				s_prev = sigma_p ! Reset for interpolation
 				D_prev = D01
+				
 			end if				
 		end do							
 		write(*,*) 'CYG-DL:',im,'m = ',m_chi,'DL = ',DL(im),'Signal:',sum(RD_wimp*sigma_p),'BG:',N_tot_bg
+		!stop
 	end do
 end subroutine
-	
-	
-!===================================USEFUL SUMS=========================================!
-function lnPF(nbins,Nob,Nex)! SUM OF LOG(POISSON PDF)
-	! Uses log-gamma function to generalise the factorial 
-	! to non-integer number of observed events (i.e. Asimov data)
-	double precision :: lnPF,Nex(nbins),Nob(nbins)
-	integer :: ii,nbins
-	lnPF = 0.0d0
-	do ii = 1,nbins
-		lnPF = lnPF + Nob(ii)*log(Nex(ii)) - Nex(ii) - lgamma(Nob(ii)+1.0)
-	end do	
-end function
-
-function lnGF(Rob,Rex,Rer) ! SUM OF LOG(GAUSSIAN PDF)
-	! for x=Rob, mu = Rex, sig = Rer
-	double precision :: Rob(:),Rex(:),Rer(:),lnGF
-	lnGF = sum(-1.0d0*log(Rer)-0.5d0*log(2.0d0*pi)&
-	        -(Rob-Rex)**2.0d0/(2.0d0*Rer**2.0d0))
-end function
-	
 	
 	
 	
@@ -210,9 +195,11 @@ end function
 
 	! Signal events	
 	N_exp1 = N_exp0 + RD_wimp*(10.0d0**X(1)) ! Add signal events sig
+
 	
 	! LL = log(Poiss. for N_obs events) + log(Gauss. for R_bg normalisations)
 	LL = -1.0*(lnPF(nTot_bins,N_obs,N_exp1)+lnGF(X(2:n_bg+1),R_bg,R_bg_err*R_bg))
+
  end subroutine llhood1
   
 !---------------------------------SIGNAL+BACKGROUND-----------------------------------!	 
@@ -230,7 +217,25 @@ subroutine llhood0(X,  LL)
 	LL = -1.0*(lnPF(nTot_bins,N_obs,N_exp0)+lnGF(X,R_bg,R_bg_err*R_bg))
   end subroutine llhood0
   	
-  
+!===================================USEFUL SUMS=========================================!
+function lnPF(nbins,Nob,Nex)! SUM OF LOG(POISSON PDF)
+	! Uses log-gamma function to generalise the factorial 
+	! to non-integer number of observed events (i.e. Asimov data)
+	double precision :: lnPF,Nex(nbins),Nob(nbins)
+	integer :: ii,nbins
+	lnPF = 0.0d0
+	do ii = 1,nbins
+		lnPF = lnPF + Nob(ii)*log(Nex(ii)) - Nex(ii) - lgamma(Nob(ii)+1.0)
+	end do	
+end function
+
+function lnGF(Rob,Rex,Rer) ! SUM OF LOG(GAUSSIAN PDF)
+	! for x=Rob, mu = Rex, sig = Rer
+	double precision :: Rob(:),Rex(:),Rer(:),lnGF
+	lnGF = sum(-1.0d0*log(Rer)-0.5d0*log(2.0d0*pi)&
+	       	 -(Rob-Rex)**2.0d0/(2.0d0*Rer**2.0d0))
+end function
+
  
 
 end module like

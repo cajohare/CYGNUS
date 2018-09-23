@@ -102,12 +102,12 @@ function HeadTailEfficiency(E_r,ni) result(eff_HT)
 	double precision :: E_r(ni),eff_HT(ni)	
 	if (headtail_on.eq.1) then
 		if (nucleus(1).eq.Fluorine(1)) then
-			eff_HT = 1.0d0
+			eff_HT = 0.5d0
 		elseif (nucleus(1).eq.Helium(1)) then
-			eff_HT = 1.0d0
+			eff_HT = 0.5d0
 		end if		
 	else
-		eff_HT = 0.0d0
+		eff_HT = 1.0d0
 	end if	
 end function
 !---------------------------------------------------------------------------------------!

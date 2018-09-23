@@ -37,13 +37,13 @@ subroutine SHM
 	sig_v = v_LSR/sqrt(2.0d0)
 	v_esc = 544.0d0
 	rho_0 = 0.3d0
-	if (nT_bins.gt.1) then
+	!if (nT_bins.gt.1) then
   	  	do bin = 1,nT_bins
 		   v_lab_all(bin,:) = LabVelocity(T_bin_centers(bin))
     	end do	
-	else
-		 v_lab_all(1,:) = v_pec + (/0.0d0,v_LSR,0.0d0/) 
-	end if 
+		!else
+	!	 v_lab_all(1,:) = v_pec + (/0.0d0,v_LSR,0.0d0/) 
+	!end if 
 end subroutine
 	
 !----------------------------- NEW STANDARD HALO MODEL ---------------------------------!	
@@ -70,7 +70,6 @@ subroutine WIMPRecoilDistribution
 	integer :: i,i1,i2,ii	
 	! Set a fiducial cross section just so numbers aren't crazy
 	sigma_p = 1.0d-45
-	
 	! Choose whether directional or non-directional is used
 	ii = 1
 	do i = 1,nT_bins
@@ -118,7 +117,7 @@ subroutine WIMPRD_3D(RD,tbin)
 	! correct for efficiencies
 	eff = Efficiency(E_bin_edges,nE_bins+1)
 	eff_HT = HeadTailEfficiency(E_bin_edges,nE_bins+1)
-	
+
 	ii = 1
 	do k = 1,npix
 		E_r1 = E_bin_edges(1)*x_pix(k,:)
@@ -130,17 +129,18 @@ subroutine WIMPRD_3D(RD,tbin)
 			RD(ii) = dpix*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
 			E_r1 = E_r2
 			fE_r1 = fE_r2
-			ii = ii+1
+			ii = ii+1			
 		end do
 	end do
+	
 end subroutine WIMPRD_3D
   
 !-------------------- Non-directional recoil distribution-------------------------------------!
 subroutine WIMPRD_Energy(RD,tbin)
 	integer, parameter :: nbins_full=1000
 	double precision :: E_lower,E_upper,wid
-	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,R,R_s,eff_full,eff
-	double precision :: fE_r1,fE_r2,E_r1,E_r2,RD(nE_bins),E_r
+	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,R,R_s,eff_full
+	double precision :: fE_r1,fE_r2,E_r1,E_r2,RD(nE_bins),E_r,eff(nE_bins+1)
 	integer :: i,j,ii,nbins,ia,tbin
 	eff = Efficiency(E_bin_edges,nE_bins+1)
 	if (sig_E.gt.0.0d0) then
@@ -253,6 +253,7 @@ function WIMPRate_Energy(E_r,tbin) result(dRdE)
 	dRdE = (c_cm**2.0)*((rho_0*1.0d6*A**2.0*sigma_p)/(2*m_chi_kg*mu_p**2.0))*gvmin
 	dRdE = dRdE*3600*24*365*1000.0d0 ! convert to per ton-year
 	dRdE = dRdE*FormFactorHelm(E_r,A)**2.0d0 ! apply form factor
+	
 end function WIMPRate_Energy
 
 
@@ -261,7 +262,14 @@ function WIMPRate_Direction(E,tbin) result(dRdEdO)
 	double precision :: Erot(3),E(3),x(3),E_r,dRdEdO,m_p,m_N,m_chi_kg,mu_p,c_cm,fhat
 	double precision :: v_min,N_esc,vlabdotq,m_N_keV,mu_N,v_lab(3)
 	integer :: A,tbin
-
+	
+	! Calculate relavant directions
+	v_lab = v_lab_all(tbin,:)	! lab velocity   
+	E_r = sqrt(sum(E**2.0)) ! Recoil energy
+	x = (/E(1)/E_r,E(2)/E_r,E(3)/E_r/) ! Recoil direction
+	vlabdotq = sum(x*v_lab) ! Lab-recoil projection
+	
+	
 	! Relevant constants
 	A = sum(nucleus) 
 	m_p = 0.9315*1e6
@@ -272,12 +280,6 @@ function WIMPRate_Direction(E,tbin) result(dRdEdO)
 	m_N_keV = A*0.9315*1.0d6
 	mu_N = 1.0d6*m_chi*m_N_keV/(1.0d6*m_chi + m_N_keV)
 	v_min = (sqrt(2.0d0*m_N_keV*E_r)/(2.0d0*mu_N))*3.0d8/1000.0d0
-
-	! Calculate relavant directions
-	v_lab = v_lab_all(tbin,:)	! lab velocity   
-	E_r = sqrt(sum(E**2.0)) ! Recoil energy
-	x = (/E(1)/E_r,E(2)/E_r,E(3)/E_r/) ! Recoil direction
-	vlabdotq = sum(x*v_lab) ! Lab-recoil projection
 
 	! Compute Radon transform fhat
 	N_esc = erf(v_esc/(sqrt(2.0)*sig_v))&

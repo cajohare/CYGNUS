@@ -52,7 +52,9 @@ subroutine PreAllocate
 		else
 			nTot_bins = npix*nT_bins 
 			nTot_bins_full = nT_bins*nE_bins*npix
-		end if	
+		end if
+	else
+		nTot_bins_full = nTot_bins	
 	end if	
 	allocate(RD_wimp(nTot_bins))
 	allocate(RD_bg(nTot_bins,n_bg))
