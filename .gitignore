@@ -13,5 +13,5 @@ util.o
 WIMPFuncs.o
 runLimits.dSYM
 runMollweide.dSYM
-runLimits
+runCYGNUS1000
 runMollweide

@@ -1,27 +1,13 @@
 c This file contains two versions of the Nelder & Mead simplex algorithm
-c for function minimization.   The first is that published in the journal
-c of Applied Statistics.   This does not include the fitting of a quadratic
+c for function minimization. This does not include the fitting of a quadratic
 c surface, which provides the only satisfactory method of testing whether
 c a minimum has been found.   The search for a minimum is liable to
 c premature termination.
-c The second version is one which has been developed jointly by CSIRO and
-c Rothamsted, and does include the quadratic-surface fitting.
-c
-c
       subroutine nelmin(fn, n, start, xmin, ynewlo, reqmin, step,
      #     konvge, kcount, icount, numres, ifault)
       implicit double precision (a-h,o-z)
-c
-c     Simplex function minimisation procedure due to Nelder+Mead(1965),
-c     as implemented by O'Neill(1971, Appl.Statist. 20, 338-45), with
-c     subsequent comments by Chambers+Ertel(1974, 23, 250-1), Benyon(1976,
-c     25, 97) and Hill(1978, 27, 380-2)
-c                                                                           
-c        Algorithm AS 47  Applied Statistics (J.R. Statist. Soc. C),
-c        (1971) Vol.20, No. 3
-c
+
 c     The Nelder-Mead Simplex Minimisation Procedure
-c
 c
 c        Purpose :: To find the minimum value of a user-specified 
 c                   function
@@ -56,15 +42,9 @@ c
 c        All variables and arrays are to be declared in the calling
 c        program as double precision.
 c
-c
 c        Auxiliary algorithm :: The double precision function
 c        subprogram fn(a) calculates the function value at point a.
 c        a is double precision with n elements.
-c
-c
-c        Reference :: Nelder,J.A. and Mead,R.(1965).  A simplex method
-c        for function minimization.  Computer J., Vol.7,308-313.
-c
 c************************************************************************
 c
       double precision start(n), xmin(n), ynewlo, reqmin, step(n),
@@ -279,23 +259,8 @@ c----------------------------------------------------------------------
 c
       SUBROUTINE MINIM(P,STEP,NOP,FUNC,MAX,IPRINT,STOPCR,NLOOP,IQUAD,
      1  SIMP,VAR,FUNCTN,IFAULT)
-C
 C     A PROGRAM FOR FUNCTION MINIMIZATION USING THE SIMPLEX METHOD.
 C     The minimum found will often be a local, not a global, minimum.
-C
-C     FOR DETAILS, SEE NELDER & MEAD, THE COMPUTER JOURNAL, JANUARY 1965
-C
-C     PROGRAMMED BY D.E.SHAW,
-C     CSIRO, DIVISION OF MATHEMATICS & STATISTICS
-C     P.O. BOX 218, LINDFIELD, N.S.W. 2070
-C
-C     WITH AMENDMENTS BY R.W.M.WEDDERBURN
-C     ROTHAMSTED EXPERIMENTAL STATION
-C     HARPENDEN, HERTFORDSHIRE, ENGLAND
-C
-C     Further amended by Alan Miller,
-C     CSIRO, Division of Mathematics & Statistics
-C     Private Bag 10, CLAYTON, VIC. 3168
 C
 C     ARGUMENTS:-
 C     P()     = INPUT, STARTING VALUES OF PARAMETERS
@@ -353,11 +318,6 @@ C       N.B. P, STEP AND VAR (IF IQUAD = 1) MUST HAVE DIMENSION AT LEAST NOP
 C            IN THE CALLING PROGRAM.
 C       THE DIMENSIONS BELOW ARE FOR A MAXIMUM OF 20 PARAMETERS.
 C      The dimension of BMAT should be at least NOP*(NOP+1)/2.
-C
-C****      N.B. This version is in DOUBLE PRECISION throughout
-C
-C       LATEST REVISION - 11 August 1991
-C
 C*****************************************************************************
 C
       implicit double precision (a-h, o-z)

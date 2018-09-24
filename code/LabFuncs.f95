@@ -21,6 +21,7 @@ contains
 ! HeadTailEfficiency: prob of correct sense recognition eff_HT = (0 -> 1)
 
 ! 3. Detector directional integrals
+! LoadReadout: 
 ! IntegrateOverEnergies: Converts an RD into direction-only data
 ! SmearRD: Applies the preloaded angular resolution curve sig_gamma to the RD
 ! Smear: The function for actually smearing the angular distribution
@@ -41,6 +42,9 @@ contains
 ! Rgal2lab: Full galactic system to lab system
 ! lab2gal: Lab system to galactic system
 !=======================================================================================!
+
+
+
 
 
 
@@ -109,6 +113,43 @@ function HeadTailEfficiency(E_r,ni) result(eff_HT)
 	else
 		eff_HT = 1.0d0
 	end if	
+end function
+
+
+!----------------------------Load Everything---------------------------------------------!
+function LoadReadout(ro) result(ReadoutName)
+	integer :: ro 
+	character(len=100) :: ReadoutName 
+	if (ro.eq.0) then
+		ReadoutName = 'Ideal'
+	elseif (ro.eq.0) then
+		ReadoutName = 'Pixel'
+	elseif (ro.eq.0) then
+		ReadoutName = 'Strip'
+	elseif (ro.eq.0) then
+		ReadoutName = 'Optical'
+	elseif (ro.eq.0) then
+		ReadoutName = 'Wire'
+	elseif (ro.eq.0) then
+		ReadoutName = 'Pad'
+	elseif (ro.eq.0) then
+		ReadoutName = 'Planar'
+	elseif (ro.eq.0) then
+		ReadoutName = 'Nondirectional'
+	end if
+	
+	open(unit=1300,file='../readouts/'//ReadoutName//'-EnergyRes.txt')
+	open(unit=1301,file='../readouts/'//ReadoutName//'-Efficiency.txt')
+	open(unit=1302,file='../readouts/'//ReadoutName//'-AngRes.txt')
+	open(unit=1303,file='../readouts/'//ReadoutName//'-HeadTail.txt')
+	
+	do i = 1,200
+		read(1300,*) sig_E_F(i),sig_E_He(i)
+		read(1301,*) eff_F(i),eff_He(i)
+		read(1302,*) angres_F(i),angres_He(i)
+		read(1303,*) eff_HT_F(i),eff_HT_He(i)
+	end do
+	
 end function
 !---------------------------------------------------------------------------------------!
 

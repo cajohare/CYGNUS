@@ -38,8 +38,8 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	character(len=*) :: filename
 	
     write(*,*) '----------------------------------------------------'
-    write(*,*) 'Start CYGNUS Limits:'
-	write(*,*) 'Experiment:',trim(filename)
+    write(*,*) 'Start Limits:'
+	write(*,*) 'Filename:',trim(filename)
 	
 	! CYGNUS is at Boubly
 	lat = Boulby(1)

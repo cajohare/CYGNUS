@@ -4,7 +4,7 @@ FCFLAGS = -O3 -fopenmp -g -ffree-line-length-none -fbounds-check
 #FCFLAGS += -I$(HEALPIX)/include -L$(HEALPIX)/lib -lhealpix -lcfitsio # and this is how you link it
 
 OBJFILES = params.o neldermead.o util.o LabFuncs.o WIMPFuncs.o NeutrinoFuncs.o like.o
-PROGRAMS = runLimits runMollweide
+PROGRAMS = runCYGNUS1000 runMollweide
 
 
 all: clean $(OBJFILES) $(PROGRAMS)
