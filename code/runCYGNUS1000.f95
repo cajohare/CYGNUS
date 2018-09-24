@@ -37,7 +37,6 @@ program runCYGNUS1000
 	
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
 	VolTime = 1000.0*3.0d0
-	sig_E = 0.0d0 ! energy res. currently switched since it is largely unimportant
 	energy_on = 1 ! energy info is currently turned on for best limits
 
 	write(*,*) '====================================================='
@@ -70,18 +69,20 @@ program runCYGNUS1000
 	end if
 
 	do readout = loopmin,loopmax
-		fn_end = ReadoutName(readout)
+		call LoadReadout(readout,	fn_end)
 		write(*,*) 'Readout = ',fn_end
 		write(*,*) '----------------------------------------------------'
 
 		if ((readout_selection.eq.1).or.((readout_selection.eq.7))) then
 			angres_on = 0
-			eff_on = 0
+			efficiency_on = 0
 			headtail_on = 0
+			energyres_on = 0
 		else
 			angres_on = 1
-			eff_on = 1
+			efficiency_on = 1
 			headtail_on = 1
+			energyres_on = 0
 		end if
 
 

@@ -140,10 +140,10 @@ subroutine WIMPRD_Energy(RD,tbin)
 	integer, parameter :: nbins_full=1000
 	double precision :: E_lower,E_upper,wid
 	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,R,R_s,eff_full
-	double precision :: fE_r1,fE_r2,E_r1,E_r2,RD(nE_bins),E_r,eff(nE_bins+1)
+	double precision :: fE_r1,fE_r2,E_r1,E_r2,RD(nE_bins),E_r,eff(nE_bins+1),sig_E(nbins_full)
 	integer :: i,j,ii,nbins,ia,tbin
 	eff = Efficiency(E_bin_edges,nE_bins+1)
-	if (sig_E.gt.0.0d0) then
+	if (energyres_on.eq.1) then
 	    ! Correct for energy resolution first
 	    E_lower = 1.0d-8 ! keV
 	    E_upper = 120.0d0 ! keV
@@ -152,6 +152,7 @@ subroutine WIMPRD_Energy(RD,tbin)
 	       E_full(i) = E_lower*10.0d0**((i-1)*wid)
 	    end do
 		eff_full = Efficiency(E_full,nbins_full)
+		sig_E = EnergyResolution(E_full,nbins_full)
 	
 	    do ia = 1,nbins_full
 			dRdE_full(ia) = WIMPRate_Energy(E_full(ia),tbin)

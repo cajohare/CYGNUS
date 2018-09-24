@@ -16,12 +16,13 @@ contains
 ! FormFactorHelm: Helm form factor, currently the only one I can be bothered with
 
 ! 2. Detector performance
+! EnergyResolution: charge detection resolution sig_E [keV]
 ! Efficiency: charge detection efficiency eff = (0 -> 1)
 ! AngularResolution: energy dependent angular resolution curve in radians
 ! HeadTailEfficiency: prob of correct sense recognition eff_HT = (0 -> 1)
+! LoadReadout: loads readout detector performance data files 
 
 ! 3. Detector directional integrals
-! LoadReadout: 
 ! IntegrateOverEnergies: Converts an RD into direction-only data
 ! SmearRD: Applies the preloaded angular resolution curve sig_gamma to the RD
 ! Smear: The function for actually smearing the angular distribution
@@ -70,31 +71,55 @@ end function FormFactorHelm
 
 
 !==============================Detector Performanc======================================!
-!----------------------------Load Detector Efficiency curve-----------------------------!
-function Efficiency(E_r,ni) result(eff)
-	integer :: i,ni
-	double precision :: E_r(ni),eff(ni),s1,Ec,EC2		
-	if (eff_on.eq.1) then
+!----------------------------Load Detector Resolution curve-----------------------------!
+function EnergyResolution(E_r,ni) result(sig_E)
+	integer :: i,ni,nuc
+	double precision :: E_r(ni),sig_E(ni),s1,Ec,EC2		
+	if (energyres_on.eq.1) then
 		if (nucleus(1).eq.Fluorine(1)) then
-			eff = 1.0d0
+			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
-			eff = 1.0d0
+			nuc = 2
 		end if		
+		do i = 1,ni
+			sig_E(i) = E_vals(i)*interp1D(E_vals,energyres_data(:,nuc),1000,E_r(i))
+		end do
+	else
+		sig_E = 1.0d0
+	end if	
+end function
+
+!---------------------------------Load  Efficiency curve-------------------------------!
+function Efficiency(E_r,ni) result(eff)
+	integer :: i,ni,nuc
+	double precision :: E_r(ni),eff(ni),s1,Ec,EC2		
+	if (efficiency_on.eq.1) then
+		if (nucleus(1).eq.Fluorine(1)) then
+			nuc = 1
+		elseif (nucleus(1).eq.Helium(1)) then
+			nuc = 2
+		end if		
+		do i = 1,ni
+			eff(i) = interp1D(E_vals,efficiency_data(:,nuc),1000,E_r(i))
+		end do
 	else
 		eff = 1.0d0
-	end if	
+	end if
 end function
 
 !----------------------------Load Angular resolution curve------------------------------!
 function AngularResolution(E_r,ni) result(sig_gamma)
-	integer :: i,ni
+	integer :: i,ni,nuc
 	double precision :: E_r(ni),sig_gamma(ni)		
 	if (angres_on.eq.1) then
 		if (nucleus(1).eq.Fluorine(1)) then
-			sig_gamma = 30.0d0*pi/180.0d0
+			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
-			sig_gamma = 30.0d0*pi/180.0d0
+			nuc = 2
 		end if		
+		do i = 1,ni
+			sig_gamma(i) = interp1D(E_vals,angres_data(:,nuc),1000,E_r(i))*(pi/180.0d0)
+		end do
 	else
 		sig_gamma = 0.0d0
 	end if	
@@ -102,14 +127,17 @@ end function
 
 !----------------------------Load Head-tail efficiency curve-----------------------------!
 function HeadTailEfficiency(E_r,ni) result(eff_HT)
-	integer :: i,ni
+	integer :: i,ni,nuc
 	double precision :: E_r(ni),eff_HT(ni)	
 	if (headtail_on.eq.1) then
 		if (nucleus(1).eq.Fluorine(1)) then
-			eff_HT = 0.5d0
+			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
-			eff_HT = 0.5d0
+			nuc = 2
 		end if		
+		do i = 1,ni
+			eff_HT(i) = interp1D(E_vals,headtail_data(:,nuc),1000,E_r(i))
+		end do
 	else
 		eff_HT = 1.0d0
 	end if	
@@ -117,40 +145,51 @@ end function
 
 
 !----------------------------Load Everything---------------------------------------------!
-function LoadReadout(ro) result(ReadoutName)
-	integer :: ro 
+subroutine LoadReadout(ro, ReadoutName)
+	integer :: ro,i
 	character(len=100) :: ReadoutName 
+	double precision :: Ei
+	
+	! Set readout name
 	if (ro.eq.0) then
 		ReadoutName = 'Ideal'
-	elseif (ro.eq.0) then
+	elseif (ro.eq.1) then
 		ReadoutName = 'Pixel'
-	elseif (ro.eq.0) then
+	elseif (ro.eq.2) then
 		ReadoutName = 'Strip'
-	elseif (ro.eq.0) then
+	elseif (ro.eq.3) then
 		ReadoutName = 'Optical'
-	elseif (ro.eq.0) then
+	elseif (ro.eq.4) then
 		ReadoutName = 'Wire'
-	elseif (ro.eq.0) then
+	elseif (ro.eq.5) then
 		ReadoutName = 'Pad'
-	elseif (ro.eq.0) then
+	elseif (ro.eq.6) then
 		ReadoutName = 'Planar'
-	elseif (ro.eq.0) then
+	elseif (ro.eq.7) then
 		ReadoutName = 'Nondirectional'
 	end if
 	
-	open(unit=1300,file='../readouts/'//ReadoutName//'-EnergyRes.txt')
-	open(unit=1301,file='../readouts/'//ReadoutName//'-Efficiency.txt')
-	open(unit=1302,file='../readouts/'//ReadoutName//'-AngRes.txt')
-	open(unit=1303,file='../readouts/'//ReadoutName//'-HeadTail.txt')
+	! Load all the data files needed
+	open(unit=1300,file='../readouts/energyres/'//trim(ReadoutName)//'-EnergyRes.txt')
+	open(unit=1301,file='../readouts/efficiency/'//trim(ReadoutName)//'-Efficiency.txt')
+	open(unit=1302,file='../readouts/angres/'//trim(ReadoutName)//'-AngRes.txt')
+	open(unit=1303,file='../readouts/headtail/'//trim(ReadoutName)//'-HeadTail.txt')
 	
-	do i = 1,200
-		read(1300,*) sig_E_F(i),sig_E_He(i)
-		read(1301,*) eff_F(i),eff_He(i)
-		read(1302,*) angres_F(i),angres_He(i)
-		read(1303,*) eff_HT_F(i),eff_HT_He(i)
+	! Allocate all data to the right arrays
+	do i = 1,1000
+		read(1300,*) E_vals(i),energyres_data(i,:)
+		read(1301,*) Ei,efficiency_data(i,:)
+		read(1302,*) Ei,angres_data(i,:)
+		read(1303,*) Ei,headtail_data(i,:)
 	end do
 	
-end function
+	! Remeber to close the file or you will let "him" out
+	close(1300)
+	close(1301)
+	close(1302)
+	close(1303)
+	
+end subroutine
 !---------------------------------------------------------------------------------------!
 
 

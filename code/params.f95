@@ -54,10 +54,15 @@ double precision :: long ! longitude of experiment in degrees
 double precision :: Exposure ! Exposure in ton-years
 double precision :: E_th ! Min analysis energy
 double precision :: E_max ! Max analysis energy
-double precision :: sig_E ! Energy resolution
 double precision :: VolTime ! TPC Volume x Time
+double precision,dimension(1000) :: E_vals ! Energy values for detector performance
+double precision,dimension(1000,2) :: energyres_data ! energy resolution (He,F)
+double precision,dimension(1000,2) :: efficiency_data ! efficiency (He,F)
+double precision,dimension(1000,2) :: headtail_data ! headtail eff. (He,F)
+double precision,dimension(1000,2) :: angres_data ! angular resolution (He,F)
 integer :: nucleus(2) ! target nucleus = (Number of neutrons, number of protons)
-integer :: eff_on ! Switch for turning efficiency on
+integer :: energyres_on ! Switch for turning efficiency on
+integer :: efficiency_on ! Switch for turning efficiency on
 integer :: angres_on ! Switch for turning angular resolution on
 integer :: headtail_on ! Switch for turning head-tail efficiency on
 integer :: Energy_on ! Switch for turning energy information on
