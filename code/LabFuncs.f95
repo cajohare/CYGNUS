@@ -73,9 +73,9 @@ end function FormFactorHelm
 !==============================Detector Performanc======================================!
 !----------------------------Load Detector Resolution curve-----------------------------!
 function EnergyResolution(E_r,ni) result(sig_E)
-	integer :: i,ni,nuc
-	double precision :: E_r(ni),sig_E(ni),s1,Ec,EC2		
-	if (energyres_on.eq.1) then
+	integer :: i,nuc,ni
+	double precision :: E_r(ni),sig_E(ni)	
+	if (energyres_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
@@ -91,9 +91,9 @@ end function
 
 !---------------------------------Load  Efficiency curve-------------------------------!
 function Efficiency(E_r,ni) result(eff)
-	integer :: i,ni,nuc
+	integer :: i,nuc,ni
 	double precision :: E_r(ni),eff(ni),s1,Ec,EC2		
-	if (efficiency_on.eq.1) then
+	if (efficiency_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
@@ -109,9 +109,9 @@ end function
 
 !----------------------------Load Angular resolution curve------------------------------!
 function AngularResolution(E_r,ni) result(sig_gamma)
-	integer :: i,ni,nuc
+	integer :: i,nuc,ni
 	double precision :: E_r(ni),sig_gamma(ni)		
-	if (angres_on.eq.1) then
+	if (angres_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
@@ -129,7 +129,7 @@ end function
 function HeadTailEfficiency(E_r,ni) result(eff_HT)
 	integer :: i,ni,nuc
 	double precision :: E_r(ni),eff_HT(ni)	
-	if (headtail_on.eq.1) then
+	if (headtail_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
@@ -213,9 +213,10 @@ end subroutine
 !-------------------------Smear the full Energy-Time-Direction RD-----------------------!
 subroutine SmearRD(RD)
 	integer :: i,ii,k,ibin
-	double precision :: sig_gamma(nE_bins),RD(nTot_bins),RDpix(npix),RD_smeared(nTot_bins)
+	double precision :: sig_gamma(nE_bins),RD(nTot_bins_full),RDpix(npix),RD_smeared(nTot_bins_full)
 	! weird loop structures just getting round the stupid way I set up the binning order
 	sig_gamma = AngularResolution(E_bin_centers,nE_bins)
+	RD_smeared = RD
 	do ibin = 1,nE_bins
 		do i = 1,nT_bins
 			do k = 1,npix
@@ -232,7 +233,7 @@ subroutine SmearRD(RD)
 					ii = (i-1)*npix*nE_bins + (k-1)*nE_bins + ibin
 					!write(*,*) ibin,i,k,ii,RD(ii),RDpix(k)
 					RD_smeared(ii) = RDpix(k)
-
+					!write(*,*) k,RD(ii),RD_smeared(ii),sig_gamma(ibin)
 				end do
 			end do	
 		end if		
@@ -255,24 +256,26 @@ subroutine Smear(RDpix_in,sig_gammai)
 		do k2 = 1,npix
 			RD_K(k2) = RDpix_in(k2)*GaussianKernel(x_pix(k2,:),x0,sig_gammai)
 		end do
+		RD_K(k) = RDpix_in(k)
 		RDpix(k) = sum(RD_K)
 	end do
 	RDpix = RDpix/sum(RDpix)
 	RDpix = RDpix*Rpixtot	
 	! update RDpix_in
-	RDpix_in = RDpix	
+	RDpix_in = RDpix
+		
 end subroutine
 
 !------------------Gaussian smoothing kernal on a sphere-------------------------------!
 function GaussianKernel(x,x0,sig_gammai) result(K)
 	double precision :: x(3),x0(3),K,gamma,sig_gammai
 	gamma = (x(1)*x0(1) + x(2)*x0(2) + x(3)*x0(3))
-	if (gamma.gt.1.0d0) then
-		gamma = 1.0d0
-	end if
-	if (gamma.lt.-1.0d0) then
-		gamma = -1.0d0
-	end if
+	!if (gamma.gt.1.0d0) then
+		!gamma = 1.0d0
+		!end if
+	!if (gamma.lt.-1.0d0) then
+		!gamma = -1.0d0
+		!end if
 	gamma = acos(gamma)
 	K = exp(-gamma*gamma/(2.0d0*sig_gammai*sig_gammai))
 end function 

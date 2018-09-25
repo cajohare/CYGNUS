@@ -46,20 +46,22 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	long = Boulby(2)
 	
 	! Calculate exposure for specified TPC Volume x Time
+	! 1000 m^3 of SF6 at 20 torr or He at 740 torr is 0.16 tons
 	Exposure = VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
+	
+
+ 	! Calculate Helium limits
+    nucleus = Helium
+    E_th = 1.8d0
+	E_max = 200.0d0
+	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
+	
 	
 	! Calculate Fluorine limits
     nucleus = Fluorine
     E_th = 3.0d0
 	E_max = 200.0d0
     call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF) 
-
-
- 	! Calculate Helium limits
-    nucleus = Helium
-    E_th = 1.12d0
-	E_max = 200.0d0
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
 	
 	
 	! Save Data
@@ -117,7 +119,7 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
     NLOOP = 1 ! Number of iterations before looping
     IQUAD = 0 ! Can't remeber what this does
     SIMP = 0.1 ! Nor this
-	STOPCR0 = 1.0d-3 ! Accuracy of max likelihood
+	STOPCR0 = 1.0d-5 ! Accuracy of max likelihood
 
 	! Mass and cross section discretisation
     m_vals = logspace(m_min,m_max,nm)
@@ -139,7 +141,6 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 		m_chi = m_vals(im)
 				
 		call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
-		
 		! CROSS SECTION SCAN
 		do j = 1,ns
 			sigma_p = sigma_p_vals(j)
@@ -170,7 +171,6 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 				end if
 				s_prev = sigma_p ! Reset for interpolation
 				D_prev = D01
-				
 			end if				
 		end do							
 		write(*,*) 'CYG-DL:',im,'m = ',m_chi,'DL = ',DL(im),'Signal:',sum(RD_wimp*sigma_p),'BG:',N_tot_bg

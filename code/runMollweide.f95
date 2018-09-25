@@ -19,10 +19,10 @@ program runMollweide
   E_th = 3.0d0
   E_max = 100.0d0
   
-  energyres_on = 0
-  angres_on = 0
-  efficiency_on = 0
-  headtail_on = 0
+  energyres_on = .false.
+  angres_on = .false.
+  efficiency_on = .false.
+  headtail_on = .false.
   Exposure = 0.16d0*3
   
   !---------------- SETUP MOLLWEIDE-----------------------!

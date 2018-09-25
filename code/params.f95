@@ -61,11 +61,11 @@ double precision,dimension(1000,2) :: efficiency_data ! efficiency (He,F)
 double precision,dimension(1000,2) :: headtail_data ! headtail eff. (He,F)
 double precision,dimension(1000,2) :: angres_data ! angular resolution (He,F)
 integer :: nucleus(2) ! target nucleus = (Number of neutrons, number of protons)
-integer :: energyres_on ! Switch for turning efficiency on
-integer :: efficiency_on ! Switch for turning efficiency on
-integer :: angres_on ! Switch for turning angular resolution on
-integer :: headtail_on ! Switch for turning head-tail efficiency on
-integer :: Energy_on ! Switch for turning energy information on
+logical :: energyres_on ! Switch for turning efficiency on
+logical :: efficiency_on ! Switch for turning efficiency on
+logical :: angres_on ! Switch for turning angular resolution on
+logical :: headtail_on ! Switch for turning head-tail efficiency on
+logical :: Energy_on ! Switch for turning energy information on
 integer :: readout ! Readout selection
 !---------------------------------------------------------------------------------------!
 

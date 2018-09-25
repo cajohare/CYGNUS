@@ -85,7 +85,7 @@ subroutine WIMPRecoilDistribution
 	end do	
 
 	! If directional, also smear by angular resolution
-	if (angres_on.eq.1) then
+	if (angres_on) then
 		if (nside.gt.0) then
 			if (sum(RD).gt.0.0d0) then
 				call SmearRD(RD)
@@ -94,12 +94,13 @@ subroutine WIMPRecoilDistribution
 	end if
 		
 	! If direction only then integrate over energies	
-	if (Energy_on.eq.0) then
+	if (Energy_on) then
+		RD_wimp = RD
+	else
 		call IntegrateOverEnergies(RD,RD_red)
 		RD_wimp = RD_red
-	else
-		RD_wimp = RD
 	end if
+
 	
 	! Multiply whole thing by Exposure so RD = Num events/sigma_p
 	RD_wimp = RD_wimp*Exposure/(nT_bins*sigma_p)
@@ -127,12 +128,12 @@ subroutine WIMPRD_3D(RD,tbin)
 			fE_r2 = eff_HT(j+1)*WIMPRate_Direction(E_r2,tbin)+(1.0-eff_HT(j+1))*WIMPRate_Direction(-1.0*E_r2,tbin)
 			
 			RD(ii) = dpix*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
+			
 			E_r1 = E_r2
 			fE_r1 = fE_r2
 			ii = ii+1			
 		end do
 	end do
-	
 end subroutine WIMPRD_3D
   
 !-------------------- Non-directional recoil distribution-------------------------------------!
@@ -143,7 +144,7 @@ subroutine WIMPRD_Energy(RD,tbin)
 	double precision :: fE_r1,fE_r2,E_r1,E_r2,RD(nE_bins),E_r,eff(nE_bins+1),sig_E(nbins_full)
 	integer :: i,j,ii,nbins,ia,tbin
 	eff = Efficiency(E_bin_edges,nE_bins+1)
-	if (energyres_on.eq.1) then
+	if (energyres_on) then
 	    ! Correct for energy resolution first
 	    E_lower = 1.0d-8 ! keV
 	    E_upper = 120.0d0 ! keV

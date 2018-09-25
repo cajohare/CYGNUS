@@ -46,7 +46,7 @@ subroutine PreAllocate
 
 	if (nside.gt.0) then
 	   call pixels
-		   if (Energy_on.eq.1) then
+		   if (Energy_on) then
 			nTot_bins = nT_bins*nE_bins*npix
 			nTot_bins_full = nT_bins*nE_bins*npix
 		else

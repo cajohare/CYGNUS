@@ -35,30 +35,46 @@ subroutine BackgroundRecoilDistribution
 		R_bg(s) = sum(RD(:,s))
 		RD(:,s) = RD(:,s)/R_bg(s)
 	end do	
-
 	
+	if (sum(RD).gt.1.0d10) then
+		WRITE(*,*) 'one'
+		stop
+	end if
+
 	! If directional, also smear by angular resolution
 	if (nside.gt.0) then
-		if (angres_on.eq.1) then
+		if (angres_on) then
 			do s = 1,2
 				call SmearRD(RD(:,s))
 			end do
 		end if
 	end if
 	
+	if (sum(RD).gt.1.0d10) then
+		WRITE(*,*) 'TWO'
+		ii = 1
+		do i = 1,npix
+			do j = 1,nE_bins
+				write(*,*) i,j,RD(ii,1:2)
+				ii = ii+1
+			end do
+		end do
+		stop
+	end if
+	
 	! If direction only then integrate over energies
-	if (Energy_on.eq.0) then
+	if (Energy_on) then
+		RD_bg = RD
+	else
 		do s = 1,n_bg
 			call IntegrateOverEnergies(RD(:,s),RD_red)
 		    RD_bg(:,s) = RD_red
 		end do
-	else
-		RD_bg = RD
 	end if
 	
+
 	! Multiply whole thing by Exposure so RD = Num events/R_bg
 	RD_bg = RD_bg*Exposure
-
 end subroutine BackgroundRecoilDistribution
 !---------------------------------------------------------------------------------------------!
 
@@ -137,13 +153,13 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 	 		 	       fE_r2 =  eff_HT(j+1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
 	 		 		   			(1.0-eff_HT(j+1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))			
 						RD(ii,si) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
-					    fE_r1 = fE_r2
+						fE_r1 = fE_r2
 						ii = ii+1
 					end do
 				end do
 			end do
 		end do
-	
+		
 	    ! Isotropic neutrinos (set each pixel to energy only spectrum/npixels*ntimes)
 	    do si = (n_nu-1),(n_nu) ! last two background are always isotropic (DSNB+Atm)
 	       E_r1 = E_bin_edges(1)

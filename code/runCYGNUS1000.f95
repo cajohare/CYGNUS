@@ -36,8 +36,8 @@ program runCYGNUS1000
 	
 	
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	VolTime = 1000.0*3.0d0
-	energy_on = 1 ! energy info is currently turned on for best limits
+	VolTime = 1000.0d2*3.0d0
+	energy_on = .true. ! energy info is currently turned on for best limits
 
 	write(*,*) '====================================================='
 	write(*,*) 'Starting program: CYGNUS-1000'
@@ -62,33 +62,33 @@ program runCYGNUS1000
 		loopmax = 7
 		loopmin = 0
 		write(*,*) 'Running all readouts'
-		write(*,*) '----------------------------------------------------'
 	else
 		loopmin = readout_selection
-		loopmax = readout_selection+1
+		loopmax = readout_selection
 	end if
 
+	write(*,*) '----------------------------------------------------'
 	do readout = loopmin,loopmax
 		call LoadReadout(readout,	fn_end)
 		write(*,*) 'Readout = ',fn_end
-		write(*,*) '----------------------------------------------------'
 
-		if ((readout_selection.eq.1).or.((readout_selection.eq.7))) then
-			angres_on = 0
-			efficiency_on = 0
-			headtail_on = 0
-			energyres_on = 0
+		if ((readout.eq.0).or.((readout.eq.7))) then
+			angres_on = .false.
+			efficiency_on = .false.
+			headtail_on = .false.
+			energyres_on = .false.
 		else
-			angres_on = 1
-			efficiency_on = 1
-			headtail_on = 1
-			energyres_on = 0
+			angres_on = .true.
+			efficiency_on = .true.
+			headtail_on = .true.
+			energyres_on = .false.
 		end if
 
+		if (readout.eq.7) then
+			nside = 0
+		end if
 
 		filename = '../data/CYGNUS1000-'//trim(fn_end)//'.txt'
-		write(*,*) trim(filename)
-		stop
 		call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 	end do
