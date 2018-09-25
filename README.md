@@ -1,5 +1,4 @@
-# CYGNUS
-[![arXiv](https://img.shields.io/badge/arXiv-1810.?????-B31B1B.svg)](https://arxiv.org/abs/1810.?????)
+# CYGNUS (work in progress)
 
 This code is a collection of many years of work on directional detection culminating in a readout technology comparison for the CYGNUS project found in this paper [arXiv:1810.?????](https://arxiv.org/abs/1810.?????).
 
