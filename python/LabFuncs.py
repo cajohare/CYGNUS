@@ -47,13 +47,13 @@ Jan1 = 2457755.0 # Julian Day of January 1 2018
 #---------------------------------------------------------------------------------------#
 # FULL LAB VELOCITY AS A FUNCTION OF DAY IN THE YEAR 
 # (i.e day = 0.5 is midday on Jan 1 2018)
-def LabVelocity(day, Location):
+def LabVelocity(JD, Location):
 
     lat = Location[0]
     lon = Location[1]
 
     # Convert day into phase of Earth rotation t_lab
-    JD = day+Jan1
+    #JD = day+Jan1
     UT = 24*(JD+0.5-floor(JD+0.5)) #Universal time
     MJD = JD - 2400000.5 #Modified Julian Day
     T_0 = (floor(MJD)-55197.5)/36525.0
@@ -110,19 +110,19 @@ def EarthSunDistance(day): # Earth-sun distance at time = day
     JD = day+Jan1
     D = JD-2451545.0
     g = 357.529 + 0.98560028*D
-    g = g*pi/180
+    g = g*pi/180.0
     r_es = 1.00014 - 0.01671*cos(g) - 0.00014*cos(2*g)
     r_es = r_es*AstronomicalUnit
     return r_es
     
 #---------------------------------------------------------------------------------------#
-def SolarDirection(day,Location): # Solar direction in lab coords at time = day
+def SolarDirection(JD,Location): # Solar direction in lab coords at time = day
 
     lat = Location[0]
     lon = Location[1]
 
     # Compute RA and dec of Sun
-    JD = day+Jan1
+    #JD = day+Jan1
     n = JD - 2451545.0
     Omega = 2.1429-0.0010394594*n
     L = 4.8950630 + 0.017202791698*n
@@ -130,7 +130,7 @@ def SolarDirection(day,Location): # Solar direction in lab coords at time = day
     ll = L+0.03341607*sin(g) + 0.00034894*sin(2*g) - 0.0001134 - 0.0000203*sin(Omega)
     ep = 0.4090928 - 6.214e-9*n + 0.0000396*cos(Omega)
     ra = np.arctan2((cos(ep)*sin(ll)),cos(ll)) # Right ascension of Sun
-    dec = asin(sin(ep)*sin(ll)) # Declination of sun
+    dec = np.arcsin(sin(ep)*sin(ll)) # Declination of sun
 
     # Solar vector
     x_sun1 = np.array([0.,0.,0.])
@@ -143,7 +143,7 @@ def SolarDirection(day,Location): # Solar direction in lab coords at time = day
     MJD = JD - 2400000.5
     T_0 = (floor(MJD)-55197.5)/36525.0
     t_GAST = (101.0308 + 36000.770*T_0 + 15.04107*UT)/15.0
-    t_lab = t_GAST + long/15
+    t_lab = t_GAST + lon/15.0
     t_lab = 15*t_lab # DEGREES
 
     # Convert vector from equatorial system into lab system
