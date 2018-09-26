@@ -6,6 +6,17 @@ Contact me to complain about why the code won't work or whatever (ciaran.aj.ohar
 
 ## Requirements
 
-* fortran compiler
-* python, although currently there is just one notebook for looking at the final plots
+* python 2...
+* something to view the ipy notebooks
+* if you wanna actually run the fortran code, then a fortran compiler. It should just work as is since it's not dependent on anything
 * that's pretty much it, I've even given you an amputed minimiser code that I like
+
+## Contents
+
+* *Code:* written in fortran, does most of the hard number-crunchy & MC stuff
+* *data:* All the discovery reach curves get put here
+* *neutrinos:* neutrino flux data
+* *pixels:* lists of cartesian vectors from the HEALpix discretisation
+* *plots:* all plots get put here
+* *python:* plotting the outputs of the main code, as well as some functions that may be useful to people
+* *readouts:* readout technology performance data
