@@ -42,6 +42,17 @@ EarthRadius = 6371.01*1000.0 # Earth Radius
 Integral_inv_EarthSun_sq = 4.468864372000642e-23 # integral(1/R^2) over 1 year
 Jan1 = 2457755.0 # Julian Day of January 1 2018
 
+# Some locations (lat, lon) in degrees
+Boulby = np.array([54.5591,0.8310])
+GranSasso = np.array([42.4691, 13.5654])
+Kamioka = np.array([36.2381, 137.1863])
+SNOlab = np.array([46.4719, -81.1868])
+Stawell = np.array([-37.0576, 142.7754])
+Oahu = np.array([21.4389, -158.0001])
+GuantanamoBay = np.array([20.0117, -75.1216])
+Pyongyang = np.array([39.0392, 125.7625])
+
+
 
 #===================================Lab Velocity========================================#
 #---------------------------------------------------------------------------------------#
