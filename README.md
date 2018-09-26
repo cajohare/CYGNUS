@@ -13,10 +13,10 @@ Contact me to complain about why the code won't work or whatever (ciaran.aj.ohar
 
 ## Contents
 
-* *Code:* written in fortran, does most of the hard number-crunchy & MC stuff
-* *data:* All the discovery reach curves get put here
-* *neutrinos:* neutrino flux data
-* *pixels:* lists of cartesian vectors from the HEALpix discretisation
-* *plots:* all plots get put here
-* *python:* plotting the outputs of the main code, as well as some functions that may be useful to people
-* *readouts:* readout technology performance data
+* **code:** written in fortran, does most of the hard number-crunchy & MC stuff
+* **data:** All the discovery reach curves get put here
+* **neutrinos:** neutrino flux data
+* **pixels:** lists of cartesian vectors from the HEALpix discretisation
+* **plots:** all plots get put here
+* **python:** plotting the outputs of the main code, as well as some functions that may be useful to people
+* **readouts:** readout technology performance data
