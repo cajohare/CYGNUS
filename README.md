@@ -13,7 +13,7 @@ Contact me to complain about why the code won't work or whatever (ciaran.aj.ohar
 
 ## Contents
 
-* **code:** written in fortran, does most of the hard number-crunchy & MC stuff
+* **code:** the main meat of the analysis, written in fortran (but hopefully in a friendly way), does most of the number-crunchy & MC stuff
 * **data:** All the discovery reach curves get put here
 * **neutrinos:** neutrino flux data
 * **pixels:** lists of cartesian vectors from the HEALpix discretisation
