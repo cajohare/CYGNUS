@@ -6,7 +6,7 @@ Contact me to complain about why the code won't work or whatever (ciaran.aj.ohar
 
 ## Requirements
 
-* python 2...
+* python 2, and mpl_toolkits.basemap
 * something to view the ipy notebooks
 * if you wanna actually run the fortran code, then a fortran compiler. It should just work as is since it's not dependent on anything
 * that's pretty much it, I've even given you an amputed minimiser code that I like
