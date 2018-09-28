@@ -8,12 +8,12 @@ Contact me to complain about why the code won't work or whatever (ciaran.aj.ohar
 
 * python 2, and mpl_toolkits.basemap
 * something to view the ipy notebooks
-* if you wanna actually run the fortran code, then a fortran compiler. It should just work as is since it's not dependent on anything
+* if you wanna actually run the fortran code, then a fortran compiler. It should just work as is since it's not dependent on anything, just check the makefile for compiler information/flags etc.
 * that's pretty much it, I've even given you an amputed minimiser code that I like
 
 ## Contents
 
-* **code:** the main meat of the analysis, written in fortran (but hopefully in a friendly way), does most of the number-crunchy & MC stuff
+* **code:** the main potatoes of the analysis, written in fortran (but hopefully in a friendly way), does most of the number-crunchy & MC stuff
 * **data:** All the discovery reach curves get put here
 * **neutrinos:** neutrino flux data
 * **pixels:** lists of cartesian vectors from the HEALpix discretisation
