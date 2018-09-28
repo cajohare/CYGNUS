@@ -6,17 +6,17 @@ Contact me to complain about why the code won't work or whatever (ciaran.aj.ohar
 
 ## Requirements
 
-* python 2...
+* python 2, and mpl_toolkits.basemap
 * something to view the ipy notebooks
 * if you wanna actually run the fortran code, then a fortran compiler. It should just work as is since it's not dependent on anything
 * that's pretty much it, I've even given you an amputed minimiser code that I like
 
 ## Contents
 
-* **code:** written in fortran, does most of the hard number-crunchy & MC stuff
+* **code:** the main meat of the analysis, written in fortran (but hopefully in a friendly way), does most of the number-crunchy & MC stuff
 * **data:** All the discovery reach curves get put here
 * **neutrinos:** neutrino flux data
 * **pixels:** lists of cartesian vectors from the HEALpix discretisation
 * **plots:** all plots get put here
-* **python:** plotting the outputs of the main code, as well as some functions that may be useful to people
+* **python:** plotting the outputs of the main code, as well as some copy-able functions in a more useful format
 * **readouts:** readout technology performance data
