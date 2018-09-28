@@ -48,12 +48,12 @@ def MaxWIMPEnergy(A,v_e,m_chi):
     return E_max_lim
 
 
-def WIMPRate_Energy(E_r,t,WIMP,HaloModel,Nuc,Loc):
+def WIMPRate_Energy(E_r,t,DM,HaloModel,Nuc,Loc):
     # relevant constants
     A = Nuc.MassNumber # mass number of nucleus
-    m_chi = WIMP.Mass
+    m_chi = DM.Mass
     mu_p = 1.0e6*m_chi*m_p/(1.0e6*m_chi + m_p)
-    sigma_p = WIMP.SICrossSection
+    sigma_p = DM.SICrossSection
     v_0 = sqrt(2.0)*HaloModel.Dispersion
     v_esc = HaloModel.EscapeSpeed
     rho_0 = HaloModel.Density
@@ -65,7 +65,7 @@ def WIMPRate_Energy(E_r,t,WIMP,HaloModel,Nuc,Loc):
     # init
     ne = size(E_r)
     nt = size(t)
-    dR = zeros(shape=(size(t),size(E_r)))
+    dR = zeros(shape=(nt,ne))
     for i in range(0,nt):
         v_e = norm(LabFuncs.LabVelocity(t[i]+Jan1, Loc, HaloModel))
 
@@ -95,7 +95,7 @@ def WIMPRate_Energy(E_r,t,WIMP,HaloModel,Nuc,Loc):
 
 
 #-------------------- Direction dependent recoil rate--------------------------------------#
-def WIMPRate_Direction(E,t,WIMP,HaloModel,Nuc,Loc):
+def WIMPRate_Direction(E,t,DM,HaloModel,Nuc,Loc):
     E_r = sqrt(E[:,0]**2 + E[:,1]**2 + E[:,2]**2) # Recoil energy
     x = zeros(shape=shape(E))
     x[:,0] = E[:,0]/E_r # Recoil direction
@@ -104,9 +104,9 @@ def WIMPRate_Direction(E,t,WIMP,HaloModel,Nuc,Loc):
 
     # relevant constants
     A = Nuc.MassNumber # mass number of nucleus
-    m_chi = WIMP.Mass
+    m_chi = DM.Mass
     mu_p = 1.0e6*m_chi*m_p/(1.0e6*m_chi + m_p)
-    sigma_p = WIMP.SICrossSection
+    sigma_p = DM.SICrossSection
     sig_v = HaloModel.Dispersion
     v_esc = HaloModel.EscapeSpeed
     rho_0 = HaloModel.Density

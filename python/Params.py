@@ -3,10 +3,13 @@ from scipy.special import erf
 
 
 #==============================================================================#
-class setWIMP:
+class WIMP:
     def __init__(self,m_chi,sigma_p):
         self.Mass = m_chi
         self.SICrossSection = sigma_p
+
+    def RecoilDistribution(self,RD):
+        self.RD = RD
 
 #------------------------------------------------------------------------------#
 class Nucleus:
@@ -21,6 +24,7 @@ class Nucleus:
         self.SDEnhancement = (4.0/3.0)*((J+1.0)/J)*(Sp-Sn)**2.0
 
 #              (xi,      N,   Z,    J,     Sp,      Sn)
+He4 =   Nucleus(1.0,     2,    2,0.01,  0.000,   0.000)
 F19 =   Nucleus(1.0,    10,   9,  0.5,  0.421,   0.045)
 Xe129 = Nucleus(0.265,  75,  54,  0.5,  0.046,   0.293)
 Xe131 = Nucleus(0.212,  75,  54,  1.5, -0.038,   0.242)
@@ -53,6 +57,17 @@ SHMpp = Halo(0.55,
         array([11.1,12.2,7.3]))
 #------------------------------------------------------------------------------#
 
+
+#==============================================================================#
+class Neutrinos:
+    def __init__(self,n_nu,energies,fluxes,uncertainties):
+        self.Flux = fluxes
+        self.Energy = energies
+        self.Uncertainty = uncertainties
+        self.NumberOfNeutrinos = n_nu
+
+    def RecoilDistribution(self,RD):
+        self.RD = RD
 
 #==============================================================================#
 class Location:

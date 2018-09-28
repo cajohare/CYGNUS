@@ -54,7 +54,6 @@ long_ecl_gal = np.array([266.141,-13.3485,179.3212])
 # Other constants
 AstronomicalUnit = 1.49597892e11 # Astronomical Unit
 EarthRadius = 6371.01*1000.0 # Earth Radius
-Integral_inv_EarthSun_sq = 4.468864372000642e-23 # integral(1/R^2) over 1 year
 #------------------------------------------------------------------------------#
 def LabVelocity(JD, Loc, HaloModel):
 
@@ -120,8 +119,7 @@ def JulianDay(month, day, year, hour): # Calculates time in JD for a given date
 
 #==========================Solar direction=====================================#
 #------------------------------------------------------------------------------#
-def EarthSunDistance(day): # Earth-sun distance at Julian Day
-    JD = day+Jan1
+def EarthSunDistance(JD): # Earth-sun distance at Julian Day
     D = JD-2451545.0
     g = 357.529 + 0.98560028*D
     g = g*pi/180.0
@@ -164,10 +162,17 @@ def SolarDirection(JD,Loc): # Solar direction in lab coords at Julian Day
     # Convert vector from equatorial system into lab system
     x_sun = eqt2lab(x_sun1,t_lab,lat)
     return x_sun
+
+def EarthSunDistanceMod(JD):
+    # Solar neutrinos:
+    # Flux is scaled by 1/EarthSunDistance^2 but since Flux is already averaged
+    # We need to also divide by Integral(1/R^2) over one year
+    # Integral_inv_EarthSun_sq is defined in params.f95
+    Integral_inv_EarthSun_sq = 4.468864372000642e-23 # integral(1/R^2) over 1 year
+    f = (1.0/Integral_inv_EarthSun_sq)*(1.0/EarthSunDistance(JD)**2.0)
+    return f
+
 #------------------------------------------------------------------------------#
-
-
-
 
 #---------------------------Coordinate trans.----------------------------------#
 def eqt2lab(vp,t_lab, lat): # Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
