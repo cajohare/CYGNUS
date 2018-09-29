@@ -3,69 +3,32 @@ from numpy import trapz, interp, loadtxt
 from numpy.linalg import norm
 import LabFuncs
 import Params
+from Params import nufile_root, nufile_dir, nuname, n_Enu_vals
+from Params import mono, NuMaxEnergy, NuFlux, NuUnc
+
 
 #================================NeutrinoFuncs=================================#
 # Contents:
-#
-#==============================================================================#
-# ORDER OF NEUTRINOS
-# Neutrno types and file locations
-nufile_root = "-1000.txt"
-nufile_dir = "../neutrinos/"
-nuname = ["" for x in range(0,11)]
-nuname[0] = "pp"
-nuname[1] = "pep"
-nuname[2] = "hep"
-nuname[3] = "7Be1"
-nuname[4] = "7Be2"
-nuname[5] = "8B"
-nuname[6] = "13N"
-nuname[7] = "15O"
-nuname[8] = "17F"
-nuname[9] = "DSNB"
-nuname[10] = "Atm"
-mono = zeros(11,dtype=bool)
-mono[[1,3,4]] = True
-
-#==============================================================================#
-# Neutrino max energies (MeV):
-NuMaxEnergy = array([0.42341,1.44,18.765,0.3843,0.8613,16.34,1.193,\
-                    1.7285,1.7365,91.201,981.75])
-
-
-# Neutrino fluxes (cm-2 s-1 MeV-1) and uncertainties (%):
-# (from Vinyoles et al (2017) Barcelona GS98 SSM)
-NuFlux_B17GS98 = array([5.98e10,1.44e8,7.98e3,4.93e8,4.50e9,5.16e6,\
-                        2.78e8,2.05e8,5.29e6,85.7,10.54])
-NuUnc_B17GS98 = array([0.006, 0.01, 0.3,0.06, 0.06, 0.02, 0.15 ,\
-                        0.17 ,0.2 ,0.5, 0.25])
 
 N_A = 6.02214e23 # Avocado's constant
 sinTheta_Wsq = 0.2387e0 # sin(Theta_W) weak mixing angle
 G_F_GeV = 1.16637e-5 # GeV**-2 ! Fermi constan in GeV
 
-#========================================Neutrino data========================================#
+#========================================Neutrino data=========================#
 def GetNuFluxes(E_th,Nuc):
     # Reads each neutrino flux data file
-    # Each flux file has 1000 rows apart from monochromatic ones
     # the energies are stored in E_nu_all, fluxes in Flux_all
-
-    # CURRENTLY USING BARCELONA FLUXES
-    NuFlux = NuFlux_B17GS98
-    NuUnc = NuUnc_B17GS98
-    nvals = 1000 # All neutrino backgrounds saved with 1000 entries
-
-    # Monochromatic neutrinos (2, 4, 5) have a negative value for E_nu which is
-    # Used to tell the rate formula to use monochromatic result
 
     # Figure out which backgrounds give recoils above E_th
     E_r_max = MaxNuRecoilEnergies(Nuc) # Max recoil energy for neutrino
     n_nu = size(E_r_max>E_th)
-    sel = range(1,12)*(E_r_max>E_th)
+    sel = range(1,n_nu_tot+1)*(E_r_max>E_th)
     sel = sel[sel!=0]-1
-    E_nu_all = zeros(shape=(1000,n_nu))
-    Flux_all = zeros(shape=(1000,n_nu))
-    Flux_err = zeros(shape=(1000,n_nu))
+    E_nu_all = zeros(shape=(n_Enu_vals,n_nu))
+    Flux_all = zeros(shape=(n_Enu_vals,n_nu))
+    Flux_err = zeros(shape=(n_nu))
+    Flux_norm = zeros(shape=(n_nu))
+
     # Load in all backgrounds with sel #= 0
     ii = 0
     for s in sel:
@@ -76,9 +39,11 @@ def GetNuFluxes(E_th,Nuc):
             data = loadtxt(nufile_dir+nuname[s]+nufile_root,delimiter=',')
             E_nu_all[:,ii],Flux_all[:,ii] = data[:,0],data[:,1]
             Flux_all[:,ii] = Flux_all[:,ii]*NuFlux[s]
+
+        Flux_norm[ii] = NuFlux[s]
         Flux_err[ii] = NuUnc[s] # Select rate normalisation uncertainties
         ii = ii+1
-    NuBG = Params.Neutrinos(n_nu,E_nu_all,Flux_all,Flux_err)
+    NuBG = Params.Neutrinos(n_nu,E_nu_all,Flux_all,Flux_norm,Flux_err)
     return NuBG
 
  #-----------------------------------------------------------------------------#
