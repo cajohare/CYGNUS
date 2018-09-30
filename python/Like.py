@@ -14,7 +14,16 @@ import WIMPFuncs
 # Contents:
 #
 #===============================================================================#
-
+def NeutrinoEvents(Expt,NuBG):
+    n_nu = NuBG.NumberOfNeutrinos
+    E_r = Expt.Energies
+    t = Expt.Times
+    if nside>0:
+        q = Expt.Directions
+        RD = NuRate_Direction(E,t,NuBG,Nuc,Loc)
+    else:
+        RD = NuRate_Direction(E,t,NuBG,Nuc,Loc)
+    return RD
 
 
 #=========================Generate limits======================================#
