@@ -47,8 +47,26 @@ def MaxWIMPEnergy(A,v_e,m_chi):
     E_max_lim = 2.0*mu_N*mu_N*2.0*((v_esc+sqrt(sum(v_lab**2.0)))*1000.0/3.0e8)**2.0/m_N
     return E_max_lim
 
+#----------------------General event rate -------------------------------------#
+# Accepts either direction or non-directional energies E_r
+def WIMPRate(E_r,t,Expt,DM,HaloModel):
+    Nuc = Expt.Nucleus
+    Loc = Expt.Location
 
-def WIMPRate_Energy(E_r,t,DM,HaloModel,Nuc,Loc):
+    if Expt.Directional:
+        ne = size(E_r)
+        dR = zeros(shape=(ne))
+        dR = dRdEdO_wimp(E,t,DM,HaloModel,Nuc,Loc)
+    else:
+        ne = size(E_r)/3
+        dR = zeros(shape=(ne))
+        dR = dRdE_wimp(E_r,t,DM,HaloModel,Nuc,Loc)
+    return dR
+
+
+
+#-------------------- Energy dependent recoil rate-----------------------------#
+def dRdE_wimp(E_r,t,DM,HaloModel,Nuc,Loc):
     # relevant constants
     A = Nuc.MassNumber # mass number of nucleus
     m_chi = DM.Mass
@@ -65,37 +83,40 @@ def WIMPRate_Energy(E_r,t,DM,HaloModel,Nuc,Loc):
     # init
     ne = size(E_r)
     nt = size(t)
-    dR = zeros(shape=(nt,ne))
-    for i in range(0,nt):
-        v_e = norm(LabFuncs.LabVelocity(t[i]+Jan1, Loc, HaloModel))
+    dR = zeros(shape=ne)
+    v_e = zeros(shape=ne)
+    if t[0] == t[-1]:
+        v_e = norm(LabFuncs.LabVelocity(t[0]+Jan1, Loc, HaloModel))
+    else:
+        for i in range(0,nt):
+            v_e[i] = norm(LabFuncs.LabVelocity(t[i]+Jan1, Loc, HaloModel))
+
 
         # Mean inverse speed
-        x = v_min/v_0
-        y = v_e/v_0
-        z = v_esc/v_0
-        gvmin = zeros(ne)
-        gvmin[(x<abs(y-z))&(z<y)] = (1.0/(v_0*y))
-        gvmin[(x<abs(y-z))&(z>y)] = (1.0/(2.0*N_esc*v_0*y))\
-                                *(erf(x[(x<abs(y-z))&(z>y)]+y)\
-                                -erf(x[(x<abs(y-z))&(z>y)]-y)\
-                                -(4.0/sqrt(pi))*y*exp(-z**2))
-        gvmin[(abs(y-z)<x)&(x<(y+z))] = (1.0/(2.0*N_esc*v_0*y))\
-                                *(erf(z)-erf(x[(abs(y-z)<x)&(x<(y+z))]-y)\
-                                -(2/sqrt(pi))*(y+z-x[(abs(y-z)<x)&(x<(y+z))])\
-                                *exp(-z**2))
-        gvmin[(y+z)<x] = 0.0
-        gvmin = gvmin/(1000.0*100.0) # convert to cm^-1 s
+    x = v_min/v_0
+    y = v_e/v_0
+    z = v_esc/v_0
+    gvmin = zeros(ne)
+    gvmin[(x<abs(y-z))&(z<y)] = (1.0/(v_0*y))
+    gvmin[(x<abs(y-z))&(z>y)] = (1.0/(2.0*N_esc*v_0*y))\
+                            *(erf(x[(x<abs(y-z))&(z>y)]+y)\
+                            -erf(x[(x<abs(y-z))&(z>y)]-y)\
+                            -(4.0/sqrt(pi))*y*exp(-z**2))
+    gvmin[(abs(y-z)<x)&(x<(y+z))] = (1.0/(2.0*N_esc*v_0*y))\
+                            *(erf(z)-erf(x[(abs(y-z)<x)&(x<(y+z))]-y)\
+                            -(2/sqrt(pi))*(y+z-x[(abs(y-z)<x)&(x<(y+z))])\
+                            *exp(-z**2))
+    gvmin[(y+z)<x] = 0.0
+    gvmin = gvmin/(1000.0*100.0) # convert to cm^-1 s
 
-        # Compute rate
-        dRdE = gvmin*FF # correct for form factor
-        dR[i,:] =  dRdE
-
+    # Compute rate = (Rate amplitude * gmin * form factor)
+    dR = R0*gvmin*FF
     dR = dR*3600*24*365*1000.0 # convert to per ton-year
     return dR
 
 
-#-------------------- Direction dependent recoil rate--------------------------------------#
-def WIMPRate_Direction(E,t,DM,HaloModel,Nuc,Loc):
+#-------------------- Direction dependent recoil rate--------------------------#
+def dRdEdO_wimp(E,t,DM,HaloModel,Nuc,Loc):
     E_r = sqrt(E[:,0]**2 + E[:,1]**2 + E[:,2]**2) # Recoil energy
     x = zeros(shape=shape(E))
     x[:,0] = E[:,0]/E_r # Recoil direction
@@ -118,23 +139,24 @@ def WIMPRate_Direction(E,t,DM,HaloModel,Nuc,Loc):
     # init
     ne = size(E_r)
     nt = size(t)
-    dR = zeros(shape=(size(t),size(E_r)))
+    dR = zeros(shape=(size(E_r)))
+    v_lab = zeros(shape=(size(E_r),3))
     for i in range(0,nt):
-        v_lab = LabFuncs.LabVelocity(t[i], Loc, HaloModel)
-        vlabdotq = (x[:,0]*v_lab[0]+x[:,1]*v_lab[1]+x[:,2]*v_lab[2]) # recoil projection
+        v_lab[i,:] = LabFuncs.LabVelocity(t[i], Loc, HaloModel)
 
-        # Radon transform
-        fhat = zeros(shape=shape(E_r))
-        fhat[((v_min+vlabdotq)<(v_esc))] = (1/(N_esc*sqrt(2*pi*sig_v**2.0)))\
-                                            *(exp(-(v_min[((v_min+vlabdotq)<(v_esc))]\
-                                            +vlabdotq[((v_min+vlabdotq)<(v_esc))])\
-                                            **2.0/(2*sig_v**2.0))\
-                                            -exp(-v_esc**2.0/(2*sig_v**2.0)))
-        fhat = fhat/(1000.0*100.0) # convert to cm^-1 s
+    vlabdotq = (x[:,0]*v_lab[:,0]+x[:,1]*v_lab[:,1]+x[:,2]*v_lab[:,2]) # recoil projection
 
-        # Compute rate
-        dRdEdO = fhat*FF # correct for form factor
-        dR[i,:] =  dRdEdO
+    # Radon transform
+    fhat = zeros(shape=shape(E_r))
+    fhat[((v_min+vlabdotq)<(v_esc))] = (1/(N_esc*sqrt(2*pi*sig_v**2.0)))\
+                                        *(exp(-(v_min[((v_min+vlabdotq)<(v_esc))]\
+                                        +vlabdotq[((v_min+vlabdotq)<(v_esc))])\
+                                        **2.0/(2*sig_v**2.0))\
+                                        -exp(-v_esc**2.0/(2*sig_v**2.0)))
+    fhat = fhat/(1000.0*100.0) # convert to cm^-1 s
+
+    # Compute rate = (Rate amplitude * radon trans. * form factor)
+    dR = R0*fhat*FF # correct for form factor
 
     dR = dR*3600*24*365*1000.0 # convert to per ton-year
     return dR

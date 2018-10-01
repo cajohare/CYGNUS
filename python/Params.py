@@ -1,4 +1,5 @@
-from numpy import array, sqrt, pi, exp, interp, loadtxt, zeros
+from numpy import array, sqrt, pi, exp, interp, loadtxt, zeros, shape, ones
+from numpy import logspace, linspace, log10
 from scipy.special import erf
 
 
@@ -95,6 +96,8 @@ nuname[9] = "DSNB"
 nuname[10] = "Atm"
 mono = zeros(n_nu_tot,dtype=bool)
 mono[[1,3,4]] = True
+whichsolar = zeros(n_nu_tot,dtype=bool)
+whichsolar[0:8] = True
 n_Enu_vals = 1000 # All neutrino backgrounds saved with 1000 entries
 # Monochromatic neutrinos (2, 4, 5) have a negative value for E_nu which is
 # Used to tell the rate formula to use monochromatic result
@@ -109,12 +112,13 @@ NuUnc = array([0.006, 0.01, 0.3,0.06, 0.06, 0.02, 0.15 ,\
                         0.17 ,0.2 ,0.5, 0.25])
 
 class Neutrinos:
-    def __init__(self,n_nu,energies,fluxes,normlisations,uncertainties):
+    def __init__(self,n_nu,solar_label,energies,fluxes,normlisations,uncertainties):
         self.Flux = fluxes
         self.Energy = energies
         self.Uncertainties = uncertainties
         self.Normalisations = normlisations
         self.NumberOfNeutrinos = n_nu
+        self.SolarLabel = solar_label
 
     def RecoilDistribution(self,RD):
         self.RD = RD
@@ -128,6 +132,7 @@ class Neutrinos:
 
 
 #==============================================================================#
+Jan1 = 2458849.5 # January 1st 2020
 froot_er = "-EnergyRes.txt"
 fdir_er = "../readouts/energyres/"
 froot_eff = "-Efficiency.txt"
@@ -137,26 +142,35 @@ fdir_ar = "../readouts/angres/"
 froot_ht = "-HeadTail.txt"
 fdir_ht = "../readouts/headtail/"
 class Detector:
-    def __init__(self,Nuc,ne=50,nt=10,nside=4,Eoff=False,ReadOut_Name="Ideal"):
-        self.Gas = Nuc
+    def __init__(self,E_th,E_max,Nuc,Loc,Exposure,ne=50,nt=10,nside=4,Eoff=False,ReadOut_Name="Ideal"):
+        self.Nucleus = Nuc
+        self.Location = Loc
+        self.Exposure = Exposure
 
         Ebins = logspace(log10(E_th),log10(E_max),ne+1)
         self.Energies = Ebins
         self.Times = linspace(Jan1,Jan1+365.0,nt)
         self.TotalNumberOfBins = ne*nt
         if nside>0:
+            self.DirectionOn = True
+            npix = 12*nside**2
             if nside==2:
-                npix = 12*nside**2
-                x_pix[:,0],x_pix[:,1],x_pix[:,2] = loadtxt("../pixels/x_pix2.txt")
+                pixlz = loadtxt("../pixels/xpix2.txt")
             elif nside==4:
-                x_pix[:,0],x_pix[:,1],x_pix[:,2] = loadtxt("../pixels/x_pix4.txt")
-            elif nside==4:
-                x_pix[:,0],x_pix[:,1],x_pix[:,2] = loadtxt("../pixels/x_pix8.txt")
-            self.Directions = x_pix
+                pixlz = loadtxt("../pixels/xpix4.txt")
+            elif nside==8:
+                pixlz = loadtxt("../pixels/xpix8.txt")
+            x_pix = zeros(shape=shape(pixlz))
+            x_pix[:,0] = pixlz[:,0]
+            x_pix[:,1] = pixlz[:,1]
+            x_pix[:,2] = pixlz[:,2]
+            self.Directional = x_pix
             self.TotalNumberOfBins = ne*nt*npix
             if Eoff:
                 self.EnergyOff = True
                 self.TotalNumberOfBins = ne*nt
+        else:
+            self.Directional = False
 
 
         data_er = loadtxt(fdir_er+ReadOut_Name+froot_er)
@@ -169,10 +183,13 @@ class Detector:
         elif Nuc.NumberOfProtons==2:
             icol = 2
 
-        self.EnergyRes = interp(Ebins,data_er[:,0],data[:,icol])
-        self.Efficiency = interp(Ebins,data_eff[:,0],data[:,icol])
-        self.AngRes = interp(Ebins,data_ar[:,0],data[:,icol])
-        self.HeadTail = interp(Ebins,data_ht[:,0],data[:,icol])
+        self.EnergyRes = interp(Ebins,data_er[:,0],data_er[:,icol])
+        self.Efficiency = interp(Ebins,data_eff[:,0],data_eff[:,icol])
+        self.AngRes = interp(Ebins,data_ar[:,0],data_ar[:,icol])
+        self.HeadTail = interp(Ebins,data_ht[:,0],data_ht[:,icol])
+
+        def SetExposure(self,Exposure):
+            self.Exposure = Exposure
 
 #==============================================================================#
 

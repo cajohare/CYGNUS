@@ -14,16 +14,6 @@ import WIMPFuncs
 # Contents:
 #
 #===============================================================================#
-def NeutrinoEvents(Expt,NuBG):
-    n_nu = NuBG.NumberOfNeutrinos
-    E_r = Expt.Energies
-    t = Expt.Times
-    if nside>0:
-        q = Expt.Directions
-        RD = NuRate_Direction(E,t,NuBG,Nuc,Loc)
-    else:
-        RD = NuRate_Direction(E,t,NuBG,Nuc,Loc)
-    return RD
 
 
 #=========================Generate limits======================================#
@@ -37,13 +27,14 @@ def CYGNUSLimit(m_vals,sigma_vals,Halo,Detector_F,Detector_He,Volume,TotTime):
 
     # Calculate exposure for specified TPC Volume x Time
     # 1000 m^3 of SF6 at 20 torr or He at 740 torr is 0.16 tons
-    Exposure = Volume*TotTime*(0.16/1000.0) # Convert m^3-years into ton-years
+    Detector_F.Exposure = Volume*TotTime*(0.16/1000.0) # Convert m^3-years into ton-years
+    Detector_He.Exposure = Volume*TotTime*(0.16/1000.0) # Convert m^3-years into ton-years
 
-    	# Calculate Helium limits
-    DLHe = GetLimits(m_vals,sigma_vals,Exposure,HaloModel,Detector_He)
+    # Calculate Helium limits
+    DLHe = GetLimits(m_vals,sigma_vals,HaloModel,Detector_He)
 
     # Calculate Fluorine limits
-    DLF = GetLimits(m_vals,sigma_vals,Exposure,HaloModel,Detector_F)
+    DLF = GetLimits(m_vals,sigma_vals,HaloModel,Detector_F)
 
     # Save Data
     file = open(filename,"w")
@@ -103,30 +94,33 @@ def llhood0(X,N_obs,Signal,Background):
 
 
 #===============================Discovery Limit================================#
-def GetLimits(m_vals,sigma_vals,Exposure,HaloModel,Expt):
+def GetLimits(m_vals,sigma_vals,HaloModel,Expt):
     # Load neutrino backgrounds
     Background = GetNuFluxes(Expt.EnergyThreshold,Experiment.Gas)
-    Background.RecoilDistribution(NeutrinoEvents(Expt,NuBG))
     n_bg = Background.NumberOfNeutrinos
     R_bg = Background.Normalisations
     R_bg_err = Background.Uncertainties
+    RD_nu = zeros(shape=(Expt.TotalNumberOfBins,n_bg))
+    for i in range(0,n_bg):
+        RD_nu[:,i] = BinEvents(Expt,NeutrinoFuncs.NuRate,Args=(NuBG,i))
+        RD_nu[:,i] *= (1.0/R_bg[i])
+    Background.RecoilDistribution(RD_nu)
 
-
-    # Discretisation
-    nTot_bins = Expt.TotalNumberOfBins
+    # Fix parameters for scan
     nm = size(m_vals)
     ns = size(sigma_vals)
     DL = zeros(shape=nm)
     X_in1 = zeros(shape=(n_bg+1))
-    N_bg = zeros(shape=nTot_bins)
+    N_bg = zeros(shape=Expt.TotalNumberOfBins)
     for i in range(0,n_bg):
-        N_bg = N_bg + Neutrinos.RD[:,i]
+        N_bg = N_bg + sum(Background.RD[:,i])
 
 
     # MASS SCAN:
     for im in range(0,nm):
         Signal = WIMP(m_vals[im],1.0e-45)
-        Signal.RecoilDistribution(WIMPEvents(m_chi,Expt,HaloModel))
+        RD_wimp = BinEvents(Expt,WIMPFuncs.WIMPRate,Args=(Signal,HaloModel))
+        Signal.RecoilDistribution(RD_wimp/sigma_p)
 
     # CROSS SECTION SCAN
     for j in range(0,ns):

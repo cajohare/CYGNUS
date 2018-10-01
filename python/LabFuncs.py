@@ -24,6 +24,122 @@ import numpy as np
 from numpy import cos, sin, pi, floor, exp, sqrt
 
 
+def BinEvents(Expt,dRfunc,Args):
+    E_bins = Expt.Energies
+    t_bins = Expt.Times
+
+    Efficiency = Expt.Efficiency
+
+    # DIRECTIONAL LIMITS
+    if Expt.Directional:
+        q = Expt.Directions
+        sig_gamma = Expt.AngularResolution
+        npix = size(q)/3
+
+        E = zeros(shape=(ne*nt*npix))
+        eff = zeros(shape=(ne*nt*npix))
+        t = zeros(shape=(ne*nt*npix))
+        eff_HT = zeros(shape=(ne*nt*npix))
+        ii = 0
+        for i in range(0,nt):
+            for j in range(0,ne):
+                for k in range(0,npix):
+                    E[ii] = E_r[j]*q[k,:]
+                    t[ii] = t_bins[i]
+                    eff[ii] = Efficiency[j]
+                    eff_HT[ii] = HeadTail[j]
+                    ii += 1
+
+        # Correct for Head-Tail
+        if HeadTail[0]>0.99:
+            dR = dRfunc(E,t,Args)
+        else:
+            dR = (1.0-eff_HT)*dRfunc(E,t,Expt,Args)+eff_HT*dRfunc(-1.0*E,t,Expt,Args)
+
+        # Correct for Efficiency
+        if Efficiency[0]<0.99:
+            dR = dR*eff
+
+        # Correct for Angular resolution
+        if sig_gamma[0]>0.1:
+            i1 = 0
+            dR_smear = zeros(shape=shape(dR))
+            for i in range(0,nt):
+                for j in range(0,npix):
+                    i2 = i1 + npix - 1
+                    dR_smear[i1:i2] = Smear(q,dR[i1:i2],sig_gamma[j])
+                    i1 = i2+1
+            dR = dR_smear
+
+        # Bin events
+        i1 = 0
+        RD = zeros(shape=(ne-1)*nt*npix)
+        for i in range(0,nt):
+            for j in range(0,ne-1):
+                i2 = i1 + npix - 1
+                i3 = i2 + npix - 1
+                dR1 = dR[i1:i2]
+                dR2 = dR[i2+1:i3]
+                RD[i1:i2] = 0.5*(E_r[j+1] - E_r[j])*(dR1+dR2)
+                i1 = i2+1
+            i1 = i3+1
+
+        # Last step: turn energy off if needed
+        if Expt.EnergyOff:
+            i1 = 0
+            RD_reduced = zeros(shape=(ne-1)*nt)
+            it1 = 0
+            for i in range(0,nt):
+                it2 = it1 + npix -1
+                for j in range(0,ne-1):
+                    i2 = i1 + npix - 1
+                    RD_reduced[it1:it2] += RD[i1:i2]
+                    i1 = i2 + 1
+                it1 = it2+1
+            RD = RD_reduced
+
+    # Non-directional limits
+    else:
+        E = zeros(shape=(ne*nt))
+        t = zeros(shape=(ne*nt))
+        eff = zeros(shape=(ne*nt))
+        ii = 0
+        for i in range(0,nt):
+            for j in range(0,ne):
+                E[ii] = E_r[j]
+                t[ii] = t_bins[i]
+                eff[ii] = Efficiency[j]
+                ii += 1
+
+        dR = dRfunc(E,t,Args)
+
+        # Correct for Efficiency
+        if Efficiency[0]<0.99:
+            dR = dR*eff
+
+        # Bin events
+        i1 = 0
+        RD = zeros(shape=(ne-1)*nt)
+        for i in range(0,nt):
+            i2 = i1 + ne - 2
+            RD[i1:i2] = 0.5*(E_r[1:] - E_r)*(dR[i1:i2]+dR2[i1+1:i2+1])
+            i1 = i2 + 2
+
+    RD *= Expt.Exposure
+    return RD
+#------------------------------------------------------------------------------#
+
+#==============================Angular Res=====================================#
+def Smear(x,dR,sig_gamma):
+    npix = size(dR)
+    for i in range(0,npix):
+        x0 = x[i,:]
+        gamma = x0[0]*x[:,0] + x0[1]*x[:,1] + x[0]
+        dR_smeared[i] = dR*exp(-gamma**2.0/(2*sig_gamma**2.0))
+
+    dR_smeared = dR_smeared*sum(dR)/sum(dR_smeared)
+    return dR_smeared
+
 
 #==============================Form Factors====================================#
 #------------------------------------------------------------------------------#

@@ -4,7 +4,7 @@ from numpy.linalg import norm
 import LabFuncs
 import Params
 from Params import nufile_root, nufile_dir, nuname, n_Enu_vals
-from Params import mono, NuMaxEnergy, NuFlux, NuUnc
+from Params import mono, NuMaxEnergy, NuFlux, NuUnc, whichsolar, n_nu_tot
 
 
 #================================NeutrinoFuncs=================================#
@@ -28,8 +28,8 @@ def GetNuFluxes(E_th,Nuc):
     Flux_all = zeros(shape=(n_Enu_vals,n_nu))
     Flux_err = zeros(shape=(n_nu))
     Flux_norm = zeros(shape=(n_nu))
+    Solar = zeros(n_nu,dtype=bool)
 
-    # Load in all backgrounds with sel #= 0
     ii = 0
     for s in sel:
         if mono[s]:
@@ -42,8 +42,9 @@ def GetNuFluxes(E_th,Nuc):
 
         Flux_norm[ii] = NuFlux[s]
         Flux_err[ii] = NuUnc[s] # Select rate normalisation uncertainties
+        Solar[ii] = whichsolar[s]
         ii = ii+1
-    NuBG = Params.Neutrinos(n_nu,E_nu_all,Flux_all,Flux_norm,Flux_err)
+    NuBG = Params.Neutrinos(n_nu,Solar,E_nu_all,Flux_all,Flux_norm,Flux_err)
     return NuBG
 
  #-----------------------------------------------------------------------------#
@@ -54,27 +55,30 @@ def MaxNuRecoilEnergies(Nuc): # Max recoil energies
 
 
 #===================================nu spectra=================================#
-def NuRate_Energy(E_r,t,NuBG,Nuc):
+def NuRate(E_r,t,Expt,NuBG,nu_i): # Time-Energy
     E_nu_all = NuBG.Energy
     Flux_all = NuBG.Flux
     n_nu = NuBG.NumberOfNeutrinos
+    Solar = NuBG.SolarLabel
 
-    ne = size(E_r)
-    nt = size(t)
-    dR = zeros(shape=(nt,ne,n_nu))
-    fMod = LabFuncs.EarthSunDistanceMod(t)
-    for nu in range(0,n_nu):
-        if nu>=(n_nu-1):
-            fMod[:] = 1.0
+    Nuc = Expt.Nucleus
+    Loc = Expt.Location
 
-        # Compute rate
-        dRdE = dRdE_nu(E_r,E_nu_all[:,nu],Flux_all[:,nu],Nuc) # correct for form factor
-        for i in range(0,nt):
-            dR[i,:,nu] =  fMod[i]*dRdE
-
+    if Expt.Directional:
+        ne = size(E_r)/3
+        dR = zeros(shape=(ne,n_nu))
+        if Solar[nu_i]:
+            dR[:,nu] = dRdEdO_solarnu(E_r,t,E_nu_all[:,nu_i],Flux_all[:,nu_i],Nuc,Loc)
+        else:
+            dR[:,nu] = dRdEdO_isonu(E_r,E_nu_all[:,nu_i],Flux_all[:,nu_i],Nuc)
+    else:
+        ne = size(E_r)
+        dR = zeros(shape=(ne,n_nu))
+        dR[:,nu] = dRdE_nu(E_r,t,Solar[nu_i],E_nu_all[:,nu_i],Flux_all[:,nu],Nuc)
     return dR
 
-def dRdE_nu(E_r,E_nu,Flux,Nuc):
+
+def dRdE_nu(E_r,t,sol,E_nu,Flux,Nuc):
     N = Nuc.NumberOfNeutrons
     Z = Nuc.NumberOfProtons
     Q_W = 1.0*N-(1-4.0*sinTheta_Wsq)*Z # weak nuclear hypercharge
@@ -100,31 +104,22 @@ def dRdE_nu(E_r,E_nu,Flux,Nuc):
             if diff_sigma>0:
                 dRdE[i] = diff_sigma*Flux[0]*E_nu[0] # for monochromatic nu's
 
+    if sol:
+        fMod = LabFuncs.EarthSunDistanceMod(t)
+    else:
+        fMod = 1.0
+
     # Convert into /ton/year/keV
-    dRdE = dRdE*(365.0*3600.0*24.0*1000.0)
+    dRdE = fMod*dRdE*(365.0*3600.0*24.0*1000.0)
     return dRdE
 
-def NuRate_Direction(E,t,NuBG,Nuc,Loc):
-    E_nu_all = NuBG.Energy
-    Flux_all = NuBG.Flux
-    n_nu = NuBG.NumberOfNeutrinos
 
-    ne = size(E_r)/3
-    nt = size(t)
-    dR = zeros(shape=(nt,ne,n_nu))
-    fMod = LabFuncs.EarthSunDistanceMod(t)
-    for nu in range(0,n_nu):
-        if nu>=(n_nu-1):
-            fMod[:] = 1.0
-
-        # Compute rate
-        dRdEdO = dRdEdO_nu(E,t,E_nu,Flux,Nuc,Loc) # correct for form factor
-        for i in range(0,nt):
-            dR[i,:,nu] =  fMod[i]*dRdEdO
-
+def dRdEdO_isonu(E,E_nu,Flux,Nuc):
+    E_r = sqrt(E[:,0]**2 + E[:,1]**2 + E[:,2]**2) # Recoil energy
+    dR = dRdE_nu(E_r,0.0,False,E_nu,Flux,Nuc)/(4*pi)
     return dR
 
-def dRdEdO_nu(E,t,E_nu,Flux,Nuc,Loc): # Directional CEnuNS for Solar
+def dRdEdO_solarnu(E,t,E_nu,Flux,Nuc,Loc): # Directional CEnuNS for Solar
     N = Nuc.NumberOfNeutrons
     Z = Nuc.NumberOfProtons
     Q_W = N-(1-4.0*sinTheta_Wsq)*Z # weak nuclear hypercharge
@@ -133,7 +128,6 @@ def dRdEdO_nu(E,t,E_nu,Flux,Nuc,Loc): # Directional CEnuNS for Solar
     m_N_kg = m_N_keV*1.783e-33
     E_nu_keV = E_nu*1e3
     x_sun = LabFuncs.SolarDirection(t,Loc)
-
 
     E_r = sqrt(E[:,0]**2 + E[:,1]**2 + E[:,2]**2) # Recoil energy
     x = zeros(shape=shape(E))
@@ -184,7 +178,6 @@ def dRdEdO_nu(E,t,E_nu,Flux,Nuc,Loc): # Directional CEnuNS for Solar
                 dRdEdO[i] = diff_sigma*(Flux[0]/1000)*E_nu_keV # /kg/keV
 
 
-    dRdEdO = dRdEdO*3600*24*365*1000/(2*pi) # /ton/year
-    #dRdEdO[dRdEdO==NaN]=0.0
-
+    fMod = LabFuncs.EarthSunDistanceMod(t)
+    dRdEdO = fMod*dRdEdO*3600*24*365*1000/(2*pi) # /ton/year
     return dRdEdO
