@@ -30,7 +30,7 @@ class Nucleus:
         self.SDEnhancement = (4.0/3.0)*((J+1.0)/J)*(Sp-Sn)**2.0
 
 #              (xi,      N,   Z,    J,     Sp,      Sn)
-He4 =   Nucleus(1.0,     2,    2,0.01,  0.000,   0.000)
+He4 =   Nucleus(1.0,     2,   2, 0.01,  0.000,   0.000)
 F19 =   Nucleus(1.0,    10,   9,  0.5,  0.421,   0.045)
 Xe129 = Nucleus(0.265,  75,  54,  0.5,  0.046,   0.293)
 Xe131 = Nucleus(0.212,  75,  54,  1.5, -0.038,   0.242)
@@ -56,12 +56,14 @@ class Halo:
                             sqrt(2.0/pi)*(v_esc/sig_v)*\
                             exp(-v_esc**2.0/(2.0*sig_v**2.0))
 
+# Standard Halo Model (old parameters)
 SHM = Halo(0.3,
         220.0,
         156.0,
         544.0,
         array([11.1,12.2,7.3]))
 
+# Standard Halo Model (Gaia parameters)
 SHMpp = Halo(0.55,
         233.0,
         164.8,
@@ -146,13 +148,15 @@ class Detector:
         self.Nucleus = Nuc
         self.Location = Loc
         self.Exposure = Exposure
+        self.EnergyThreshold = E_th
+        self.MaximumEnergy = E_max
 
         Ebins = logspace(log10(E_th),log10(E_max),ne+1)
         self.Energies = Ebins
         self.Times = linspace(Jan1,Jan1+365.0,nt)
         self.TotalNumberOfBins = ne*nt
         if nside>0:
-            self.DirectionOn = True
+            self.Directional = True
             npix = 12*nside**2
             if nside==2:
                 pixlz = loadtxt("../pixels/xpix2.txt")
@@ -164,11 +168,13 @@ class Detector:
             x_pix[:,0] = pixlz[:,0]
             x_pix[:,1] = pixlz[:,1]
             x_pix[:,2] = pixlz[:,2]
-            self.Directional = x_pix
+            self.Directions = x_pix
             self.TotalNumberOfBins = ne*nt*npix
             if Eoff:
                 self.EnergyOff = True
                 self.TotalNumberOfBins = ne*nt
+            else:
+                self.EnergyOff = False
         else:
             self.Directional = False
 
@@ -178,18 +184,15 @@ class Detector:
         data_ar = loadtxt(fdir_ar+ReadOut_Name+froot_ar)
         data_ht = loadtxt(fdir_ht+ReadOut_Name+froot_ht)
 
-        if Nuc.NumberOfProtons==19:
+        if Nuc.NumberOfProtons==9:
             icol = 1
         elif Nuc.NumberOfProtons==2:
             icol = 2
 
-        self.EnergyRes = interp(Ebins,data_er[:,0],data_er[:,icol])
+        self.EnergyResolution = interp(Ebins,data_er[:,0],data_er[:,icol])
         self.Efficiency = interp(Ebins,data_eff[:,0],data_eff[:,icol])
-        self.AngRes = interp(Ebins,data_ar[:,0],data_ar[:,icol])
-        self.HeadTail = interp(Ebins,data_ht[:,0],data_ht[:,icol])
-
-        def SetExposure(self,Exposure):
-            self.Exposure = Exposure
+        self.AngularResolution = interp(Ebins,data_ar[:,0],data_ar[:,icol])
+        self.HeadTailEfficiency = interp(Ebins,data_ht[:,0],data_ht[:,icol])
 
 #==============================================================================#
 

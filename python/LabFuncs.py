@@ -21,22 +21,24 @@
 
 
 import numpy as np
-from numpy import cos, sin, pi, floor, exp, sqrt
+from numpy import cos, sin, pi, floor, exp, sqrt, size, zeros, shape
 
 
-def BinEvents(Expt,dRfunc,Args):
+def BinEvents(Expt,dRfunc,*Args):
     E_bins = Expt.Energies
     t_bins = Expt.Times
-
     Efficiency = Expt.Efficiency
+    ne = size(E_bins)
+    nt = size(t_bins)
 
     # DIRECTIONAL LIMITS
     if Expt.Directional:
         q = Expt.Directions
         sig_gamma = Expt.AngularResolution
+        HeadTail = Expt.HeadTailEfficiency
         npix = size(q)/3
-
-        E = zeros(shape=(ne*nt*npix))
+        E_r = zeros(shape=(ne*nt*npix))
+        E = zeros(shape=(ne*nt*npix,3))
         eff = zeros(shape=(ne*nt*npix))
         t = zeros(shape=(ne*nt*npix))
         eff_HT = zeros(shape=(ne*nt*npix))
@@ -44,7 +46,8 @@ def BinEvents(Expt,dRfunc,Args):
         for i in range(0,nt):
             for j in range(0,ne):
                 for k in range(0,npix):
-                    E[ii] = E_r[j]*q[k,:]
+                    E_r[ii] = E_bins[j]
+                    E[ii,:] = E_bins[j]*q[k,:]
                     t[ii] = t_bins[i]
                     eff[ii] = Efficiency[j]
                     eff_HT[ii] = HeadTail[j]
@@ -52,10 +55,12 @@ def BinEvents(Expt,dRfunc,Args):
 
         # Correct for Head-Tail
         if HeadTail[0]>0.99:
-            dR = dRfunc(E,t,Args)
+            dR = dRfunc(E,t,Expt,Args[0],Args[1])
         else:
-            dR = (1.0-eff_HT)*dRfunc(E,t,Expt,Args)+eff_HT*dRfunc(-1.0*E,t,Expt,Args)
+            dR = (1.0-eff_HT)*dRfunc(E,t,Expt,Args[0],Args[1])\
+                    +eff_HT*dRfunc(-1.0*E,t,Expt,Args[0],Args[1])
 
+        dR = dR*4*pi/(1.0*npix*nt)
         # Correct for Efficiency
         if Efficiency[0]<0.99:
             dR = dR*eff
@@ -67,7 +72,7 @@ def BinEvents(Expt,dRfunc,Args):
             for i in range(0,nt):
                 for j in range(0,npix):
                     i2 = i1 + npix - 1
-                    dR_smear[i1:i2] = Smear(q,dR[i1:i2],sig_gamma[j])
+                    dR_smear[i1:i2+1] = Smear(q,dR[i1:i2+1],sig_gamma[j])
                     i1 = i2+1
             dR = dR_smear
 
@@ -77,13 +82,10 @@ def BinEvents(Expt,dRfunc,Args):
         for i in range(0,nt):
             for j in range(0,ne-1):
                 i2 = i1 + npix - 1
-                i3 = i2 + npix - 1
-                dR1 = dR[i1:i2]
-                dR2 = dR[i2+1:i3]
-                RD[i1:i2] = 0.5*(E_r[j+1] - E_r[j])*(dR1+dR2)
+                dR1 = dR[(t==t_bins[i])&(E_r==E_bins[j])]
+                dR2 = dR[(t==t_bins[i])&(E_r==E_bins[j+1])]
+                RD[i1:i2+1] = 0.5*(E_bins[j+1] - E_bins[j])*(dR1+dR2)
                 i1 = i2+1
-            i1 = i3+1
-
         # Last step: turn energy off if needed
         if Expt.EnergyOff:
             i1 = 0
@@ -93,7 +95,7 @@ def BinEvents(Expt,dRfunc,Args):
                 it2 = it1 + npix -1
                 for j in range(0,ne-1):
                     i2 = i1 + npix - 1
-                    RD_reduced[it1:it2] += RD[i1:i2]
+                    RD_reduced[it1:it2+1] += RD[i1:i2]
                     i1 = i2 + 1
                 it1 = it2+1
             RD = RD_reduced
@@ -106,13 +108,13 @@ def BinEvents(Expt,dRfunc,Args):
         ii = 0
         for i in range(0,nt):
             for j in range(0,ne):
-                E[ii] = E_r[j]
+                E[ii] = E_bins[j]
                 t[ii] = t_bins[i]
                 eff[ii] = Efficiency[j]
                 ii += 1
 
-        dR = dRfunc(E,t,Args)
-
+        dR = dRfunc(E,t,Expt,Args[0],Args[1])
+        dR = dR/(1.0*nt)
         # Correct for Efficiency
         if Efficiency[0]<0.99:
             dR = dR*eff
@@ -122,8 +124,9 @@ def BinEvents(Expt,dRfunc,Args):
         RD = zeros(shape=(ne-1)*nt)
         for i in range(0,nt):
             i2 = i1 + ne - 2
-            RD[i1:i2] = 0.5*(E_r[1:] - E_r)*(dR[i1:i2]+dR2[i1+1:i2+1])
-            i1 = i2 + 2
+            dR1 = dR[(t==t_bins[i])]
+            RD[i1:i2+1] = 0.5*(E_bins[1:] - E_bins[0:-1])*(dR1[1:]+dR1[0:-1])
+            i1 = i2 + 1
 
     RD *= Expt.Exposure
     return RD
@@ -180,7 +183,6 @@ def LabVelocity(JD, Loc, HaloModel):
     v_pec = HaloModel.PeculiarVelocity
 
     # Convert day into phase of Earth rotation t_lab
-    #JD = day+Jan1
     UT = 24*(JD+0.5-floor(JD+0.5)) #Universal time
     MJD = JD - 2400000.5 #Modified Julian Day
     T_0 = (floor(MJD)-55197.5)/36525.0

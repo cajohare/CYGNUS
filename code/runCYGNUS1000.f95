@@ -15,29 +15,62 @@ program runCYGNUS1000
 	! Seed rand and random
 	call itime(mytime)
 	call cpu_time(clock_start)
-	
-	
+
+
 	!------------------Optimisation-----------------!
-	!-----Set binning ------------------------------!	
-	  nE_bins = 20 ! Number of energy bins			!
-	  nT_bins = 1 ! Number of time bins				!
-	  nside = 4  ! Order of pixelation (2,4 or 8)	!
-	!----- Mass range for limits -------------------!	
-	  nm = 100 !  Number of mass points				!
-	  m_min = 0.5d0 ! Min mass						!
-	  m_max = 1000.0d0 ! Max mass					!
-	!----- Cross section range for limits ----------!	
-	  ns = 500 ! resolution of cs scan				!
-	  sigma_min = 1.0d-49 ! min. expected cs		!
-	  sigma_max = 1.0d-40 ! max expected cs			!
+	!-----Set binning ------------------------------!
+	  nE_bins = 20 ! Number of energy bins		  		!
+	  nT_bins = 10 ! Number of time bins						!
+	  nside = 0  ! Order of pixelation (2,4 or 8)		!
+	!----- Mass range for limits -------------------!
+	  nm = 100 ! Number of mass points							!
+	  m_min = 0.5d0 ! Min mass											!
+	  m_max = 1000.0d0 ! Max mass										!
+	!----- Cross section range for limits ----------!
+	  ns = 500 ! resolution of cs scan							!
+	  sigma_min = 1.0d-49 ! min. expected cs				!
+	  sigma_max = 1.0d-40 ! max expected cs					!
 	!-----------------------------------------------!
 	!-----------------------------------------------!
-	
-	
-	
+
+
+
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	VolTime = 1000.0d2*3.0d0
+	VolTime = 1000.0*3.0d0
 	energy_on = .true. ! energy info is currently turned on for best limits
+
+ 	! ===== !
+	readout = 0
+	angres_on = .false.
+	efficiency_on = .false.
+	headtail_on = .false.
+	energyres_on = .false.
+
+	! CYGNUS is at Boubly
+	lat = Boulby(1)
+	long = Boulby(2)
+	Exposure = VolTime*(0.16/1000.0d0)
+
+  nucleus = Fluorine
+  E_th = 3.0d0
+	E_max = 200.0d0
+
+  call GetNuFluxes ! Load Neutrinos
+  call PreAllocate ! Allocate data size (readout dependent)
+  call BackgroundRecoilDistribution ! Load Background	model
+  call SHM ! Load halo model
+	m_chi = 10.0
+	sigma_p = 1.0d-45
+	call WIMPRecoilDistribution
+	open(unit=1000,file='../../RD_fo.txt')
+	write(1000,*) RD_wimp*1.0d-45
+	do jj = 1,n_bg
+		write(1000,*) RD_bg(:,jj)*R_bg(jj)
+	end do
+	close(1000)
+	stop
+	! ===== !
+
 
 	write(*,*) '====================================================='
 	write(*,*) 'Starting program: CYGNUS-1000'
@@ -52,7 +85,7 @@ program runCYGNUS1000
 	write(*,*) '7 --- Nondirectional (0D)'
 	write(*,*) '8 --- RUN ALL READOUTS'
 	readout_selection = -1
-	do while ((readout_selection.gt.8).or.(readout_selection.lt.0)) 
+	do while ((readout_selection.gt.8).or.(readout_selection.lt.0))
 		write(*,*) 'Select 1-8'
 		write(*,*) '>...'
 		read(*,*) readout_selection
@@ -93,4 +126,4 @@ program runCYGNUS1000
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 	end do
 
-  end program runCYGNUS1000
+end program runCYGNUS1000

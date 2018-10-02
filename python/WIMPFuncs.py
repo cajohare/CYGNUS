@@ -28,8 +28,6 @@ import Params
 m_p = 0.9315*1e6
 c_cm = 3.0e8*100.0 # speed of light in cm/s
 GeV_2_kg = 1.0e6*1.783e-33 # convert GeV to kg
-Jan1 = 2457755.0 # Julian Day of January 1 2018
-
 
 #==============================================================================#
 #-------------------- Energy-Time dependent recoil rate------------------------#
@@ -49,18 +47,18 @@ def MaxWIMPEnergy(A,v_e,m_chi):
 
 #----------------------General event rate -------------------------------------#
 # Accepts either direction or non-directional energies E_r
-def WIMPRate(E_r,t,Expt,DM,HaloModel):
+def WIMPRate(E,t,Expt,DM,HaloModel):
     Nuc = Expt.Nucleus
     Loc = Expt.Location
 
     if Expt.Directional:
-        ne = size(E_r)
+        ne = size(E)
         dR = zeros(shape=(ne))
         dR = dRdEdO_wimp(E,t,DM,HaloModel,Nuc,Loc)
     else:
-        ne = size(E_r)/3
+        ne = size(E)/3
         dR = zeros(shape=(ne))
-        dR = dRdE_wimp(E_r,t,DM,HaloModel,Nuc,Loc)
+        dR = dRdE_wimp(E,t,DM,HaloModel,Nuc,Loc)
     return dR
 
 
@@ -84,28 +82,28 @@ def dRdE_wimp(E_r,t,DM,HaloModel,Nuc,Loc):
     ne = size(E_r)
     nt = size(t)
     dR = zeros(shape=ne)
-    v_e = zeros(shape=ne)
-    if t[0] == t[-1]:
-        v_e = norm(LabFuncs.LabVelocity(t[0]+Jan1, Loc, HaloModel))
-    else:
-        for i in range(0,nt):
-            v_e[i] = norm(LabFuncs.LabVelocity(t[i]+Jan1, Loc, HaloModel))
-
-
-        # Mean inverse speed
-    x = v_min/v_0
-    y = v_e/v_0
-    z = v_esc/v_0
     gvmin = zeros(ne)
-    gvmin[(x<abs(y-z))&(z<y)] = (1.0/(v_0*y))
-    gvmin[(x<abs(y-z))&(z>y)] = (1.0/(2.0*N_esc*v_0*y))\
-                            *(erf(x[(x<abs(y-z))&(z>y)]+y)\
-                            -erf(x[(x<abs(y-z))&(z>y)]-y)\
-                            -(4.0/sqrt(pi))*y*exp(-z**2))
-    gvmin[(abs(y-z)<x)&(x<(y+z))] = (1.0/(2.0*N_esc*v_0*y))\
-                            *(erf(z)-erf(x[(abs(y-z)<x)&(x<(y+z))]-y)\
-                            -(2/sqrt(pi))*(y+z-x[(abs(y-z)<x)&(x<(y+z))])\
-                            *exp(-z**2))
+
+
+    # Mean inverse speed
+    x = v_min/v_0
+    z = v_esc/v_0
+    if t[0] == t[-1]:
+        v_e = norm(LabFuncs.LabVelocity(t[0], Loc, HaloModel))
+        y = v_e/v_0
+        gvmin[(x<abs(y-z))&(z<y)] = (1.0/(v_0*y))
+    else:
+        v_e = zeros(shape=ne)
+        for i in range(0,nt):
+            v_e[i] = norm(LabFuncs.LabVelocity(t[i], Loc, HaloModel))
+        y = v_e/v_0
+        g1 = (1.0/(v_0*y))
+        gvmin[(x<abs(y-z))&(z<y)] = g1[(x<abs(y-z))&(z<y)]
+
+    g2 = (1.0/(2.0*N_esc*v_0*y))*(erf(x+y)-erf(x-y)-(4.0/sqrt(pi))*y*exp(-z**2))
+    g3 = (1.0/(2.0*N_esc*v_0*y))*(erf(z)-erf(x-y)-(2.0/sqrt(pi))*(y+z-x)*exp(-z**2))
+    gvmin[(x<abs(y-z))&(z>y)] = g2[(x<abs(y-z))&(z>y)]
+    gvmin[(abs(y-z)<x)&(x<(y+z))] = g3[(abs(y-z)<x)&(x<(y+z))]
     gvmin[(y+z)<x] = 0.0
     gvmin = gvmin/(1000.0*100.0) # convert to cm^-1 s
 

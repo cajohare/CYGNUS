@@ -5,7 +5,7 @@ module NeutrinoFuncs
   implicit none
 
 contains
-	
+
 !================================NeutrinoFuncs.f95==========================================!
 !
 ! Contents:
@@ -13,11 +13,11 @@ contains
 !
 ! 2. Neutrino event rates and fluxes
 ! GetNuFluxes = Determines which neutrino backgrounds are needed and loads them in
-! 
+!
 !===========================================================================================!
 
-	
-	
+
+
 !===========================================================================================!
 subroutine BackgroundRecoilDistribution
 	double precision :: RD(nTot_bins_full,n_bg),RD_red(nTot_bins)
@@ -26,16 +26,16 @@ subroutine BackgroundRecoilDistribution
 	RD_bg = 0.0d0
 	RD = 0.0d0
 	RD_red = 0.0d0
-	
-	! Load all Neutrino RDs	
+
+	! Load all Neutrino RDs
 	call NeutrinoRD(nTot_bins_full,RD)
 
 	! Get total rates and rescale RD_bg by them
 	do s = 1,n_bg
 		R_bg(s) = sum(RD(:,s))
 		RD(:,s) = RD(:,s)/R_bg(s)
-	end do	
-	
+	end do
+
 	if (sum(RD).gt.1.0d10) then
 		WRITE(*,*) 'one'
 		stop
@@ -49,7 +49,7 @@ subroutine BackgroundRecoilDistribution
 			end do
 		end if
 	end if
-	
+
 	if (sum(RD).gt.1.0d10) then
 		WRITE(*,*) 'TWO'
 		ii = 1
@@ -61,7 +61,7 @@ subroutine BackgroundRecoilDistribution
 		end do
 		stop
 	end if
-	
+
 	! If direction only then integrate over energies
 	if (Energy_on) then
 		RD_bg = RD
@@ -71,7 +71,7 @@ subroutine BackgroundRecoilDistribution
 		    RD_bg(:,s) = RD_red
 		end do
 	end if
-	
+
 
 	! Multiply whole thing by Exposure so RD = Num events/R_bg
 	RD_bg = RD_bg*Exposure
@@ -92,10 +92,10 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 	! Load efficiency curve
 	eff = Efficiency(E_bin_edges,nE_bins+1)
 
-	!---------------------------  NON-DIRECTIONAL ----------------------!	
+	!---------------------------  NON-DIRECTIONAL ----------------------!
 	if (nside.eq.0) then
-	    do si = 1,n_nu  
-	       E_r1 = E_bin_edges(1)		   
+	    do si = 1,n_nu
+	       E_r1 = E_bin_edges(1)
 	       fE_r1 =  NeutrinoRecoilEnergySpectrum(E_r1,E_nu_all(:,si),Flux_all(:,si))
 	       do j = 1,nE_bins
 	          E_r2 = E_bin_edges(j+1)
@@ -105,7 +105,7 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 	          fE_r1 = fE_r2
 	       end do
 		   RD(1:nE_bins,si) = dRdE
-	   
+
 		   ! Correct for annual modulation correction
 			ii = 1
 			do i = 1,nT_bins
@@ -118,7 +118,7 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 					! Integral_inv_EarthSun_sq is defined in params.f95
 					RD(i1:i2,si) = (dRdE/Integral_inv_EarthSun_sq)&
 							*(1.0d0/EarthSunDistance(T_bin_centers(i))**2.0d0)
-				else 
+				else
 					! dsnb and atm neutrinos:
 					! Currently am not incorporating any modulation since the
 					! event rate is nonexistent anyway
@@ -127,20 +127,21 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 				ii = i2+1
 			end do
 
-			
+
 			RD(:,si) = RD(:,si)/(1.0d0*nT_bins)
 	    end do
-	end if	
+	end if
 
+  do i = 1,nT_bins
+    write(*,*) T_bin_centers(i),(1.0/Integral_inv_EarthSun_sq)*(1.0d0/EarthSunDistance(T_bin_centers(i))**2.0d0)
+  end do
 
-
-
-	!---------------------------  DIRECTIONAL ---------------------------!	
-	if (nside.gt.0) then	
+	!---------------------------  DIRECTIONAL ---------------------------!
+	if (nside.gt.0) then
 		! Load Head-tail efficiency
-		eff_HT = HeadTailEfficiency(E_bin_edges,nE_bins+1)	
-		
-		
+		eff_HT = HeadTailEfficiency(E_bin_edges,nE_bins+1)
+
+
 	    ! Solar neutrinos (set each pixel to energy only spectrum/npixels*ntimes)
 	    dpix = 4*pi/(npix*1.0d0)
 	    do si = 1,n_nu-2
@@ -151,7 +152,7 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 		 		   			(1.0-eff_HT(1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
 					do j = 1,nE_bins
 	 		 	       fE_r2 =  eff_HT(j+1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
-	 		 		   			(1.0-eff_HT(j+1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))			
+	 		 		   			(1.0-eff_HT(j+1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
 						RD(ii,si) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
 						fE_r1 = fE_r2
 						ii = ii+1
@@ -159,7 +160,7 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 				end do
 			end do
 		end do
-		
+
 	    ! Isotropic neutrinos (set each pixel to energy only spectrum/npixels*ntimes)
 	    do si = (n_nu-1),(n_nu) ! last two background are always isotropic (DSNB+Atm)
 	       E_r1 = E_bin_edges(1)
@@ -180,46 +181,46 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 		  			ii = i2+1
 		  		end do
 			end do
-	    end do	
-	end if	
+	    end do
+	end if
 
 end subroutine NeutrinoRD
 !---------------------------------------------------------------------------------------------!
 
-	
-	
-	
-	
-	
+
+
+
+
+
 
 !========================================Neutrino data========================================!
 subroutine GetNuFluxes
-	! Reads each neutrino flux data file 
-	! Each flux file has 1000 rows apart from monochromatic ones 
+	! Reads each neutrino flux data file
+	! Each flux file has 1000 rows apart from monochromatic ones
 	! the energies are stored in E_nu_all, fluxes in Flux_all
 	integer :: i,nvals,ii,j
 	integer :: sel(11),s
 	double precision :: E_r_max
-	
+
 	! CURRENTLY USING BARCELONA FLUXES
 	NuFlux = NuFlux_B17GS98
 	NuUnc = NuUnc_B17GS98
 	nvals = 1000 ! All neutrino backgrounds saved with 1000 entries
-	
-	
+
+
 	! ORDER OF NEUTRINOS
 	! 1. pp
 	! 2. pep
 	! 3. hep
 	! 4. 7Be [343 keV]
 	! 5. 7Be [843 keV]
-	! 6. 8B 
+	! 6. 8B
 	! 7. 13 N
 	! 8. 15 O
 	! 9. 17 F
 	! 10. DSNB
 	! 11. Atm
-	
+
 	! Monochromatic neutrinos (2, 4, 5) have a negative value for E_nu which is
 	! Used to tell the rate formula to use monochromatic result
 
@@ -254,21 +255,21 @@ subroutine GetNuFluxes
 		    else if (s.eq.3) then
 		       open(unit=10,file='../neutrinos/hep-1000.txt')
 		    else if (s.eq.4) then
-		       open(unit=10,file='../neutrinos/7Be1-1000.txt') 
+		       open(unit=10,file='../neutrinos/7Be1-1000.txt')
 		    else if (s.eq.5) then
-		       open(unit=10,file='../neutrinos/7Be2-1000.txt') 
+		       open(unit=10,file='../neutrinos/7Be2-1000.txt')
 		    else if (s.eq.6) then
-		       open(unit=10,file='../neutrinos/8B-1000.txt') 
+		       open(unit=10,file='../neutrinos/8B-1000.txt')
 		    else if (s.eq.7) then
-		       open(unit=10,file='../neutrinos/13N-1000.txt') 
+		       open(unit=10,file='../neutrinos/13N-1000.txt')
 		    else if (s.eq.8) then
-		       open(unit=10,file='../neutrinos/15O-1000.txt') 
+		       open(unit=10,file='../neutrinos/15O-1000.txt')
 		    else if (s.eq.9) then
-		       open(unit=10,file='../neutrinos/17F-1000.txt') 
+		       open(unit=10,file='../neutrinos/17F-1000.txt')
 		    else if (s.eq.10) then
-		       open(unit=10,file='../neutrinos/DSNB-1000.txt')  
+		       open(unit=10,file='../neutrinos/DSNB-1000.txt')
 		    else if (s.eq.11) then
-		       open(unit=10,file='../neutrinos/Atm-1000.txt') 
+		       open(unit=10,file='../neutrinos/Atm-1000.txt')
 		    end if
 		    do j = 1,nvals
 		      read(10,*) E_nu_all(j,ii),Flux_all(j,ii)
@@ -277,7 +278,7 @@ subroutine GetNuFluxes
 		    Flux_all(:,ii) = NuFlux(i)*Flux_all(:,ii) ! Select rate normalisations
 			R_bg_err(ii) = NuUnc(i) ! Select rate normalisation uncertainties
 			ii = ii+1
-		end if	
+		end if
 	end do
 
 end subroutine GetNuFluxes
@@ -341,9 +342,9 @@ function NeutrinoRecoilSpectrum_Solar(E3,tbin,E_nu,Flux_in) result(dR)
 	x_sun = 1.0*SolarDirection(T_bin_centers(tbin)) ! Direction of sun at tbin
 	Flux = (Flux_in/Integral_inv_EarthSun_sq)*(1.0/EarthSunDistance(t)**2.0) ! Modulated flux
 
-	dR = 0.0d0	
+	dR = 0.0d0
 	N = nucleus(1)
-	Z = nucleus(2) 
+	Z = nucleus(2)
 	Q_W = N-(1-4*sintheta_Wsq)*Z ! Weak nuclear hypercharge
 	m_N_GeV = 0.93141941*(N+Z)
 	m_N_keV = m_N_GeV*1.0e6
@@ -351,9 +352,9 @@ function NeutrinoRecoilSpectrum_Solar(E3,tbin,E_nu,Flux_in) result(dR)
 	E_r_max = 2*m_N_keV*(1000.0*E_nu(nn))**2.0/(m_N_keV+1000.0*E_nu(nn))**2.0
 	costh = sum(-(x_sun*x_r)) ! Angle between sun and recoil
 	Eps = 0.0
-	
+
 	if (E_r.le.E_r_max) then ! recoil energy is permitted
-	  E_nu_min = sqrt(m_N_keV*E_r/2.0)	! Min nu energy to create 
+	  E_nu_min = sqrt(m_N_keV*E_r/2.0)	! Min nu energy to create
 	  if (Flux(2).gt.0.0d0)	 then
 	      ! CHROMATIC NEUTRINOS
 	      if (costh.gt.(E_nu_min/m_N_keV)) then
@@ -380,16 +381,16 @@ function NeutrinoRecoilSpectrum_Solar(E3,tbin,E_nu,Flux_in) result(dR)
 			  end if
 			end do
 		    else
-			F_value = Flux(1)                  
+			F_value = Flux(1)
 		    end if
-		    dRdEdO = diff_sigma*(F_value/1000)*(Eps**2.0)/(E_nu_min)    
+		    dRdEdO = diff_sigma*(F_value/1000)*(Eps**2.0)/(E_nu_min)
 		  else
 		    dRdEdO = 0.0
 		  end if
-	      else 
+	      else
 		  dRdEdO = 0.0
-	      end if  
-	  else 
+	      end if
+	  else
 		  ! MONOCHROMATIC NEUTRINOS
 	      costh_r=((E_nu(1)*1000.0d0+m_N_keV)/(1000.0d0*E_nu(1)))&
 	           *sqrt(E_r/(2*m_N_keV))
@@ -403,7 +404,7 @@ function NeutrinoRecoilSpectrum_Solar(E3,tbin,E_nu,Flux_in) result(dR)
 	      else
 	         dRdEdO = 0.0
 	      end if
-	  end if	   
+	  end if
 	else
 	   dRdEdO = 0.0
 	end if
