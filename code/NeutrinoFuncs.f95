@@ -132,10 +132,6 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 	    end do
 	end if
 
-  do i = 1,nT_bins
-    write(*,*) T_bin_centers(i),(1.0/Integral_inv_EarthSun_sq)*(1.0d0/EarthSunDistance(T_bin_centers(i))**2.0d0)
-  end do
-
 	!---------------------------  DIRECTIONAL ---------------------------!
 	if (nside.gt.0) then
 		! Load Head-tail efficiency
@@ -340,7 +336,8 @@ function NeutrinoRecoilSpectrum_Solar(E3,tbin,E_nu,Flux_in) result(dR)
 	x_r = E3/E_r ! Recoil direction
 
 	x_sun = 1.0*SolarDirection(T_bin_centers(tbin)) ! Direction of sun at tbin
-	Flux = (Flux_in/Integral_inv_EarthSun_sq)*(1.0/EarthSunDistance(t)**2.0) ! Modulated flux
+  write(*,*) x_sun,T_bin_centers(tbin)
+  Flux = (Flux_in/Integral_inv_EarthSun_sq)*(1.0/EarthSunDistance(t)**2.0) ! Modulated flux
 
 	dR = 0.0d0
 	N = nucleus(1)

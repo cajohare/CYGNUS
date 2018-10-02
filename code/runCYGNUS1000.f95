@@ -19,9 +19,9 @@ program runCYGNUS1000
 
 	!------------------Optimisation-----------------!
 	!-----Set binning ------------------------------!
-	  nE_bins = 20 ! Number of energy bins		  		!
-	  nT_bins = 10 ! Number of time bins						!
-	  nside = 0  ! Order of pixelation (2,4 or 8)		!
+	  nE_bins = 1 ! Number of energy bins		  		!
+	  nT_bins = 1 ! Number of time bins						!
+	  nside = 4  ! Order of pixelation (2,4 or 8)		!
 	!----- Mass range for limits -------------------!
 	  nm = 100 ! Number of mass points							!
 	  m_min = 0.5d0 ! Min mass											!

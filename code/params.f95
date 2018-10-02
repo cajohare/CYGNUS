@@ -1,6 +1,6 @@
 module params
   implicit none
-  
+
 !================================param.f95=============================================!
 ! contains all parameters that need to be defined globally, seems like there is a lot  !
 ! but it just makes everything a lot nice to look at and less confusing this way.	   !
@@ -18,7 +18,7 @@ double precision :: m_chi ! WIMP mass
 double precision :: rho_0 ! Local DM density
 double precision :: v_esc ! Escape speed
 double precision :: v_LSR ! Local standard of rest
-double precision :: sig_v ! Halo dispersion 
+double precision :: sig_v ! Halo dispersion
 double precision,dimension(3),parameter :: v_pec = (/11.1d0,12.24d0,7.25d0/) ! Solar vel.
 double precision,dimension(:,:),allocatable :: v_lab_all ! Time dependent lab velocity
 !---------------------------------------------------------------------------------------!
@@ -29,7 +29,7 @@ double precision,dimension(:,:),allocatable :: v_lab_all ! Time dependent lab ve
 
 
 !--------------------------------------Backgrounds---------------------------------------!
-integer :: n_bg ! Number of backgrounds 
+integer :: n_bg ! Number of backgrounds
 double precision,dimension(:),allocatable :: R_bg ! Background rate normalisations
 double precision,dimension(:),allocatable :: R_bg_err ! Background rate uncertainties
 double precision,dimension(11) :: NuUnc ! All neutrino uncertainties
@@ -107,19 +107,19 @@ double precision,parameter :: sinTheta_Wsq=0.2387d0 ! sin(Theta_W) weak mixing a
 double precision,parameter :: AstronomicalUnit = 1.49597892d11 ! Astronomical Unit
 double precision,parameter :: EarthRadius = 6371.01d0*1000.0d0 ! Earth Radius
 double precision,parameter :: Integral_inv_EarthSun_sq = 4.468864372000642d-23 ! 1/r^2 int
-double precision,parameter :: Jan1 = 2457755.0 ! Julian Day of January first
+double precision,parameter :: Jan1 = 2458849.5! Julian Day of January 1 2020
 double precision,parameter :: vv_earthrev = 29.79d0 ! Earth revolution speed
 double precision,parameter :: eccentricity = 0.016722d0 ! eccentricity of earth orbit
-double precision,parameter :: eccentricity_deg = 0.9574d0 ! eccentricity in degrees  
-double precision,parameter :: orb_long_ecliptic = 13.0d0+1.0d0 ! 
+double precision,parameter :: eccentricity_deg = 0.9574d0 ! eccentricity in degrees
+double precision,parameter :: orb_long_ecliptic = 13.0d0+1.0d0 !
 double precision,dimension(3),parameter :: lat_ecl_gal = (/-5.5303d0,59.575d0,29.812d0/)
-double precision,dimension(3),parameter :: long_ecl_gal =(/266.141d0,-13.3485d0,179.3212d0/)  
+double precision,dimension(3),parameter :: long_ecl_gal =(/266.141d0,-13.3485d0,179.3212d0/)
 !------------------------------------------------------------------------------------------!
 
 
 
 
-!--------------------------------------Various Locations-----------------------------------! 
+!--------------------------------------Various Locations-----------------------------------!
 double precision,dimension(2),parameter :: Boulby = (/54.5591d0,0.8310d0/)
 double precision,dimension(2),parameter :: GranSasso = (/2.4691, 13.5654/)
 double precision,dimension(2),parameter :: Kamioka = (/36.2381, 137.1863/)

@@ -137,7 +137,7 @@ def Smear(x,dR,sig_gamma):
     npix = size(dR)
     for i in range(0,npix):
         x0 = x[i,:]
-        gamma = x0[0]*x[:,0] + x0[1]*x[:,1] + x[0]
+        gamma = x0[0]*x[:,0] + x0[1]*x[:,1] + x[2]*x[:,2]
         dR_smeared[i] = dR*exp(-gamma**2.0/(2*sig_gamma**2.0))
 
     dR_smeared = dR_smeared*sum(dR)/sum(dR_smeared)
@@ -237,7 +237,7 @@ def JulianDay(month, day, year, hour): # Calculates time in JD for a given date
 
 #==========================Solar direction=====================================#
 #------------------------------------------------------------------------------#
-def EarthSunDistance(JD): # Earth-sun distance at Julian Day
+def EarthSunDistance(JD): # Earth-sun distance at Julian Day (JD)
     D = JD-2451545.0
     g = 357.529 + 0.98560028*D
     g = g*pi/180.0
@@ -246,7 +246,7 @@ def EarthSunDistance(JD): # Earth-sun distance at Julian Day
     return r_es
 
 #------------------------------------------------------------------------------#
-def SolarDirection(JD,Loc): # Solar direction in lab coords at Julian Day
+def SolarDirection(JD,Loc): # Solar direction in lab coords at Julian Day (JD)
 
     lat = Loc.Latitude
     lon = Loc.Longitude
@@ -293,7 +293,7 @@ def EarthSunDistanceMod(JD):
 #------------------------------------------------------------------------------#
 
 #---------------------------Coordinate trans.----------------------------------#
-def eqt2lab(vp,t_lab, lat): # Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
+def eqt2lab(vp,t_lab,lat): # Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
     t = t_lab*pi/180.0
     latr = lat*pi/180.0
     v = vp*0.0
@@ -305,8 +305,8 @@ def eqt2lab(vp,t_lab, lat): # Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
 def gal2eqt(vp): # Galactic (x_g,y_g,z_g) to Equatorial (x_e,y_e,z_e)
     v = 0.0*vp
     v[0] = -0.06699*vp[0] + 0.4927*vp[1] - 0.8676*vp[2]
-    v[1] = -0.8728*vp[0] -0.4503*vp[1] -0.1884*vp[2]
-    v[2] = -0.4835*vp[0] + 0.7446*vp[1] + 0.4602*vp[2]
+    v[1] = -0.8728*vp[0]  - 0.4503*vp[1] - 0.1884*vp[2]
+    v[2] = -0.4835*vp[0]  + 0.7446*vp[1] + 0.4602*vp[2]
     return v
 
 def gal2lab(v,t_lab, lat): # Galactic (x_g,y_g,z_g) to Laboratory (N,W,Z)

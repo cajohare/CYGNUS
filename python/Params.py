@@ -153,7 +153,7 @@ class Detector:
 
         Ebins = logspace(log10(E_th),log10(E_max),ne+1)
         self.Energies = Ebins
-        self.Times = linspace(Jan1,Jan1+365.0,nt)
+        self.Times = linspace(Jan1+0.5*(365./(1.0*nt)),Jan1+365.0-0.5*(365./(1.0*nt)),nt)
         self.TotalNumberOfBins = ne*nt
         if nside>0:
             self.Directional = True
