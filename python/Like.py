@@ -1,5 +1,6 @@
+from __future__ import print_function
 from numpy import pi, sqrt, exp, zeros, size, shape, array, append
-from numpy import trapz, interp, loadtxt, log10, log
+from numpy import trapz, interp, loadtxt, log10, log, savetxt, vstack
 from iminuit import minimize
 from numpy.linalg import norm
 from scipy.special import gammaln
@@ -20,6 +21,8 @@ import WIMPFuncs
 #------------------------------CYGNUS------------------------------------------#
 def CYGNUSLimit(filename,m_vals,sigma_vals,Volume,TotTime,HaloModel=Params.SHM,ne=20,nt=1,nside=4,Eoff=False,ReadOut_Name="Ideal"):
     # Code for running both fluorine and helium limits
+    print("="*50)
+    print("CYGNUS limits")
     E_th_F = 3.0
     E_th_He = 1.8
     E_max = 200.0
@@ -35,16 +38,19 @@ def CYGNUSLimit(filename,m_vals,sigma_vals,Volume,TotTime,HaloModel=Params.SHM,n
     Detector_He = Params.Detector(E_th_He,E_max,Params.He4,Loc,Exposure,ne,nt,nside,Eoff,ReadOut_Name)
 
     # Calculate Fluorine limits
+
     DLF = GetLimits(m_vals,sigma_vals,HaloModel,Detector_F)
+    print("-"*50)
 
     # Calculate Helium limits
+    print("-"*50)
     DLHe = GetLimits(m_vals,sigma_vals,HaloModel,Detector_He)
-
+    print("-"*50)
     # Save Data
-    savetxt(filename,vstack(m_vals,DLF,DLHe), delimiter='\t')
+    savetxt(filename,vstack((m_vals,DLF,DLHe)), delimiter='\t')
 
-    print "written to:",filename
-    print "----------------------------------------------------"
+    print("written to:",filename)
+    print("="*50)
     return DLHe, DLF
 
 
@@ -96,13 +102,11 @@ def llhood0(X,N_obs,Signal,Background):
 
 #===============================Discovery Limit================================#
 def GetLimits(m_vals,sigma_vals,HaloModel,Expt):
-    print "----------------------------------------------------"
     # Load neutrino backgrounds
     Background = NeutrinoFuncs.GetNuFluxes(Expt.EnergyThreshold,Expt.Nucleus)
     n_bg = Background.NumberOfNeutrinos
     R_bg = Background.Normalisations
     R_bg_err = Background.Uncertainties
-    print R_bg
     RD_nu = zeros(shape=(Expt.TotalNumberOfBins,n_bg))
     for i in range(0,n_bg):
         RD_nu[:,i] = LabFuncs.BinEvents(Expt,NeutrinoFuncs.NuRate,Background,i)
@@ -116,7 +120,7 @@ def GetLimits(m_vals,sigma_vals,HaloModel,Expt):
     X_in1 = zeros(shape=(n_bg+1))
     N_bg = zeros(shape=Expt.TotalNumberOfBins)
     for i in range(0,n_bg):
-        N_bg = N_bg + R_bg[i]*sum(Background.RD[:,i])
+        N_bg = N_bg + R_bg[i]*Background.RD[:,i]
 
 
     # MASS SCAN:
@@ -141,13 +145,15 @@ def GetLimits(m_vals,sigma_vals,HaloModel,Expt):
 
                 #------ Background only ------#
                 X_in0 = R_bg
-                step = R_bg*R_bg_err
+                step = R_bg_err
                 res = minimize(llhood0, X_in0, args=(N_obs,Signal,Background)\
-                                ,options={'xtol': 1e-1, 'eps': step})
+                                ,options={'xtol': R_bg_err, 'eps': 2*step})
                 L0 = res.fun
+                #L0 = llhood0(X_in0,N_obs,Signal,Background)
 
                 # Test statistic
                 D01 = -2.0*(L1-L0)
+                #print(j,sigma_p,D01,sum(N_signal),L1,L0)
                 if D01>9.0: # Median 3sigma detection -> D = 9
                 	# Do interpolation to find discovery limit cross section
                 	DL[im] = 10.0**(interp(9.0,array([D_prev,D01]),\
@@ -155,5 +161,6 @@ def GetLimits(m_vals,sigma_vals,HaloModel,Expt):
                 	break
                 s_prev = sigma_p # Reset for interpolation
                 D_prev = D01
-        print "m_chi = ",m_vals[im],"sigma_p = ",DL[im]
+        #Params.printProgressBar(im, nm)
+        print("m_chi = ",m_vals[im],"sigma_p = ",DL[im],sum(N_signal),sum(N_bg))
     return DL

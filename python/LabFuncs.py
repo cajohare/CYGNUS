@@ -70,9 +70,10 @@ def BinEvents(Expt,dRfunc,*Args):
             i1 = 0
             dR_smear = zeros(shape=shape(dR))
             for i in range(0,nt):
-                for j in range(0,npix):
+                for j in range(0,ne):
                     i2 = i1 + npix - 1
-                    dR_smear[i1:i2+1] = Smear(q,dR[i1:i2+1],sig_gamma[j])
+                    if sum(dR[i1:i2+1])>0.0:
+                        dR_smear[i1:i2+1] = Smear(q,dR[i1:i2+1],sig_gamma[j])
                     i1 = i2+1
             dR = dR_smear
 
@@ -135,10 +136,11 @@ def BinEvents(Expt,dRfunc,*Args):
 #==============================Angular Res=====================================#
 def Smear(x,dR,sig_gamma):
     npix = size(dR)
+    dR_smeared = zeros(shape=shape(dR))
     for i in range(0,npix):
         x0 = x[i,:]
-        gamma = x0[0]*x[:,0] + x0[1]*x[:,1] + x[2]*x[:,2]
-        dR_smeared[i] = dR*exp(-gamma**2.0/(2*sig_gamma**2.0))
+        gamma = x0[0]*x[:,0] + x0[1]*x[:,1] + x0[2]*x[:,2]
+        dR_smeared[i] = sum(dR*exp(-gamma**2.0/(2*sig_gamma**2.0)))
 
     dR_smeared = dR_smeared*sum(dR)/sum(dR_smeared)
     return dR_smeared

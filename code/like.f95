@@ -139,24 +139,26 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 	! MASS SCAN:
 	do im = 1,nm
 		m_chi = m_vals(im)
-
 		call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
 		! CROSS SECTION SCAN
 		do j = 1,ns
 			sigma_p = sigma_p_vals(j)
 			if (sum(RD_wimp*sigma_p).gt.0.1d0) then	! Generally need >0.5 events to see DM
+
+
+
 				N_exp = N_exp_bg + RD_wimp*sigma_p
 				N_obs = N_exp  ! Observed=Expected for Asimov data
 
 			    !------ Signal + Background ------!
 				! X_in = (log10(sigma_p), background rates)
-			    X_in1(1) = log10(sigma_p)
+			   X_in1(1) = log10(sigma_p)
 				X_in1(2:n_bg+1) = R_bg
 			    call llhood1(X_in1,L1) ! Asimov data maximises likelihood at correct value
 
 			    !------ Background only ------!
 			    X_in0 = R_bg
-			    step0 = R_bg_err*R_bg
+			   step0 = R_bg_err*R_bg
 				call llhood0(X_in0,L0)
 			    call MINIM(X_in0,step0,n_bg,L0,&
 				  MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,&

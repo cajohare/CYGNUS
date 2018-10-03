@@ -1,7 +1,7 @@
 module LabFuncs
 	use params
 	use util
-	
+
 	implicit none
 
 contains
@@ -20,7 +20,7 @@ contains
 ! Efficiency: charge detection efficiency eff = (0 -> 1)
 ! AngularResolution: energy dependent angular resolution curve in radians
 ! HeadTailEfficiency: prob of correct sense recognition eff_HT = (0 -> 1)
-! LoadReadout: loads readout detector performance data files 
+! LoadReadout: loads readout detector performance data files
 
 ! 3. Detector directional integrals
 ! IntegrateOverEnergies: Converts an RD into direction-only data
@@ -74,31 +74,31 @@ end function FormFactorHelm
 !----------------------------Load Detector Resolution curve-----------------------------!
 function EnergyResolution(E_r,ni) result(sig_E)
 	integer :: i,nuc,ni
-	double precision :: E_r(ni),sig_E(ni)	
+	double precision :: E_r(ni),sig_E(ni)
 	if (energyres_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
 			nuc = 2
-		end if		
+		end if
 		do i = 1,ni
 			sig_E(i) = E_vals(i)*interp1D(E_vals,energyres_data(:,nuc),1000,E_r(i))
 		end do
 	else
 		sig_E = 1.0d0
-	end if	
+	end if
 end function
 
 !---------------------------------Load  Efficiency curve-------------------------------!
 function Efficiency(E_r,ni) result(eff)
 	integer :: i,nuc,ni
-	double precision :: E_r(ni),eff(ni),s1,Ec,EC2		
+	double precision :: E_r(ni),eff(ni),s1,Ec,EC2
 	if (efficiency_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
 			nuc = 2
-		end if		
+		end if
 		do i = 1,ni
 			eff(i) = interp1D(E_vals,efficiency_data(:,nuc),1000,E_r(i))
 		end do
@@ -110,46 +110,46 @@ end function
 !----------------------------Load Angular resolution curve------------------------------!
 function AngularResolution(E_r,ni) result(sig_gamma)
 	integer :: i,nuc,ni
-	double precision :: E_r(ni),sig_gamma(ni)		
+	double precision :: E_r(ni),sig_gamma(ni)
 	if (angres_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
 			nuc = 2
-		end if		
+		end if
 		do i = 1,ni
 			sig_gamma(i) = interp1D(E_vals,angres_data(:,nuc),1000,E_r(i))*(pi/180.0d0)
 		end do
 	else
 		sig_gamma = 0.0d0
-	end if	
+	end if
 end function
 
 !----------------------------Load Head-tail efficiency curve-----------------------------!
 function HeadTailEfficiency(E_r,ni) result(eff_HT)
 	integer :: i,ni,nuc
-	double precision :: E_r(ni),eff_HT(ni)	
+	double precision :: E_r(ni),eff_HT(ni)
 	if (headtail_on) then
 		if (nucleus(1).eq.Fluorine(1)) then
 			nuc = 1
 		elseif (nucleus(1).eq.Helium(1)) then
 			nuc = 2
-		end if		
+		end if
 		do i = 1,ni
 			eff_HT(i) = interp1D(E_vals,headtail_data(:,nuc),1000,E_r(i))
 		end do
 	else
 		eff_HT = 1.0d0
-	end if	
+	end if
 end function
 
 
 !----------------------------Load Everything---------------------------------------------!
 subroutine LoadReadout(ro, ReadoutName)
 	integer :: ro,i
-	character(len=100) :: ReadoutName 
+	character(len=100) :: ReadoutName
 	double precision :: Ei
-	
+
 	! Set readout name
 	if (ro.eq.0) then
 		ReadoutName = 'Ideal'
@@ -168,13 +168,13 @@ subroutine LoadReadout(ro, ReadoutName)
 	elseif (ro.eq.7) then
 		ReadoutName = 'Nondirectional'
 	end if
-	
+
 	! Load all the data files needed
 	open(unit=1300,file='../readouts/energyres/'//trim(ReadoutName)//'-EnergyRes.txt')
 	open(unit=1301,file='../readouts/efficiency/'//trim(ReadoutName)//'-Efficiency.txt')
 	open(unit=1302,file='../readouts/angres/'//trim(ReadoutName)//'-AngRes.txt')
 	open(unit=1303,file='../readouts/headtail/'//trim(ReadoutName)//'-HeadTail.txt')
-	
+
 	! Allocate all data to the right arrays
 	do i = 1,1000
 		read(1300,*) E_vals(i),energyres_data(i,:)
@@ -182,13 +182,13 @@ subroutine LoadReadout(ro, ReadoutName)
 		read(1302,*) Ei,angres_data(i,:)
 		read(1303,*) Ei,headtail_data(i,:)
 	end do
-	
+
 	! Remeber to close the file or you will let "him" out
 	close(1300)
 	close(1301)
 	close(1302)
 	close(1303)
-	
+
 end subroutine
 !---------------------------------------------------------------------------------------!
 
@@ -196,7 +196,7 @@ end subroutine
 
 
 
-!======Directional performance integrals needed to modify recoil distribitions==========!	
+!======Directional performance integrals needed to modify recoil distribitions==========!
 subroutine IntegrateOverEnergies(RD,RD_red)
 	double precision :: RD(nTot_bins_full),RD_red(nTot_bins)
 	integer :: i1,i2,i,k
@@ -207,7 +207,7 @@ subroutine IntegrateOverEnergies(RD,RD_red)
 			RD_red = sum(RD(i1:i2))
 			i1 = i2+1
 		end do
-	end do	
+	end do
 end subroutine
 
 !-------------------------Smear the full Energy-Time-Direction RD-----------------------!
@@ -224,7 +224,7 @@ subroutine SmearRD(RD)
 				RDpix(k) = RD(ii)
 			end do
 		end do
-	
+
 		if (sum(RDpix).gt.0.0d0) then
 			call Smear(RDpix,sig_gamma(ibin))
 
@@ -235,8 +235,8 @@ subroutine SmearRD(RD)
 					RD_smeared(ii) = RDpix(k)
 					!write(*,*) k,RD(ii),RD_smeared(ii),sig_gamma(ibin)
 				end do
-			end do	
-		end if		
+			end do
+		end if
 	end do
 	RD = RD_smeared
 end subroutine
@@ -247,7 +247,7 @@ subroutine Smear(RDpix_in,sig_gammai)
 	double precision :: sig_gammai,Rtot,x0(3),Rpixtot
 	integer :: k,k2
 	! Smears pixelised angular recoil distribution by angular res. sig_gamma
-	! assumes that angular distribution is at a single energy	
+	! assumes that angular distribution is at a single energy
 	Rpixtot = sum(RDpix_in) ! used to normalise the smearing
 	RDpix = RDpix_in
 	do k = 1,npix
@@ -260,10 +260,10 @@ subroutine Smear(RDpix_in,sig_gammai)
 		RDpix(k) = sum(RD_K)
 	end do
 	RDpix = RDpix/sum(RDpix)
-	RDpix = RDpix*Rpixtot	
+	RDpix = RDpix*Rpixtot
 	! update RDpix_in
 	RDpix_in = RDpix
-		
+
 end subroutine
 
 !------------------Gaussian smoothing kernal on a sphere-------------------------------!
@@ -278,7 +278,7 @@ function GaussianKernel(x,x0,sig_gammai) result(K)
 		!end if
 	gamma = acos(gamma)
 	K = exp(-gamma*gamma/(2.0d0*sig_gammai*sig_gammai))
-end function 
+end function
 !---------------------------------------------------------------------------------------!
 
 
@@ -310,7 +310,7 @@ function LabVelocity(day) ! More complex version in Lab frame system
 	t_lab = t_GAST + long/15
 	t_lab = 15*t_lab ! Lab time in degrees
 
-	! Galactic (LSR) Rotation 
+	! Galactic (LSR) Rotation
 	vv_galrot = v_LSR
 	v_galrot = (/0.0d0,vv_galrot,0.0d0/)
 	call gal2lab(v_galrot,t_lab) ! transform to lab co-ords
@@ -425,7 +425,7 @@ subroutine eqt2lab(v,t_lab) ! Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
 end subroutine eqt2lab
 
 !---------------------------------------------------------------------------------------!
-subroutine gal2eqt(v) ! Galactic (x_g,y_g,z_g) to Equatorial (x_e,y_e,z_e) 
+subroutine gal2eqt(v) ! Galactic (x_g,y_g,z_g) to Equatorial (x_e,y_e,z_e)
 	double precision :: v(3),vp(3)
 	vp = v
 	v(1) = -0.06699*vp(1) + 0.4927*vp(2) - 0.8676*vp(3)
@@ -485,7 +485,7 @@ subroutine lab2gal(v,day)
 	e2l(2,:) = (/sin(t_lab), -cos(t_lab),0.0d0/)
 	e2l(3,:) = (/cos(latr)*cos(t_lab), cos(latr)*sin(t_lab), sin(latr)/)
 	call inverse(e2l,l2e,3)
-	M =  matmul(e2g,l2e)    
+	M =  matmul(e2g,l2e)
 	vp = v
 	v(1) = M(1,1)*vp(1) + M(1,2)*vp(2) + M(1,3)*vp(3)
 	v(2) = M(2,1)*vp(1) + M(2,2)*vp(2) + M(2,3)*vp(3)

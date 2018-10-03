@@ -1,3 +1,4 @@
+from __future__ import print_function
 from numpy import array, sqrt, pi, exp, interp, loadtxt, zeros, shape, ones
 from numpy import logspace, linspace, log10
 from scipy.special import erf
@@ -117,7 +118,7 @@ class Neutrinos:
     def __init__(self,n_nu,solar_label,energies,fluxes,normlisations,uncertainties):
         self.Flux = fluxes
         self.Energy = energies
-        self.Uncertainties = uncertainties
+        self.Uncertainties = uncertainties*normlisations
         self.Normalisations = normlisations
         self.NumberOfNeutrinos = n_nu
         self.SolarLabel = solar_label
@@ -155,6 +156,9 @@ class Detector:
         self.Energies = Ebins
         self.Times = linspace(Jan1+0.5*(365./(1.0*nt)),Jan1+365.0-0.5*(365./(1.0*nt)),nt)
         self.TotalNumberOfBins = ne*nt
+        if ReadOut_Name=="Nondirectional":
+            nside = 0
+
         if nside>0:
             self.Directional = True
             npix = 12*nside**2
@@ -214,3 +218,10 @@ Oahu = Location(21.4389, -158.0001)
 GuantanamoBay = Location(20.0117, -75.1216)
 Pyongyang = Location(39.0392, 125.7625)
 #------------------------------------------------------------------------------#
+
+
+def printProgressBar (iteration, total):
+    percent = ("{0:." + str(1) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(50 * iteration // total)
+    bar = 'O' * filledLength + '-' * (50 - filledLength)
+    print('%s |%s| %s%% %s' % ('Progress:', bar, percent, 'Complete'), end='\r')

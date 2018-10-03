@@ -336,7 +336,6 @@ function NeutrinoRecoilSpectrum_Solar(E3,tbin,E_nu,Flux_in) result(dR)
 	x_r = E3/E_r ! Recoil direction
 
 	x_sun = 1.0*SolarDirection(T_bin_centers(tbin)) ! Direction of sun at tbin
-  write(*,*) x_sun,T_bin_centers(tbin)
   Flux = (Flux_in/Integral_inv_EarthSun_sq)*(1.0/EarthSunDistance(t)**2.0) ! Modulated flux
 
 	dR = 0.0d0
