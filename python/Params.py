@@ -195,7 +195,7 @@ class Detector:
 
         self.EnergyResolution = interp(Ebins,data_er[:,0],data_er[:,icol])
         self.Efficiency = interp(Ebins,data_eff[:,0],data_eff[:,icol])
-        self.AngularResolution = interp(Ebins,data_ar[:,0],data_ar[:,icol])
+        self.AngularResolution = (pi/180.0)*interp(Ebins,data_ar[:,0],data_ar[:,icol])
         self.HeadTailEfficiency = interp(Ebins,data_ht[:,0],data_ht[:,icol])
 
 #==============================================================================#

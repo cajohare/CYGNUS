@@ -4,6 +4,7 @@ from numpy import trapz, interp, loadtxt, log10, log, savetxt, vstack
 from iminuit import minimize
 from numpy.linalg import norm
 from scipy.special import gammaln
+from sys import exit
 import LabFuncs
 import Params
 import NeutrinoFuncs
@@ -19,10 +20,12 @@ import WIMPFuncs
 
 #=========================Generate limits======================================#
 #------------------------------CYGNUS------------------------------------------#
-def CYGNUSLimit(filename,m_vals,sigma_vals,Volume,TotTime,HaloModel=Params.SHM,ne=20,nt=1,nside=4,Eoff=False,ReadOut_Name="Ideal"):
+def CYGNUSLimit(filename,m_vals,sigma_vals,Volume,TotTime,\
+    HaloModel=Params.SHM,ne=20,nt=1,nside=4,Eoff=False,\
+    ReadOut_Name="Ideal",Verbose=True):
     # Code for running both fluorine and helium limits
     print("="*50)
-    print("CYGNUS limits")
+    print("CYGNUS limits:   "+filename)
     E_th_F = 3.0
     E_th_He = 1.8
     E_max = 200.0
@@ -37,14 +40,15 @@ def CYGNUSLimit(filename,m_vals,sigma_vals,Volume,TotTime,HaloModel=Params.SHM,n
     Detector_F = Params.Detector(E_th_F,E_max,Params.F19,Loc,Exposure,ne,nt,nside,Eoff,ReadOut_Name)
     Detector_He = Params.Detector(E_th_He,E_max,Params.He4,Loc,Exposure,ne,nt,nside,Eoff,ReadOut_Name)
 
-    # Calculate Fluorine limits
-
-    DLF = GetLimits(m_vals,sigma_vals,HaloModel,Detector_F)
-    print("-"*50)
-
     # Calculate Helium limits
+    print("Helium...")
+    DLHe = GetLimits(m_vals,sigma_vals,HaloModel,Detector_He,Verbose=Verbose)
     print("-"*50)
-    DLHe = GetLimits(m_vals,sigma_vals,HaloModel,Detector_He)
+
+    # Calculate Fluorine limits
+    print("-"*50)
+    print("Fluorine...")
+    DLF = GetLimits(m_vals,sigma_vals,HaloModel,Detector_F,Verbose=Verbose)
     print("-"*50)
     # Save Data
     savetxt(filename,vstack((m_vals,DLF,DLHe)), delimiter='\t')
@@ -101,7 +105,7 @@ def llhood0(X,N_obs,Signal,Background):
 
 
 #===============================Discovery Limit================================#
-def GetLimits(m_vals,sigma_vals,HaloModel,Expt):
+def GetLimits(m_vals,sigma_vals,HaloModel,Expt,Verbose=True):
     # Load neutrino backgrounds
     Background = NeutrinoFuncs.GetNuFluxes(Expt.EnergyThreshold,Expt.Nucleus)
     n_bg = Background.NumberOfNeutrinos
@@ -162,5 +166,7 @@ def GetLimits(m_vals,sigma_vals,HaloModel,Expt):
                 s_prev = sigma_p # Reset for interpolation
                 D_prev = D01
         #Params.printProgressBar(im, nm)
-        print("m_chi = ",m_vals[im],"sigma_p = ",DL[im],sum(N_signal),sum(N_bg))
+        if Verbose:
+            print("m_chi = ",m_vals[im],"| sigma_p = ",DL[im],\
+            "| # Signal = ",sum(N_signal),"| # Background = ",sum(N_bg))
     return DL

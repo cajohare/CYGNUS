@@ -27,7 +27,7 @@ program runCYGNUS1000
 	  m_min = 0.5d0 ! Min mass											!
 	  m_max = 1000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
-	  ns = 500 ! resolution of cs scan							!
+	  ns = 100 ! resolution of cs scan							!
 	  sigma_min = 1.0d-49 ! min. expected cs				!
 	  sigma_max = 1.0d-40 ! max expected cs					!
 	!-----------------------------------------------!

@@ -2,8 +2,11 @@
 # CIARAN O'HARE
 #
 # Currently it contains:
-# FormFactorHelm
 #
+# BinEvents: For generating binned direction or non-directional recoil data
+# whilst applying the detector performance curves associated with "Expt"
+#
+# FormFactorHelm: Only Form factor being used atm
 #
 # Lab velocity:
 # LabVelocity: Full lab velocity in (N,W,Z) with Earth rotation
@@ -19,9 +22,8 @@
 # gal2lab: Galactic system to lab system
 #==============================================================================#
 
-
 import numpy as np
-from numpy import cos, sin, pi, floor, exp, sqrt, size, zeros, shape
+from numpy import cos, sin, pi, floor, exp, sqrt, size, zeros, shape, arccos
 
 
 def BinEvents(Expt,dRfunc,*Args):
@@ -36,6 +38,7 @@ def BinEvents(Expt,dRfunc,*Args):
         q = Expt.Directions
         sig_gamma = Expt.AngularResolution
         HeadTail = Expt.HeadTailEfficiency
+
         npix = size(q)/3
         E_r = zeros(shape=(ne*nt*npix))
         E = zeros(shape=(ne*nt*npix,3))
@@ -66,7 +69,7 @@ def BinEvents(Expt,dRfunc,*Args):
             dR = dR*eff
 
         # Correct for Angular resolution
-        if sig_gamma[0]>0.1:
+        if sig_gamma[0]>0.01:
             i1 = 0
             dR_smear = zeros(shape=shape(dR))
             for i in range(0,nt):
@@ -140,6 +143,8 @@ def Smear(x,dR,sig_gamma):
     for i in range(0,npix):
         x0 = x[i,:]
         gamma = x0[0]*x[:,0] + x0[1]*x[:,1] + x0[2]*x[:,2]
+        gamma[i] = 1.0
+        gamma = arccos(gamma)
         dR_smeared[i] = sum(dR*exp(-gamma**2.0/(2*sig_gamma**2.0)))
 
     dR_smeared = dR_smeared*sum(dR)/sum(dR_smeared)
