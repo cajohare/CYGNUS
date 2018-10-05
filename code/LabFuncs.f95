@@ -216,7 +216,7 @@ subroutine SmearRD(RD)
 	double precision :: sig_gamma(nE_bins),RD(nTot_bins_full),RDpix(npix),RD_smeared(nTot_bins_full)
 	! weird loop structures just getting round the stupid way I set up the binning order
 	sig_gamma = AngularResolution(E_bin_centers,nE_bins)
-		
+	
 	RD_smeared = RD
 	do ibin = 1,nE_bins
 		do i = 1,nT_bins
