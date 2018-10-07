@@ -9,17 +9,14 @@ import Params
 # Just contains a bunch of boring but useful/essential stuff
 
 # Contents:
-# 1. Halo models
-#    SHM: Loads in old SHM parameters
-#    SHMpp: Loads in updated SHM paramers
 
-# 2. Loading recoil distribution for WIMPs (RD_wimp)
+# Loading recoil distribution for WIMPs (RD_wimp)
 #    WIMPRecoilDistribution: Loads RD_wimp to be used by likelihood
 #    WIMPRD_Energy: Energy dependent recoil distribution
 #    WIMPRD_3D: Direction dependent recoil distribution
 
 
-# 3. Energy dependnt and direction dependent rates
+# Energy dependnt and direction dependent rates
 #    WIMPRate_Direction: Directional recoil rate d^2R(t)/dEdO
 #    WIMPRate_Energy: Non-directional recoil rate dR(t)/dE
 #	 MaxWIMPEnergy: Maximum recoil energy for a given date

@@ -27,6 +27,11 @@ from numpy import cos, sin, pi, floor, exp, sqrt, size, zeros, shape, arccos
 
 
 def BinEvents(Expt,dRfunc,*Args):
+    # Expt = Detector class
+    # dRfunc = differential recoil rate that is being binned
+    # Args = anything else needed by dRfunc
+
+    # Energy and time binning:
     E_bins = Expt.Energies
     t_bins = Expt.Times
     Efficiency = Expt.Efficiency
@@ -136,6 +141,11 @@ def BinEvents(Expt,dRfunc,*Args):
     return RD
 #------------------------------------------------------------------------------#
 
+
+
+
+
+
 #==============================Angular Res=====================================#
 def Smear(x,dR,sig_gamma):
     npix = size(dR)
@@ -149,10 +159,14 @@ def Smear(x,dR,sig_gamma):
 
     dR_smeared = dR_smeared*sum(dR)/sum(dR_smeared)
     return dR_smeared
+#------------------------------------------------------------------------------#
+
+
+
+
 
 
 #==============================Form Factors====================================#
-#------------------------------------------------------------------------------#
 def FormFactorHelm(E_r,A):
     q = sqrt(2*A*931.5*1000*E_r)*1.0e-12/1.97e-7
     c1 = 1.23*A**(1.0/3.0)-0.6
@@ -168,7 +182,6 @@ def FormFactorHelm(E_r,A):
 
 
 #==============================Lab Velocity====================================#
-#------------------------------------------------------------------------------#
 # Earth orbital params
 vv_earthrev = 29.8
 eccentricity = 0.016722
@@ -243,7 +256,6 @@ def JulianDay(month, day, year, hour): # Calculates time in JD for a given date
 
 
 #==========================Solar direction=====================================#
-#------------------------------------------------------------------------------#
 def EarthSunDistance(JD): # Earth-sun distance at Julian Day (JD)
     D = JD-2451545.0
     g = 357.529 + 0.98560028*D
@@ -299,6 +311,10 @@ def EarthSunDistanceMod(JD):
 
 #------------------------------------------------------------------------------#
 
+
+
+
+#==============================================================================#
 #---------------------------Coordinate trans.----------------------------------#
 def eqt2lab(vp,t_lab,lat): # Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
     t = t_lab*pi/180.0
@@ -319,5 +335,4 @@ def gal2eqt(vp): # Galactic (x_g,y_g,z_g) to Equatorial (x_e,y_e,z_e)
 def gal2lab(v,t_lab, lat): # Galactic (x_g,y_g,z_g) to Laboratory (N,W,Z)
     vp = gal2eqt(v)
     return eqt2lab(vp, t_lab, lat)
-#------------------------------------------------------------------------------#
 #==============================================================================#

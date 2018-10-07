@@ -4,7 +4,6 @@ from numpy import trapz, interp, loadtxt, log10, log, savetxt, vstack
 from iminuit import minimize
 from numpy.linalg import norm
 from scipy.special import gammaln
-from sys import exit
 import LabFuncs
 import Params
 import NeutrinoFuncs
@@ -14,7 +13,15 @@ import WIMPFuncs
 # Modeule for doing all of the Likelihood analysis
 #
 # Contents:
+# CYGNUSLimit : Generate discovery limits for F and He for the CYGNUS exptself.
 #
+# GetLimit : Calculate nu+wimp discovery limit for input detector and Exposure
+#
+# lnPF : logarithm of poisson PDF
+# lnGF : logarithm of gaussian PDF
+#
+# llhood1 : Signal+Background Likelihood
+# llhood0 : Background only likelihood
 #===============================================================================#
 
 
