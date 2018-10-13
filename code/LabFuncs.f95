@@ -144,7 +144,7 @@ function HeadTailEfficiency(E_r,ni) result(eff_HT)
 end function
 
 
-!----------------------------Load Everything---------------------------------------------!
+!----------------------------Load Everything-----------------------------------
 subroutine LoadReadout(ro, ReadoutName)
 	integer :: ro,i
 	character(len=100) :: ReadoutName
@@ -156,16 +156,20 @@ subroutine LoadReadout(ro, ReadoutName)
 	elseif (ro.eq.1) then
 		ReadoutName = 'Pixel'
 	elseif (ro.eq.2) then
-		ReadoutName = 'Strip'
+		ReadoutName = 'Pixel-predrift'
 	elseif (ro.eq.3) then
-		ReadoutName = 'Optical'
+		ReadoutName = 'Pixel-postdrift'
 	elseif (ro.eq.4) then
-		ReadoutName = 'Wire'
+		ReadoutName = 'Strip'
 	elseif (ro.eq.5) then
-		ReadoutName = 'Pad'
+		ReadoutName = 'Optical'
 	elseif (ro.eq.6) then
-		ReadoutName = 'Planar'
+		ReadoutName = 'Wire'
 	elseif (ro.eq.7) then
+		ReadoutName = 'Pad'
+	elseif (ro.eq.8) then
+		ReadoutName = 'Planar'
+	elseif (ro.eq.9) then
 		ReadoutName = 'Nondirectional'
 	end if
 
@@ -190,13 +194,13 @@ subroutine LoadReadout(ro, ReadoutName)
 	close(1303)
 
 end subroutine
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 
 
 
 
 
-!======Directional performance integrals needed to modify recoil distribitions==========!
+!======Directional performance integrals needed to modify recoil distribitions=!
 subroutine IntegrateOverEnergies(RD,RD_red)
 	double precision :: RD(nTot_bins_full),RD_red(nTot_bins)
 	integer :: i1,i2,i,k
@@ -210,13 +214,13 @@ subroutine IntegrateOverEnergies(RD,RD_red)
 	end do
 end subroutine
 
-!-------------------------Smear the full Energy-Time-Direction RD-----------------------!
+!-------------------------Smear the full Energy-Time-Direction RD--------------!
 subroutine SmearRD(RD)
 	integer :: i,ii,k,ibin
 	double precision :: sig_gamma(nE_bins),RD(nTot_bins_full),RDpix(npix),RD_smeared(nTot_bins_full)
 	! weird loop structures just getting round the stupid way I set up the binning order
 	sig_gamma = AngularResolution(E_bin_centers,nE_bins)
-	
+
 	RD_smeared = RD
 	do ibin = 1,nE_bins
 		do i = 1,nT_bins
@@ -242,7 +246,7 @@ subroutine SmearRD(RD)
 	RD = RD_smeared
 end subroutine
 
-!-------------------------Smear just one set of pixels-----------------------------!
+!-------------------------Smear just one set of pixels-------------------------!
 subroutine Smear(RDpix_in,sig_gammai)
 	double precision :: RDpix(npix),RD_K(npix),RDpix_in(npix)
 	double precision :: sig_gammai,Rtot,x0(3),Rpixtot
@@ -267,7 +271,7 @@ subroutine Smear(RDpix_in,sig_gammai)
 
 end subroutine
 
-!------------------Gaussian smoothing kernal on a sphere-------------------------------!
+!------------------Gaussian smoothing kernal on a sphere-----------------------!
 function GaussianKernel(x,x0,sig_gammai) result(K)
 	double precision :: x(3),x0(3),K,gamma,sig_gammai
 	gamma = (x(1)*x0(1) + x(2)*x0(2) + x(3)*x0(3))

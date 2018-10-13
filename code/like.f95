@@ -8,27 +8,27 @@ module like
 
 contains
 
-!====================================like.f95===========================================!
-! Modeule for doing all of the Likelihood analysis									    !
-!																						!
-! Contents:																				!
-!																						!
-! 1. Compute limits for input experiment												!
-! CYGNUSLimit: Generates discovery limit (DL) for CYGNUS (He and F)						!
-! GetLimits: Generates discovery limit for arbitrary experiment							!
-! DiscoveryLimit: Mass scan for Median discovery limit at 3sigma						!
-!																						!
-! 2. Likelihoods																		!
-! lnPF = sum over log(Poisson pdf)														!
-! lnGF = sum over log(Gaussian pdf)														!
-! llhood1 = signal+background likelihood												!
-! llhood0 = background likelihood														!
-!=======================================================================================!
+!====================================like.f95==================================!
+! Modeule for doing all of the Likelihood analysis
+!
+! Contents:																				
+!
+! 1. Compute limits for input experiment
+! CYGNUSLimit: Generates discovery limit (DL) for CYGNUS (He and F)
+! GetLimits: Generates discovery limit for arbitrary experiment
+! DiscoveryLimit: Mass scan for Median discovery limit at 3sigma
+!
+! 2. Likelihoods
+! lnPF = sum over log(Poisson pdf)
+! lnGF = sum over log(Gaussian pdf)
+! llhood1 = signal+background likelihood
+! llhood0 = background likelihood
+!==============================================================================!
 
 
 
-!==================================Generate limits======================================!
-!---------------------------------------CYGNUS------------------------------------------!
+!==================================Generate limits=============================!
+!---------------------------------------CYGNUS---------------------------------!
 subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	! Limits from m_chi = m_min to m_max, with nm values
 	! Cross section scan from sigma_min to sigma_max with ns values
@@ -37,8 +37,8 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	integer :: i,nm,nf,ns
 	character(len=*) :: filename
 
-    write(*,*) '----------------------------------------------------'
-    write(*,*) 'Start Limits:'
+  write(*,*) '----------------------------------------------------'
+  write(*,*) 'Start Limits:'
 	write(*,*) 'Filename:',trim(filename)
 
 	! CYGNUS is at Boubly
@@ -74,7 +74,7 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
     write(*,*) '----------------------------------------------------'
 end subroutine
 
-!---------------------------------Abitrary limit----------------------------------------!
+!---------------------------------Abitrary limit-------------------------------!
 subroutine GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 	! Limits from m_chi = m_min to m_max, with nm values
 	! Cross section scan from sigma_min to sigma_max with ns values
@@ -97,7 +97,7 @@ end subroutine
 
 
 
-!=====================================DISCOVERY LIMIT====================================!
+!=====================================DISCOVERY LIMIT==========================!
 subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 	! * Calculates discovery limits (DL) from m_chi = m_min to m_max
 	! * Parameters of likelihood are X = (sigma_p,R_bg)
@@ -182,8 +182,8 @@ end subroutine
 
 
 
-!===================================LIKELIHOODS=========================================!
-!---------------------------------SIGNAL+BACKGROUND-------------------------------------!
+!===================================LIKELIHOODS================================!
+!---------------------------------SIGNAL+BACKGROUND----------------------------!
  subroutine llhood1(X,  LL)
     ! input: Parameters X = (log10(sigma_p),background rates(1:n_bg))
 	! output: -1*LogLikelihood = LL
@@ -204,7 +204,7 @@ end subroutine
 
  end subroutine llhood1
 
-!---------------------------------SIGNAL+BACKGROUND-----------------------------------!
+!---------------------------------SIGNAL+BACKGROUND----------------------------!
 subroutine llhood0(X,  LL)
     ! input: Parameters X = background rates(1:n_bg)
 	! output: -1*LogLikelihood = LL
@@ -219,7 +219,7 @@ subroutine llhood0(X,  LL)
 	LL = -1.0*(lnPF(nTot_bins,N_obs,N_exp0)+lnGF(X,R_bg,R_bg_err*R_bg))
   end subroutine llhood0
 
-!===================================USEFUL SUMS=========================================!
+!===================================USEFUL SUMS================================!
 function lnPF(nbins,Nob,Nex)! SUM OF LOG(POISSON PDF)
 	! Uses log-gamma function to generalise the factorial
 	! to non-integer number of observed events (i.e. Asimov data)

@@ -41,25 +41,27 @@ program runCYGNUS1000
 
 	write(*,*) '====================================================='
 	write(*,*) 'Starting program: CYGNUS-1000'
-	write(*,*) 'Select redout technology (0-8):'
+	write(*,*) 'Select redout technology (0-10):'
 	write(*,*) '0 --- Idealised detector (3D)'
 	write(*,*) '1 --- Pixel grid readout (3D)'
-	write(*,*) '2 --- Strip readout (3D)'
-	write(*,*) '3 --- Optical readout (2D)'
-	write(*,*) '4 --- Wire readout (2D)'
-	write(*,*) '5 --- Pad readout (1D)'
-	write(*,*) '6 --- Planar readout (1D)'
-	write(*,*) '7 --- Nondirectional (0D)'
-	write(*,*) '8 --- RUN ALL READOUTS'
+	write(*,*) '2 --- Pre drift grid readout (3D)'
+	write(*,*) '3 --- Post drift grid readout (3D)'
+	write(*,*) '4 --- Strip readout (3D)'
+	write(*,*) '5 --- Optical readout (2D)'
+	write(*,*) '6 --- Wire readout (2D)'
+	write(*,*) '7 --- Pad readout (1D)'
+	write(*,*) '8 --- Planar readout (1D)'
+	write(*,*) '9 --- Nondirectional (0D)'
+	write(*,*) '10 --- RUN ALL READOUTS'
 	readout_selection = -1
-	do while ((readout_selection.gt.8).or.(readout_selection.lt.0))
+	do while ((readout_selection.gt.10).or.(readout_selection.lt.0))
 		write(*,*) 'Select 1-8'
 		write(*,*) '>...'
 		read(*,*) readout_selection
 	end do
 
-	if (readout_selection.eq.8) then
-		loopmax = 7
+	if (readout_selection.eq.10) then
+		loopmax = 9
 		loopmin = 0
 		write(*,*) 'Running all readouts'
 	else
@@ -72,7 +74,7 @@ program runCYGNUS1000
 		call LoadReadout(readout,	fn_end)
 		write(*,*) 'Readout = ',fn_end
 
-		if ((readout.eq.0).or.((readout.eq.7))) then
+		if ((readout.eq.0).or.((readout.eq.10))) then
 			angres_on = .false.
 			efficiency_on = .false.
 			headtail_on = .false.
@@ -84,7 +86,7 @@ program runCYGNUS1000
 			energyres_on = .false.
 		end if
 
-		if (readout.eq.7) then
+		if (readout.eq.10) then
 			nside = 0
 		end if
 
