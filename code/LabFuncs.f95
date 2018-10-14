@@ -7,7 +7,7 @@ module LabFuncs
 contains
 
 
-!================================LabFuncs.f95==========================================!
+!================================LabFuncs.f95==================================!
 ! Contains all functions needed to compute lab dependent and detector dependent effects
 
 ! Contents:
@@ -42,15 +42,15 @@ contains
 ! gal2lab: Galactic system to lab system
 ! Rgal2lab: Full galactic system to lab system
 ! lab2gal: Lab system to galactic system
-!=======================================================================================!
+!==============================================================================!
 
 
 
 
 
 
-!====================================Form Factors=======================================!
-!----------------------------------------HELM-------------------------------------------!
+!====================================Form Factors==============================!
+!----------------------------------------HELM----------------------------------!
 function FormFactorHelm(E_r,A)
 	integer :: A
 	double precision :: E_r,FormFactorHelm,q,c1,s,R_1
@@ -65,13 +65,13 @@ function FormFactorHelm(E_r,A)
 	FormFactorHelm = 1.0d0
 	end if
 end function FormFactorHelm
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 
 
 
 
-!==============================Detector Performanc======================================!
-!----------------------------Load Detector Resolution curve-----------------------------!
+!==============================Detector Performanc=============================!
+!----------------------------Load Detector Resolution curve--------------------!
 function EnergyResolution(E_r,ni) result(sig_E)
 	integer :: i,nuc,ni
 	double precision :: E_r(ni),sig_E(ni)
@@ -89,7 +89,7 @@ function EnergyResolution(E_r,ni) result(sig_E)
 	end if
 end function
 
-!---------------------------------Load  Efficiency curve-------------------------------!
+!---------------------------------Load  Efficiency curve-----------------------!
 function Efficiency(E_r,ni) result(eff)
 	integer :: i,nuc,ni
 	double precision :: E_r(ni),eff(ni),s1,Ec,EC2
@@ -107,7 +107,7 @@ function Efficiency(E_r,ni) result(eff)
 	end if
 end function
 
-!----------------------------Load Angular resolution curve------------------------------!
+!----------------------------Load Angular resolution curve---------------------!
 function AngularResolution(E_r,ni) result(sig_gamma)
 	integer :: i,nuc,ni
 	double precision :: E_r(ni),sig_gamma(ni)
@@ -125,7 +125,7 @@ function AngularResolution(E_r,ni) result(sig_gamma)
 	end if
 end function
 
-!----------------------------Load Head-tail efficiency curve-----------------------------!
+!----------------------------Load Head-tail efficiency curve-------------------!
 function HeadTailEfficiency(E_r,ni) result(eff_HT)
 	integer :: i,ni,nuc
 	double precision :: E_r(ni),eff_HT(ni)
@@ -144,7 +144,7 @@ function HeadTailEfficiency(E_r,ni) result(eff_HT)
 end function
 
 
-!----------------------------Load Everything-----------------------------------
+!----------------------------Load Everything-----------------------------------!
 subroutine LoadReadout(ro, ReadoutName)
 	integer :: ro,i
 	character(len=100) :: ReadoutName
@@ -217,8 +217,10 @@ end subroutine
 !-------------------------Smear the full Energy-Time-Direction RD--------------!
 subroutine SmearRD(RD)
 	integer :: i,ii,k,ibin
-	double precision :: sig_gamma(nE_bins),RD(nTot_bins_full),RDpix(npix),RD_smeared(nTot_bins_full)
-	! weird loop structures just getting round the stupid way I set up the binning order
+	double precision :: sig_gamma(nE_bins),RD(nTot_bins_full)
+	double precision :: RDpix(npix),RD_smeared(nTot_bins_full)
+	! weird loop structures just getting
+	! round the stupid way I set up the binning order
 	sig_gamma = AngularResolution(E_bin_centers,nE_bins)
 
 	RD_smeared = RD
@@ -284,12 +286,13 @@ function GaussianKernel(x,x0,sig_gammai) result(K)
 	gamma = acos(gamma)
 	K = exp(-gamma*gamma/(2.0d0*sig_gammai*sig_gammai))
 end function
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 
 
-!=================================Lab Velocity==========================================!
-!---------------------------------------------------------------------------------------!
-function LabVelocitySimple(day) result(vlab)! Simple version in Galactic system without Earth ro.
+!=================================Lab Velocity=================================!
+!------------------------------------------------------------------------------!
+function LabVelocitySimple(day) result(vlab)
+	! Simple version in Galactic system without Earth ro.
 	double precision :: day,e1(3),e2(3),t1,w,vlab(3)
 	w = 2*pi/365.0d0
 	t1 = 79.0d0
@@ -300,7 +303,7 @@ function LabVelocitySimple(day) result(vlab)! Simple version in Galactic system 
 	vlab(2) = vlab(2) + v_LSR ! add LSR velocity
 end function LabVelocitySimple
 
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 function LabVelocity(day) ! More complex version in Lab frame system
 	double precision :: day,JD,LabVelocity(3),UT,MJD,T_0,t_GAST,t_lab
 	double precision :: vv_galrot,v_galrot(3),v_solar(3),v_earthrot(3)
@@ -345,7 +348,7 @@ function LabVelocity(day) ! More complex version in Lab frame system
 
 end function LabVelocity
 
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 function JulianDay(month,day,year,hour) ! calculates Julian day from input date
 	integer :: month,day,year,year_r,month_r
 	double precision :: hour,JulianDay
@@ -355,14 +358,14 @@ function JulianDay(month,day,year,hour) ! calculates Julian day from input date
 				+ floor(year_r/4.0) -floor(year_r/100.0) &
 				+ floor(year_r/400.0) - 32045 + (hour-12.0)/24.0
 end function JulianDay
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 
 
 
 
 
-!===================================Solar direction=====================================!
-!---------------------------------------------------------------------------------------!
+!===================================Solar direction============================!
+!------------------------------------------------------------------------------!
 function EarthSunDistance(day) result(r_es) ! Earth-sun distance at time = day
 	double precision :: day,r_es,g,D
 	double precision :: JD
@@ -374,7 +377,7 @@ function EarthSunDistance(day) result(r_es) ! Earth-sun distance at time = day
 	r_es = r_es*AstronomicalUnit
 end function  EarthSunDistance
 
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 function SolarDirection(day) ! Solar direction in lab coords at time = day
 	double precision :: day,n,Omega,L,g,ll,ep,ra,dec,gmst,lmst,JD
 	double precision :: omega_hour,theta_z,parallax,gamma,longr,latr
@@ -408,8 +411,8 @@ function SolarDirection(day) ! Solar direction in lab coords at time = day
 	call eqt2lab(x_sun,t_lab)
 	SolarDirection = x_sun
 end function SolarDirection
-!---------------------------------------------------------------------------------------!
-!=======================================================================================!
+!------------------------------------------------------------------------------!
+!==============================================================================!
 
 
 
@@ -417,8 +420,8 @@ end function SolarDirection
 
 
 
-!=================================Co-ord transformations================================!
-!---------------------------------------------------------------------------------------!
+!=================================Co-ord transformations=======================!
+!------------------------------------------------------------------------------!
 subroutine eqt2lab(v,t_lab) ! Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
 	double precision:: v(3),t_lab,t,vp(3),latr
 	t = t_lab*pi/180.0
@@ -429,7 +432,7 @@ subroutine eqt2lab(v,t_lab) ! Equatorial (x_e,y_e,z_e) to Laboratory (N,W,Z)
 	v(3) = cos(t)*cos(latr)*vp(1) + cos(latr)*sin(t)*vp(2) + sin(latr)*vp(3)
 end subroutine eqt2lab
 
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 subroutine gal2eqt(v) ! Galactic (x_g,y_g,z_g) to Equatorial (x_e,y_e,z_e)
 	double precision :: v(3),vp(3)
 	vp = v
@@ -438,15 +441,16 @@ subroutine gal2eqt(v) ! Galactic (x_g,y_g,z_g) to Equatorial (x_e,y_e,z_e)
 	v(3) = -0.4835*vp(1) + 0.7446*vp(2) + 0.4602*vp(3)
 end subroutine gal2eqt
 
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 subroutine gal2lab(v,t_lab) ! Galactic (x_g,y_g,z_g) to Laboratory (N,W,Z)
 	double precision :: v(3),t_lab
 	call gal2eqt(v)
 	call eqt2lab(v,t_lab)
 end subroutine gal2lab
 
-!---------------------------------------------------------------------------------------!
-function Rgal2lab(v,day) result(vrot) ! Full Galactic (x_g,y_g,z_g) to Laboratory (N,W,Z)
+!------------------------------------------------------------------------------!
+function Rgal2lab(v,day) result(vrot)
+	! Full Galactic (x_g,y_g,z_g) to Laboratory (N,W,Z)
 	double precision :: vrot(3),v(3),t_lab,JD,day
 	double precision :: UT,MJD,T_0,t_GAST
 	JD = Jan1 + day
@@ -463,7 +467,7 @@ function Rgal2lab(v,day) result(vrot) ! Full Galactic (x_g,y_g,z_g) to Laborator
 	call eqt2lab(vrot,t_lab)
 end function
 
-!------------------------------------Inverse of above----------------------------------!
+!------------------------------------Inverse of above--------------------------!
 subroutine lab2gal(v,day)
 	double precision :: day,JD,v(3) ! input
 	double precision :: UT,MJD,T_0,t_GAST,t_lab,vp(3),latr
@@ -496,7 +500,7 @@ subroutine lab2gal(v,day)
 	v(2) = M(2,1)*vp(1) + M(2,2)*vp(2) + M(2,3)*vp(3)
 	v(3) = M(3,1)*vp(1) + M(3,2)*vp(2) + M(3,3)*vp(3)
 end subroutine lab2gal
-!---------------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 
 
 
