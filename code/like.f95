@@ -11,7 +11,7 @@ contains
 !====================================like.f95==================================!
 ! Modeule for doing all of the Likelihood analysis
 !
-! Contents:																				
+! Contents:
 !
 ! 1. Compute limits for input experiment
 ! CYGNUSLimit: Generates discovery limit (DL) for CYGNUS (He and F)
@@ -119,7 +119,7 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
   NLOOP = 1 ! Number of iterations before looping
   IQUAD = 0 ! Can't remeber what this does
   SIMP = 0.1 ! Nor this
-	STOPCR0 = 1.0d-5 ! Accuracy of max likelihood
+	STOPCR0 = 1.0d-6 ! Accuracy of max likelihood
 
 	! Mass and cross section discretisation
   m_vals = logspace(m_min,m_max,nm)

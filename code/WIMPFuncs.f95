@@ -3,12 +3,12 @@ module WIMPFuncs
   use util
   use LabFuncs
   implicit none
-  
+
 contains
-	
-	
+
+
 !================================WIMPFuncs.f95==========================================!
-! Just contains a bunch of boring but useful/essential stuff 
+! Just contains a bunch of boring but useful/essential stuff
 
 ! Contents:
 ! 1. Halo models
@@ -26,12 +26,12 @@ contains
 !    WIMPRate_Energy: Non-directional recoil rate dR(t)/dE
 !	 MaxWIMPEnergy: Maximum recoil energy for a given date
 !=====================================================================================!
-	
-	
-	
+
+
+
 !=====================================================================================!
 !------------------------------ OLD STANDARD HALO MODEL ------------------------------!
-subroutine SHM		
+subroutine SHM
 	integer :: bin
 	v_LSR = 220.0d0
 	sig_v = v_LSR/sqrt(2.0d0)
@@ -40,14 +40,14 @@ subroutine SHM
 	!if (nT_bins.gt.1) then
   	  	do bin = 1,nT_bins
 		   v_lab_all(bin,:) = LabVelocity(T_bin_centers(bin))
-    	end do	
+    	end do
 		!else
-	!	 v_lab_all(1,:) = v_pec + (/0.0d0,v_LSR,0.0d0/) 
-	!end if 
+	!	 v_lab_all(1,:) = v_pec + (/0.0d0,v_LSR,0.0d0/)
+	!end if
 end subroutine
-	
-!----------------------------- NEW STANDARD HALO MODEL ---------------------------------!	
-subroutine SHMpp		
+
+!----------------------------- NEW STANDARD HALO MODEL ---------------------------------!
+subroutine SHMpp
 	integer :: bin
 	v_LSR = 235.0d0
 	sig_v = v_LSR/sqrt(2.0d0)
@@ -56,18 +56,18 @@ subroutine SHMpp
 	if (nT_bins.gt.1) then
   	  	do bin = 1,nT_bins
 		   v_lab_all(bin,:) = LabVelocity(T_bin_centers(bin))
-    	end do	
+    	end do
 	else
 		v_lab_all(1,:) = v_pec + (/0.0d0,v_LSR,0.0d0/)
-	end if 
+	end if
 end subroutine
-	
-	
+
+
 !====================================================================================!
 !---------- Load in full WIMP recoil distribution for arbitrary binning -------------!
 subroutine WIMPRecoilDistribution
 	double precision :: RD(nTot_bins_full),RD_red(nTot_bins)
-	integer :: i,i1,i2,ii	
+	integer :: i,i1,i2,ii
 	! Set a fiducial cross section just so numbers aren't crazy
 	sigma_p = 1.0d-45
 	! Choose whether directional or non-directional is used
@@ -82,7 +82,7 @@ subroutine WIMPRecoilDistribution
 			call WIMPRD_Energy(RD(i1:i2),i)
 		end if
 		ii = i2+1
-	end do	
+	end do
 
 	! If directional, also smear by angular resolution
 	if (angres_on) then
@@ -92,22 +92,26 @@ subroutine WIMPRecoilDistribution
 			end if
 		end if
 	end if
-		
-	! If direction only then integrate over energies	
-	if (Energy_on) then
-		RD_wimp = RD
-	else
-		call IntegrateOverEnergies(RD,RD_red)
-		RD_wimp = RD_red
-	end if
 
-	
+	! If direction only then integrate over energies
+  if (nside.gt.0) then
+  	if (Energy_on) then
+  		RD_wimp = RD
+  	else
+  		call IntegrateOverEnergies(RD,RD_red)
+  		RD_wimp = RD_red
+  	end if
+  else
+    RD_wimp = RD
+  end if
+
+
 	! Multiply whole thing by Exposure so RD = Num events/sigma_p
 	RD_wimp = RD_wimp*Exposure/(nT_bins*sigma_p)
-	
+
 end subroutine WIMPRecoilDistribution
 
-!-------------------- Directional recoil distribution --------------------------------!    
+!-------------------- Directional recoil distribution --------------------------------!
 subroutine WIMPRD_3D(RD,tbin)
 	double precision :: fE_r1,fE_r2,E_r1(3),E_r2(3)
 	double precision :: dpix,RD(nE_bins*npix),eff(nE_bins+1),eff_HT(nE_bins+1)
@@ -126,16 +130,16 @@ subroutine WIMPRD_3D(RD,tbin)
 		do j = 1,nE_bins
 			E_r2 = E_bin_edges(j+1)*x_pix(k,:)
 			fE_r2 = eff_HT(j+1)*WIMPRate_Direction(E_r2,tbin)+(1.0-eff_HT(j+1))*WIMPRate_Direction(-1.0*E_r2,tbin)
-			
+
 			RD(ii) = dpix*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
-			
+
 			E_r1 = E_r2
 			fE_r1 = fE_r2
-			ii = ii+1			
+			ii = ii+1
 		end do
 	end do
 end subroutine WIMPRD_3D
-  
+
 !-------------------- Non-directional recoil distribution-------------------------------------!
 subroutine WIMPRD_Energy(RD,tbin)
 	integer, parameter :: nbins_full=1000
@@ -154,7 +158,7 @@ subroutine WIMPRD_Energy(RD,tbin)
 	    end do
 		eff_full = Efficiency(E_full,nbins_full)
 		sig_E = EnergyResolution(E_full,nbins_full)
-	
+
 	    do ia = 1,nbins_full
 			dRdE_full(ia) = WIMPRate_Energy(E_full(ia),tbin)
 	    end do
@@ -170,7 +174,7 @@ subroutine WIMPRD_Energy(RD,tbin)
 	    R_s = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
 	         *0.5d0*(dRdE_full_s(1:nbins_full-1) + dRdE_full_s(2:nbins_full)))
 	    dRdE_full_s = dRdE_full_s*R/R_s
-	
+
 		! Compute actual RD
 	    RD = 0.0d0
 		E_r1 = E_bin_edges(1)
@@ -184,7 +188,7 @@ subroutine WIMPRD_Energy(RD,tbin)
 		  	RD(ii) = (E_r2-E_r1)*(fE_r1 + fE_r2)/2.0d0
 		  	E_r1 = E_r2
 		  	fE_r1 = fE_r2
-		  	ii = ii+1       
+		  	ii = ii+1
 		end do
 
 	else
@@ -199,10 +203,10 @@ subroutine WIMPRD_Energy(RD,tbin)
 		  	RD(ii) = (E_r2-E_r1)*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0d0
 		  	E_r1 = E_r2
 		  	fE_r1 = fE_r2
-		  	ii = ii+1       
+		  	ii = ii+1
 		end do
 	end if
-		
+
 end subroutine WIMPRD_Energy
 
 
@@ -214,7 +218,7 @@ end subroutine WIMPRD_Energy
 function WIMPRate_Energy(E_r,tbin) result(dRdE)
 	double precision :: E_r,dRdE,m_p,m_N,m_chi_kg,mu_p,c_cm
 	double precision :: x,y,z,v_e,N_esc,gvmin,m_N_keV,mu_N,v_min,v_0,v_lab(3)
-	integer :: A,tbin	   
+	integer :: A,tbin
 
 	! relevant constants
 	A = sum(nucleus) ! mass number of nucleus
@@ -226,8 +230,8 @@ function WIMPRate_Energy(E_r,tbin) result(dRdE)
 	m_N_keV = A*0.9315*1.0d6 ! nucleus mass in keV
 	mu_N = 1.0d6*m_chi*m_N_keV/(1.0d6*m_chi + m_N_keV) ! reduced nucleus mass
 	v_min = (sqrt(2.0d0*m_N_keV*E_r)/(2.0d0*mu_N))*3.0d8/1000.0d0 ! vmin in km/s
-  
-   
+
+
 	! Compute g(vmin) mean inverse speed halo integral
 	N_esc = erf(v_esc/(sqrt(2.0d0)*sig_v))&
 	   -sqrt(2.0d0/pi)*(v_esc/sig_v)*exp(-v_esc**2.0d0/(2.0d0*sig_v**2.0d0))
@@ -255,7 +259,7 @@ function WIMPRate_Energy(E_r,tbin) result(dRdE)
 	dRdE = (c_cm**2.0)*((rho_0*1.0d6*A**2.0*sigma_p)/(2*m_chi_kg*mu_p**2.0))*gvmin
 	dRdE = dRdE*3600*24*365*1000.0d0 ! convert to per ton-year
 	dRdE = dRdE*FormFactorHelm(E_r,A)**2.0d0 ! apply form factor
-	
+
 end function WIMPRate_Energy
 
 
@@ -264,16 +268,16 @@ function WIMPRate_Direction(E,tbin) result(dRdEdO)
 	double precision :: Erot(3),E(3),x(3),E_r,dRdEdO,m_p,m_N,m_chi_kg,mu_p,c_cm,fhat
 	double precision :: v_min,N_esc,vlabdotq,m_N_keV,mu_N,v_lab(3)
 	integer :: A,tbin
-	
+
 	! Calculate relavant directions
-	v_lab = v_lab_all(tbin,:)	! lab velocity   
+	v_lab = v_lab_all(tbin,:)	! lab velocity
 	E_r = sqrt(sum(E**2.0)) ! Recoil energy
 	x = (/E(1)/E_r,E(2)/E_r,E(3)/E_r/) ! Recoil direction
 	vlabdotq = sum(x*v_lab) ! Lab-recoil projection
-	
-	
+
+
 	! Relevant constants
-	A = sum(nucleus) 
+	A = sum(nucleus)
 	m_p = 0.9315*1e6
 	m_chi_kg = m_chi*1.0d6*1.783d-33
 	mu_p = 1.0d6*m_chi*m_p/(1.0d6*m_chi + m_p)
@@ -290,7 +294,7 @@ function WIMPRate_Direction(E,tbin) result(dRdEdO)
 		fhat = (1/(N_esc*sqrt(2*pi*sig_v**2.0)))*&
 	          (exp(-(v_min+vlabdotq)**2.0/(2*sig_v**2.0))-&
 	          exp(-v_esc**2.0/(2*sig_v**2.0)))
-	else 
+	else
 		fhat = 0.0d0
 	end if
 	fhat = fhat/(1000.0d0*100.0d0) ! convert to cm^-1 s
@@ -301,8 +305,8 @@ function WIMPRate_Direction(E,tbin) result(dRdEdO)
 	dRdEdO = dRdEdO*FormFactorHelm(E_r,A)**2.0d0 ! correct for form factor
 
 end function WIMPRate_Direction
-		
-			
+
+
 !=================================Max Energy==================================!
 function MaxWIMPEnergy(A,v_lab) result(E_max_lim)
 	double precision :: E_max_lim,mu_N,m_N,v_lab(3)
@@ -311,5 +315,5 @@ function MaxWIMPEnergy(A,v_lab) result(E_max_lim)
 	mu_N = 1.0d6*m_N*m_chi/(1.0d6*m_chi+m_N)
 	E_max_lim = 2.0d0*mu_N**2.0d0*((v_esc+sqrt(sum(v_lab**2.0)))*1000.0/3.0d8)**2.0d0/m_N
 end function MaxWIMPEnergy
-	
+
 end module WIMPFuncs

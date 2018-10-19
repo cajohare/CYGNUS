@@ -27,7 +27,7 @@ program runCYGNUS1000
 	  m_min = 0.5d0 ! Min mass											!
 	  m_max = 1000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
-	  ns = 100 ! resolution of cs scan							!
+	  ns = 500 ! resolution of cs scan							!
 	  sigma_min = 1.0d-49 ! min. expected cs				!
 	  sigma_max = 1.0d-40 ! max expected cs					!
 	!-----------------------------------------------!
@@ -36,7 +36,7 @@ program runCYGNUS1000
 
 
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	VolTime = 1000.0*3.0d0
+	VolTime = 1000.0*3.0d0*100
 	energy_on = .true. ! energy info is currently turned on for best limits
 
 	write(*,*) '====================================================='
@@ -55,7 +55,7 @@ program runCYGNUS1000
 	write(*,*) '10 --- RUN ALL READOUTS'
 	readout_selection = -1
 	do while ((readout_selection.gt.10).or.(readout_selection.lt.0))
-		write(*,*) 'Select 1-8'
+		write(*,*) 'Select 0-10'
 		write(*,*) '>...'
 		read(*,*) readout_selection
 	end do
@@ -74,7 +74,7 @@ program runCYGNUS1000
 		call LoadReadout(readout,	fn_end)
 		write(*,*) 'Readout = ',fn_end
 
-		if ((readout.eq.0).or.((readout.eq.10))) then
+		if ((readout.eq.0).or.((readout.eq.9))) then
 			angres_on = .false.
 			efficiency_on = .false.
 			headtail_on = .false.
@@ -86,11 +86,11 @@ program runCYGNUS1000
 			energyres_on = .false.
 		end if
 
-		if (readout.eq.10) then
+		if (readout.eq.9) then
 			nside = 0
 		end if
 
-		filename = '../data/CYGNUS1000-'//trim(fn_end)//'.txt'
+		filename = '../data/CYGNUS100k-EnergyOn-'//trim(fn_end)//'.txt'
 		call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 	end do

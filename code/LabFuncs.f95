@@ -156,9 +156,9 @@ subroutine LoadReadout(ro, ReadoutName)
 	elseif (ro.eq.1) then
 		ReadoutName = 'Pixel'
 	elseif (ro.eq.2) then
-		ReadoutName = 'Pixel-predrift'
+		ReadoutName = 'Predrift'
 	elseif (ro.eq.3) then
-		ReadoutName = 'Pixel-postdrift'
+		ReadoutName = 'Postdrift'
 	elseif (ro.eq.4) then
 		ReadoutName = 'Strip'
 	elseif (ro.eq.5) then

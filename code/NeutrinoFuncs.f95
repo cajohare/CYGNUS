@@ -63,14 +63,18 @@ subroutine BackgroundRecoilDistribution
 	end if
 
 	! If direction only then integrate over energies
-	if (Energy_on) then
-		RD_bg = RD
-	else
-		do s = 1,n_bg
-			call IntegrateOverEnergies(RD(:,s),RD_red)
-		    RD_bg(:,s) = RD_red
-		end do
-	end if
+  if (nside.gt.0) then
+  	if (Energy_on) then
+  		RD_bg = RD
+  	else
+  		do s = 1,n_bg
+  			call IntegrateOverEnergies(RD(:,s),RD_red)
+  		    RD_bg(:,s) = RD_red
+  		end do
+  	end if
+  else
+    RD_bg = RD
+  end if
 
 
 	! Multiply whole thing by Exposure so RD = Num events/R_bg
