@@ -273,7 +273,7 @@ subroutine Smear(RDpix_in,sig_gammai)
 
 end subroutine
 
-!------------------Gaussian smoothing kernal on a sphere-----------------------!
+!------------------Gaussian (theta) smoothing kernal on a sphere---------------!
 function GaussianKernel(x,x0,sig_gammai) result(K)
 	double precision :: x(3),x0(3),K,gamma,sig_gammai
 	gamma = (x(1)*x0(1) + x(2)*x0(2) + x(3)*x0(3))
@@ -285,6 +285,22 @@ function GaussianKernel(x,x0,sig_gammai) result(K)
 		!end if
 	gamma = acos(gamma)
 	K = exp(-gamma*gamma/(2.0d0*sig_gammai*sig_gammai))
+end function
+!------------------------------------------------------------------------------!
+
+
+!------------------Gaussian (costh) smoothing kernal on a sphere---------------!
+function GaussianKernelCosth(x,x0,sig_gammai) result(K)
+	double precision :: x(3),x0(3),K,cosgamma,cossig,sig_gammai
+	cosgamma = (x(1)*x0(1) + x(2)*x0(2) + x(3)*x0(3))
+	cossig = cos(sig_gammai)
+	!if (gamma.gt.1.0d0) then
+		!gamma = 1.0d0
+		!end if
+	!if (gamma.lt.-1.0d0) then
+		!gamma = -1.0d0
+		!end if
+	K = exp(-(1.0-cosgamma*cosgamma)/(2.0d0*cossig*cossig))
 end function
 !------------------------------------------------------------------------------!
 

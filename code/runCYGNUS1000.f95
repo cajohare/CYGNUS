@@ -20,7 +20,7 @@ program runCYGNUS1000
 	!------------------Optimisation-----------------!
 	!-----Set binning ------------------------------!
 	  nE_bins = 20 ! Number of energy bins		  		!
-	  nT_bins = 10 ! Number of time bins					  !
+	  nT_bins = 1 ! Number of time bins					  !
 	  nside = 4  ! Order of pixelation (2,4 or 8)		!
 	!----- Mass range for limits -------------------!
 	  nm = 50 !  Number of mass points							!
@@ -36,7 +36,7 @@ program runCYGNUS1000
 
 
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	VolTime = 1000.0*3.0d0*100
+	VolTime = 1000.0*3.0d0
 	energy_on = .true. ! energy info is currently turned on for best limits
 
 	write(*,*) '====================================================='
@@ -81,7 +81,7 @@ program runCYGNUS1000
 			energyres_on = .false.
 		else
 			angres_on = .true.
-			efficiency_on = .true.
+			efficiency_on = .false.
 			headtail_on = .true.
 			energyres_on = .false.
 		end if
@@ -90,7 +90,9 @@ program runCYGNUS1000
 			nside = 0
 		end if
 
-		filename = '../data/CYGNUS100k-EnergyOn-'//trim(fn_end)//'.txt'
+		filename = '../data/CYGNUS1000-EnergyOn-costh'//trim(fn_end)//'.txt'
+		!filename = '../data/CYGNUS100k-EnergyOn-'//trim(fn_end)//'.txt'
+
 		call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 	end do
