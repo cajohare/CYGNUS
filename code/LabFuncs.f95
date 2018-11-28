@@ -118,7 +118,7 @@ function AngularResolution(E_r,ni) result(sig_gamma)
 			nuc = 2
 		end if
 		do i = 1,ni
-			sig_gamma(i) = interp1D(E_vals,angres_data(:,nuc),1000,E_r(i))*(pi/180.0d0)
+			sig_gamma(i) = interp1D(E_vals,angres_data(:,nuc),1000,E_r(i))*(pi/180.0d0)/100.0
 		end do
 	else
 		sig_gamma = 0.0d0
@@ -277,12 +277,12 @@ end subroutine
 function GaussianKernel(x,x0,sig_gammai) result(K)
 	double precision :: x(3),x0(3),K,gamma,sig_gammai
 	gamma = (x(1)*x0(1) + x(2)*x0(2) + x(3)*x0(3))
-	!if (gamma.gt.1.0d0) then
-		!gamma = 1.0d0
-		!end if
-	!if (gamma.lt.-1.0d0) then
-		!gamma = -1.0d0
-		!end if
+	if (gamma.gt.1.0d0) then
+		gamma = 1.0d0
+		end if
+	if (gamma.lt.-1.0d0) then
+		gamma = -1.0d0
+		end if
 	gamma = acos(gamma)
 	K = exp(-gamma*gamma/(2.0d0*sig_gammai*sig_gammai))
 end function
@@ -300,7 +300,7 @@ function GaussianKernelCosth(x,x0,sig_gammai) result(K)
 	!if (gamma.lt.-1.0d0) then
 		!gamma = -1.0d0
 		!end if
-	K = exp(-(1.0-cosgamma*cosgamma)/(2.0d0*cossig*cossig))
+	K = exp(-(1.0-cosgamma)**2.0/(2.0d0*cossig*cossig))
 end function
 !------------------------------------------------------------------------------!
 

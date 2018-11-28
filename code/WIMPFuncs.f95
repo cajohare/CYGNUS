@@ -69,6 +69,7 @@ subroutine WIMPRecoilDistribution
 	double precision :: RD(nTot_bins_full),RD_red(nTot_bins)
 	integer :: i,i1,i2,ii
 	! Set a fiducial cross section just so numbers aren't crazy
+  m_chi = 20.0
 	sigma_p = 1.0d-45
 	! Choose whether directional or non-directional is used
 	ii = 1
@@ -108,6 +109,10 @@ subroutine WIMPRecoilDistribution
 
 	! Multiply whole thing by Exposure so RD = Num events/sigma_p
 	RD_wimp = RD_wimp*Exposure/(nT_bins*sigma_p)
+
+  open(unit=1000,file='RD_wimp_th.dat')
+  write(1000,*) RD_wimp
+  stop
 
 end subroutine WIMPRecoilDistribution
 
