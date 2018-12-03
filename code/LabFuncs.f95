@@ -118,7 +118,10 @@ function AngularResolution(E_r,ni) result(sig_gamma)
 			nuc = 2
 		end if
 		do i = 1,ni
-			sig_gamma(i) = interp1D(E_vals,angres_data(:,nuc),1000,E_r(i))*(pi/180.0d0)/100.0
+			sig_gamma(i) = interp1D(E_vals,angres_data(:,nuc),1000,E_r(i))*(pi/180.0d0)
+			if (sig_gamma(i)>1.0) then
+					sig_gamma(i) = 0.99
+			end if
 		end do
 	else
 		sig_gamma = 0.0d0
@@ -261,7 +264,7 @@ subroutine Smear(RDpix_in,sig_gammai)
 		x0 = x_pix(k,:)
 		RD_K = 0.0d0
 		do k2 = 1,npix
-			RD_K(k2) = RDpix_in(k2)*GaussianKernel(x_pix(k2,:),x0,sig_gammai)
+			RD_K(k2) = RDpix_in(k2)*GaussianKernelCosth(x_pix(k2,:),x0,sig_gammai)
 		end do
 		RD_K(k) = RDpix_in(k)
 		RDpix(k) = sum(RD_K)
@@ -270,7 +273,6 @@ subroutine Smear(RDpix_in,sig_gammai)
 	RDpix = RDpix*Rpixtot
 	! update RDpix_in
 	RDpix_in = RDpix
-
 end subroutine
 
 !------------------Gaussian (theta) smoothing kernal on a sphere---------------!
@@ -293,7 +295,8 @@ end function
 function GaussianKernelCosth(x,x0,sig_gammai) result(K)
 	double precision :: x(3),x0(3),K,cosgamma,cossig,sig_gammai
 	cosgamma = (x(1)*x0(1) + x(2)*x0(2) + x(3)*x0(3))
-	cossig = cos(sig_gammai)
+	cossig = 1.0-cos(asin(sig_gammai/1.0))
+	! sig_gammai can't be more than 1 radian or this will break
 	!if (gamma.gt.1.0d0) then
 		!gamma = 1.0d0
 		!end if
