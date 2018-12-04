@@ -79,6 +79,12 @@ subroutine BackgroundRecoilDistribution
 
 	! Multiply whole thing by Exposure so RD = Num events/R_bg
 	RD_bg = RD_bg*Exposure
+
+!  open(unit=2000,file='RD_nu_1.txt')
+!  do i = 1,nTot_bins
+!    write(2000,*) RD_bg(i,:)
+  !end do
+
 end subroutine BackgroundRecoilDistribution
 !---------------------------------------------------------------------------------------------!
 
@@ -183,6 +189,8 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 			end do
 	    end do
 	end if
+
+
 
 end subroutine NeutrinoRD
 !---------------------------------------------------------------------------------------------!

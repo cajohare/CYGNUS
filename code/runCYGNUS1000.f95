@@ -20,7 +20,7 @@ program runCYGNUS1000
 	!------------------Optimisation-----------------!
 	!-----Set binning ------------------------------!
 	  nE_bins = 20 ! Number of energy bins		  		!
-	  nT_bins = 1 ! Number of time bins					  !
+	  nT_bins = 10	 ! Number of time bins					  !
 	  nside = 4  ! Order of pixelation (2,4 or 8)		!
 	!----- Mass range for limits -------------------!
 	  nm = 50 !  Number of mass points							!
@@ -74,9 +74,14 @@ program runCYGNUS1000
 		call LoadReadout(readout,	fn_end)
 		write(*,*) 'Readout = ',fn_end
 
-		if ((readout.eq.0).or.((readout.eq.9))) then
+		if (readout.eq.0) then
 			angres_on = .false.
 			efficiency_on = .false.
+			headtail_on = .false.
+			energyres_on = .false.
+		elseif (readout.eq.9) then
+			angres_on = .false.
+			efficiency_on = .true.
 			headtail_on = .false.
 			energyres_on = .false.
 		else
@@ -90,7 +95,7 @@ program runCYGNUS1000
 			nside = 0
 		end if
 
-		filename = '../data/CYGNUS1000-EnergyOn-costh'//trim(fn_end)//'.txt'
+		filename = '../data/CYGNUS1000-EnergyOn-costh-'//trim(fn_end)//'.txt'
 		!filename = '../data/CYGNUS100k-EnergyOn-'//trim(fn_end)//'.txt'
 
 		call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)

@@ -206,13 +206,15 @@ end subroutine
 !======Directional performance integrals needed to modify recoil distribitions=!
 subroutine IntegrateOverEnergies(RD,RD_red)
 	double precision :: RD(nTot_bins_full),RD_red(nTot_bins)
-	integer :: i1,i2,i,k
+	integer :: ii,i1,i2,i,k
 	i1 = 1
+	ii = 1
 	do i = 1,nT_bins
 		do k = 1,npix
 			i2 = i1+nE_bins-1
-			RD_red = sum(RD(i1:i2))
+			RD_red(ii) = sum(RD(i1:i2))
 			i1 = i2+1
+			ii = ii+1
 		end do
 	end do
 end subroutine
@@ -260,19 +262,23 @@ subroutine Smear(RDpix_in,sig_gammai)
 	! assumes that angular distribution is at a single energy
 	Rpixtot = sum(RDpix_in) ! used to normalise the smearing
 	RDpix = RDpix_in
+	!open(unit=1234,file='gauss.dat')
 	do k = 1,npix
 		x0 = x_pix(k,:)
 		RD_K = 0.0d0
 		do k2 = 1,npix
-			RD_K(k2) = RDpix_in(k2)*GaussianKernelCosth(x_pix(k2,:),x0,sig_gammai)
+			RD_K(k2) = RDpix_in(k2)*GaussianKernel(x_pix(k2,:),x0,sig_gammai)
 		end do
 		RD_K(k) = RDpix_in(k)
 		RDpix(k) = sum(RD_K)
+		!write(1234,*) GaussianKernelCosth(x_pix(30,:),x0,sig_gammai),GaussianKernel(x_pix(30,:),x0,sig_gammai)
 	end do
 	RDpix = RDpix/sum(RDpix)
 	RDpix = RDpix*Rpixtot
 	! update RDpix_in
 	RDpix_in = RDpix
+	!write(*,*) sig_gammai
+	!stop
 end subroutine
 
 !------------------Gaussian (theta) smoothing kernal on a sphere---------------!
