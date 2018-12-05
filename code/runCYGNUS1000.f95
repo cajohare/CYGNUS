@@ -8,7 +8,7 @@ program runCYGNUS1000
 	implicit none
 
 	integer :: jj,ns,nm,readout_selection,loopmin,loopmax
-	double precision :: m_min,m_max,sigma_min,sigma_max
+	double precision :: m_min,m_max,sigma_min,sigma_max,Vol,Time
 	character(len=100) :: filename
 	character(len=100) :: fn_end
 
@@ -19,15 +19,15 @@ program runCYGNUS1000
 
 	!------------------Optimisation-----------------!
 	!-----Set binning ------------------------------!
-	  nE_bins = 20 ! Number of energy bins		  		!
-	  nT_bins = 10	 ! Number of time bins					  !
+	  nE_bins = 200 ! Number of energy bins		  		!
+	  nT_bins = 1	 ! Number of time bins					  !
 	  nside = 4  ! Order of pixelation (2,4 or 8)		!
 	!----- Mass range for limits -------------------!
-	  nm = 50 !  Number of mass points							!
+	  nm = 20 !  Number of mass points							!
 	  m_min = 0.5d0 ! Min mass											!
 	  m_max = 1000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
-	  ns = 500 ! resolution of cs scan							!
+	  ns = 100 ! resolution of cs scan							!
 	  sigma_min = 1.0d-49 ! min. expected cs				!
 	  sigma_max = 1.0d-40 ! max expected cs					!
 	!-----------------------------------------------!
@@ -36,7 +36,9 @@ program runCYGNUS1000
 
 
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	VolTime = 1000.0*3.0d0
+	Vol = 1000.0*100
+	Time = 6.0d0
+	VolTime = Vol*Time
 	energy_on = .true. ! energy info is currently turned on for best limits
 
 	write(*,*) '====================================================='
@@ -53,9 +55,10 @@ program runCYGNUS1000
 	write(*,*) '8 --- Planar readout (1D)'
 	write(*,*) '9 --- Nondirectional (0D)'
 	write(*,*) '10 --- RUN ALL READOUTS'
+	write(*,*) '11 --- RUN ALL PIXEL READOUTS'
 	readout_selection = -1
-	do while ((readout_selection.gt.10).or.(readout_selection.lt.0))
-		write(*,*) 'Select 0-10'
+	do while ((readout_selection.gt.11).or.(readout_selection.lt.0))
+		write(*,*) 'Select 0-11'
 		write(*,*) '>...'
 		read(*,*) readout_selection
 	end do
@@ -64,6 +67,9 @@ program runCYGNUS1000
 		loopmax = 9
 		loopmin = 0
 		write(*,*) 'Running all readouts'
+	elseif (readout_selection.eq.11) then
+		loopmax = 2
+		loopmin = 0
 	else
 		loopmin = readout_selection
 		loopmax = readout_selection
@@ -95,8 +101,11 @@ program runCYGNUS1000
 			nside = 0
 		end if
 
-		filename = '../data/CYGNUS1000-EnergyOn-costh-'//trim(fn_end)//'.txt'
-		!filename = '../data/CYGNUS100k-EnergyOn-'//trim(fn_end)//'.txt'
+		if (Vol.eq.1000.0) then
+			filename = '../data/CYGNUS1000-'//trim(fn_end)//'.txt'
+		elseif (Vol.eq.100000.0) then
+			filename = '../data/CYGNUS100k-'//trim(fn_end)//'.txt'
+		end if
 
 		call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start

@@ -4,10 +4,10 @@ module util
 	implicit none
 
 contains
-	
-	
+
+
 !================================util.f95=============================================!
-! Just contains a bunch of boring but useful/essential stuff 
+! Just contains a bunch of boring but useful/essential stuff
 
 ! Contents:
 ! 1. Memory allocation for likelihood analysis
@@ -27,21 +27,21 @@ contains
 ! erfi: complex error function
 ! inverse: matrix inverse
 !=====================================================================================!
-		
-		
-			
-	
-	
+
+
+
+
+
 !================================Memory Allocation====================================!
 !-------------------- Preallocate everything needed by likelihood---------------------!
-subroutine PreAllocate		
+subroutine PreAllocate
 	allocate(E_bin_centers(nE_bins))
 	allocate(E_bin_edges(nE_bins+1))
 	nTot_bins = nE_bins
 	call E_bins
 	if (nT_bins.gt.0) then
 		nTot_bins = nE_bins*nT_bins
-	    call T_bins		  
+	    call T_bins
 	end if
 
 	if (nside.gt.0) then
@@ -50,20 +50,20 @@ subroutine PreAllocate
 			nTot_bins = nT_bins*nE_bins*npix
 			nTot_bins_full = nT_bins*nE_bins*npix
 		else
-			nTot_bins = npix*nT_bins 
+			nTot_bins = npix*nT_bins
 			nTot_bins_full = nT_bins*nE_bins*npix
 		end if
 	else
-		nTot_bins_full = nTot_bins	
-	end if	
+		nTot_bins_full = nTot_bins
+	end if
 	allocate(RD_wimp(nTot_bins))
 	allocate(RD_bg(nTot_bins,n_bg))
 	allocate(N_obs(nTot_bins))
 	write(*,*) 'Total number of bins = ',nTot_bins
 end subroutine
-  
+
 !--------------------------------- Unallocate all of that ------------------------------!
-subroutine UnAllocate	  
+subroutine UnAllocate
 	deallocate(E_nu_all)
 	deallocate(Flux_all)
 	deallocate(R_bg_err)
@@ -78,7 +78,7 @@ subroutine UnAllocate
 	if (nside.gt.0) then
 		deallocate(x_pix)
 	end if
-end subroutine				
+end subroutine
 
 
 
@@ -97,7 +97,7 @@ subroutine E_bins
 	end do
 	E_bin_edges(nE_bins+1) = E_max
 end subroutine E_bins
-	
+
 !------------------------------------- Time bins---------------------------------------!
 subroutine T_bins
 	integer :: bin
@@ -106,13 +106,13 @@ subroutine T_bins
 	allocate(v_lab_all(nT_bins,3))
 	T_binwidth = 365.0d0/(1.0d0*nT_bins)
 	do bin = 1,nT_bins
-	   T_bin_centers(bin) = (bin-1)*T_binwidth + T_binwidth/2
-	end do		
+	   T_bin_centers(bin) = 257.0d0+(bin-1)*T_binwidth + T_binwidth/2
+	end do
 end subroutine
-	
+
 !------------------------------------- Direction bins-----------------------------------!
 subroutine pixels
-	integer :: pix  
+	integer :: pix
 	if (nside.eq.2) then
 		open(unit=1333,file='../pixels/xpix2.txt')
 	elseif (nside.eq.4) then
@@ -128,7 +128,7 @@ subroutine pixels
 		read(1333,*) x_pix(pix,:)
 	end do
 	close(1333)
-end subroutine	
+end subroutine
 
 ! IF USING HEALpix this is the way to alloacte the pixels
 !   subroutine pixels
@@ -141,10 +141,10 @@ end subroutine
 !        x_pix(pix+1,:) = x_pix_db
 !     end do
 !   end subroutine
-  
-			
-			
-				
+
+
+
+
 !================================USEFUL FUNCTIONS=====================================!
 !------------------------------Linearly Spaced Array----------------------------------!
 function linspace(x_lower,x_upper,n) result(V)
@@ -153,7 +153,7 @@ function linspace(x_lower,x_upper,n) result(V)
 	w = (x_upper-x_lower)/(1.0*n-1.0d0)
 	V = (/(i,i=0,n-1)/)*w + x_lower
 end function
-  
+
 !------------------------Logarithmically Spaced Array---------------------------------!
 function logspace(x_lower,x_upper,n) result(V)
 	double precision :: V(n),x_upper,x_lower,wid
@@ -223,7 +223,7 @@ function erf(x)
 	erf = 1.0d0 - dumerfc
 end function erf
 !-----------------------complex error function----------------------------------------!
-! Copied from some library. It does seem to work 
+! Copied from some library. It does seem to work
 ! just don't look at if for too long
 function erfi(x)
 	double precision :: erfi,x
@@ -345,10 +345,10 @@ subroutine inverse(a,c,n)
 ! output ...
 ! c(n,n) - inverse matrix of A
 ! comments ...
-! the original matrix a(n,n) will be destroyed 
+! the original matrix a(n,n) will be destroyed
 ! during the calculation
 !===========================================================
-	implicit none 
+	implicit none
 	integer n
 	double precision a(n,n), c(n,n)
 	double precision L(n,n), U(n,n), b(n), d(n), x(n)
@@ -372,7 +372,7 @@ subroutine inverse(a,c,n)
 	  end do
 	end do
 
-	! Step 2: prepare L and U matrices 
+	! Step 2: prepare L and U matrices
 	! L matrix is a matrix of the elimination coefficient
 	! + the diagonal elements are 1.0
 	do i=1,n
@@ -412,8 +412,8 @@ subroutine inverse(a,c,n)
 	  b(k)=0.0
 	end do
 end subroutine inverse
-	
-	
+
+
 !-------------------------------------------------------------------------------------!
 !-------------------------------------------------------------------------------------!
 
