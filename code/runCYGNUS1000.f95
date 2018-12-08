@@ -19,15 +19,15 @@ program runCYGNUS1000
 
 	!------------------Optimisation-----------------!
 	!-----Set binning ------------------------------!
-	  nE_bins = 200 ! Number of energy bins		  		!
+	  nE_bins = 50 ! Number of energy bins		  		!
 	  nT_bins = 1	 ! Number of time bins					  !
 	  nside = 4  ! Order of pixelation (2,4 or 8)		!
 	!----- Mass range for limits -------------------!
-	  nm = 20 !  Number of mass points							!
+	  nm = 200 !  Number of mass points							!
 	  m_min = 0.5d0 ! Min mass											!
 	  m_max = 1000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
-	  ns = 100 ! resolution of cs scan							!
+	  ns = 1000 ! resolution of cs scan							!
 	  sigma_min = 1.0d-49 ! min. expected cs				!
 	  sigma_max = 1.0d-40 ! max expected cs					!
 	!-----------------------------------------------!
@@ -36,7 +36,7 @@ program runCYGNUS1000
 
 
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	Vol = 1000.0*100
+	Vol = 1000.0
 	Time = 6.0d0
 	VolTime = Vol*Time
 	energy_on = .true. ! energy info is currently turned on for best limits

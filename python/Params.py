@@ -208,8 +208,6 @@ class Detector:
             self.TotalNumberOfBins = ne*nt
             self.Directional = False
 
-
-        # Load in detector performance curves
         data_er = loadtxt(fdir_er+ReadOut_Name+froot_er)
         data_eff = loadtxt(fdir_eff+ReadOut_Name+froot_eff)
         data_ar = loadtxt(fdir_ar+ReadOut_Name+froot_ar)
