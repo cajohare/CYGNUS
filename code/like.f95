@@ -47,21 +47,31 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 
 	! Calculate exposure for specified TPC Volume x Time
 	! 1000 m^3 of SF6 at 20 torr or He at 740 torr is 0.16 tons
-	Exposure = VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
-
+  if (searchmode) then
+    ! 1000 m^3 of SF6 at 200 torr or He at 740 torr is 1.6 tons
+	  Exposure = 10.0*VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
+    nside = 0 ! switch off directionality in search mode
+  else
+    ! 1000 m^3 of SF6 at 20 torr or He at 740 torr is 0.16 tons
+    Exposure = VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
+  end if
 
  	! Calculate Helium limits
+  if (searchmode) then
+    DLHe = 0.0d0 ! No helium used in search mode
+  else
     nucleus = Helium
     E_th = 1.8d0
-	E_max = 200.0d0
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
+  	E_max = 200.0d0
+  	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
+  end if
 
 
 	! Calculate Fluorine limits
-    nucleus = Fluorine
-    E_th = 3.0d0
+  nucleus = Fluorine
+  E_th = 3.0d0
 	E_max = 200.0d0
-    call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
+  call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
 
 
 	! Save Data
@@ -71,7 +81,7 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	write(123,*) DLHe
 	close(123)
 	write(*,*) 'writing to: ',trim(filename)
-    write(*,*) '----------------------------------------------------'
+  write(*,*) '----------------------------------------------------'
 end subroutine
 
 !---------------------------------Abitrary limit-------------------------------!

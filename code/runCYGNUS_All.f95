@@ -1,4 +1,4 @@
-program runCYGNUS1000
+program runCYGNUS_All
 	use params
 	use WIMPFuncs
 	use util
@@ -40,7 +40,8 @@ program runCYGNUS1000
 	Time = 6.0d0
 	VolTime = Vol*Time
 	energy_on = .true. ! energy info is currently turned on for best limits
-
+	searchmode = .false.
+	
 	write(*,*) '====================================================='
 	write(*,*) 'Starting program: CYGNUS-1000'
 	write(*,*) 'Select redout technology (0-10):'
@@ -111,4 +112,4 @@ program runCYGNUS1000
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 	end do
 
-  end program runCYGNUS1000
+end program runCYGNUS_All

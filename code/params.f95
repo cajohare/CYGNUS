@@ -66,6 +66,7 @@ logical :: efficiency_on ! Switch for turning efficiency on
 logical :: angres_on ! Switch for turning angular resolution on
 logical :: headtail_on ! Switch for turning head-tail efficiency on
 logical :: Energy_on ! Switch for turning energy information on
+logical :: searchmode ! Switch for turning search mode on
 integer :: readout ! Readout selection
 !---------------------------------------------------------------------------------------!
 
