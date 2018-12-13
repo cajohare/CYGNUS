@@ -19,17 +19,17 @@ program runCYGNUS_Ideal
 
 	!------------------Optimisation-----------------!
 	!-----Set binning ------------------------------!
-	  nE_bins = 50 ! Number of energy bins		  		!
+	  nE_bins = 20 ! Number of energy bins		  		!
 	  nT_bins = 1	 ! Number of time bins					  !
 	  nside = 4  ! Order of pixelation (2,4 or 8)		!
 	!----- Mass range for limits -------------------!
 	  nm = 200 !  Number of mass points							!
-	  m_min = 0.8d0 ! Min mass											!
+	  m_min = 0.5d0 ! Min mass											!
 	  m_max = 10000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
-	  ns = 1000 ! resolution of cs scan							!
+	  ns = 500 ! resolution of cs scan							!
 	  sigma_min = 1.0d-50 ! min. expected cs				!
-	  sigma_max = 1.0d-43 ! max expected cs					!
+	  sigma_max = 1.0d-41 ! max expected cs					!
 	!-----------------------------------------------!
 	!-----------------------------------------------!
 
@@ -62,12 +62,12 @@ program runCYGNUS_Ideal
 	nside = 0
 	!-----------------------------------------------!
 	VolTime = 1000.0*3.0d0
-	filename = '../data/CYGNUS1000-Final.txt'
+	filename = '../data/CYGNUS1000-SearchMode.txt'
 	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 
 	! CYGNUS 100k x 3 years of running
 	VolTime = 100000.0*3.0d0
-	filename = '../data/CYGNUS100k-Final.txt'
+	filename = '../data/CYGNUS100k-SearchMode.txt'
 	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	!-----------------------------------------------!
 
