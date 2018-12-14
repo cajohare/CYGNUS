@@ -1,6 +1,6 @@
 # CYGNUS (work in progress)
 
-This code runs the main readout technology comparison for the CYGNUS project found in this paper [arXiv:1810.?????](https://arxiv.org/abs/1810.?????).
+This code runs the readout technology comparison for the CYGNUS project found in this paper [arXiv:1810.?????](https://arxiv.org/abs/1810.?????).
 
 Contact me to complain about why the code won't work or whatever (ciaran.aj.ohare@gmail.com).
 
