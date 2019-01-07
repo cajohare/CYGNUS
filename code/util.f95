@@ -119,8 +119,10 @@ subroutine pixels
 		open(unit=1333,file='../pixels/xpix4.txt')
 	elseif (nside.eq.8) then
 		open(unit=1333,file='../pixels/xpix8.txt')
+	elseif (nside.eq.16) then
+		open(unit=1333,file='../pixels/xpix16.txt')
 	else
-		write(*,*) 'nside must be 2, 4 or 8'
+		write(*,*) 'nside must be 2, 4, 8 or 16'
 	end if
 	npix = 12*nside**2
 	allocate(x_pix(npix,3))
@@ -158,10 +160,14 @@ end function
 function logspace(x_lower,x_upper,n) result(V)
 	double precision :: V(n),x_upper,x_lower,wid
 	integer :: n,i
-	wid = (log10(x_upper)-log10(x_lower))/(1.0d0*n-1.0d0)
-	do i = 1,n
-		V(i) = x_lower*10.0d0**((i-1)*wid)
-	end do
+	if (n>1) then
+		wid = (log10(x_upper)-log10(x_lower))/(1.0d0*n-1.0d0)
+		do i = 1,n
+			V(i) = x_lower*10.0d0**((i-1)*wid)
+		end do
+	else
+		V(1) = x_lower
+	end if
 end function
 
 !------------------------------Linear Interpolation--------------------------------!

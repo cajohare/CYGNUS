@@ -102,8 +102,31 @@ subroutine GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
     call UnAllocate ! Reset
 end subroutine
 
-
-
+!---------------------------------Abitrary limit-------------------------------!
+subroutine GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL)
+	! Limits from m_chi = m_min to m_max, with nm values
+	! Cross section scan from sigma_min to sigma_max with ns values
+	! DL = Discovery Limit
+	double precision :: ex_min,ex_max,m,sigma_min,sigma_max,m_vals(1),DL(n_ex),ex_vals(n_ex)
+	integer :: i,nf,ns,n_ex
+    write(*,*) 'Nucleus = ',nucleus,'Exposure = ',Exposure,'ton years'
+    write(*,*) '[E_th,E_max] = ',E_th,E_max,'keV'
+    write(*,*) '----------------------------------------------------'
+    Exposure = 1.0
+    call GetNuFluxes ! Load Neutrinos
+    call PreAllocate ! Allocate data size (readout dependent)
+    call BackgroundRecoilDistribution ! Load Background	model
+    call SHM ! Load halo model
+    ex_vals = logspace(ex_min,ex_max,n_ex)
+    do i=1,n_ex
+      Exposure = ex_vals(i)
+      RD_bg = RD_bg*Exposure
+      write(*,*) 'Exposure = ',Exposure
+      call DiscoveryLimit(m,m,1,sigma_min,sigma_max,ns,	m_vals,DL(i))
+      RD_bg = RD_bg/Exposure
+    end do
+    call UnAllocate ! Reset
+end subroutine
 
 
 
