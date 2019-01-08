@@ -103,12 +103,13 @@ subroutine GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 end subroutine
 
 !---------------------------------Abitrary limit-------------------------------!
-subroutine GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL)
+subroutine GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL,Nsig,Nbg)
 	! Limits from m_chi = m_min to m_max, with nm values
 	! Cross section scan from sigma_min to sigma_max with ns values
 	! DL = Discovery Limit
-	double precision :: ex_min,ex_max,m,sigma_min,sigma_max,m_vals(1),DL(n_ex),ex_vals(n_ex)
-	integer :: i,nf,ns,n_ex
+	double precision :: ex_min,ex_max,m,sigma_min,sigma_max,m_vals(1)
+  double precision :: DL(n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex)
+	integer :: i,nf,ns,n_ex,si
     write(*,*) 'Nucleus = ',nucleus,'Exposure = ',Exposure,'ton years'
     write(*,*) '[E_th,E_max] = ',E_th,E_max,'keV'
     write(*,*) '----------------------------------------------------'
@@ -123,6 +124,14 @@ subroutine GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_val
       RD_bg = RD_bg*Exposure
       write(*,*) 'Exposure = ',Exposure
       call DiscoveryLimit(m,m,1,sigma_min,sigma_max,ns,	m_vals,DL(i))
+
+      ! numbers of events
+      Nsig(i) = sum(RD_wimp*DL(i))
+      Nbg(i) = 0.0d0
+      do si = 1,n_bg
+        Nbg(i) = Nbg(i) + sum(R_bg(si)*RD_bg(:,si))
+      end do
+
       RD_bg = RD_bg/Exposure
     end do
     call UnAllocate ! Reset

@@ -106,7 +106,7 @@ subroutine T_bins
 	allocate(v_lab_all(nT_bins,3))
 	T_binwidth = 365.0d0/(1.0d0*nT_bins)
 	do bin = 1,nT_bins
-	   T_bin_centers(bin) = 257.0d0+(bin-1)*T_binwidth + T_binwidth/2
+	   T_bin_centers(bin) = 255.75+(bin-1)*T_binwidth !+ T_binwidth/2
 	end do
 end subroutine
 
@@ -121,8 +121,10 @@ subroutine pixels
 		open(unit=1333,file='../pixels/xpix8.txt')
 	elseif (nside.eq.16) then
 		open(unit=1333,file='../pixels/xpix16.txt')
+	elseif (nside.eq.32) then
+		open(unit=1333,file='../pixels/xpix32.txt')
 	else
-		write(*,*) 'nside must be 2, 4, 8 or 16'
+		write(*,*) 'nside must be 2, 4, 8, 16, or 32'
 	end if
 	npix = 12*nside**2
 	allocate(x_pix(npix,3))

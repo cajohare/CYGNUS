@@ -9,7 +9,7 @@ program runCYGNUS_Exposure
 
 	integer :: jj,ns,nm,readout_selection,loopmin,loopmax,i1,i2,i,n_ex
 	double precision :: m_min,m_max,sigma_min,sigma_max,Vol,Time,ex_min,ex_max,m
-	double precision,dimension(:),allocatable :: ex_vals,DL
+	double precision,dimension(:),allocatable :: ex_vals,DL,Nbg,Nsig
 	character(len=100) :: filename
 	character(len=100) :: fn_end
 
@@ -29,8 +29,8 @@ program runCYGNUS_Exposure
 	  m_max = 10000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
 	  ns = 500 ! resolution of cs scan							!
-	  sigma_min = 1.0d-50 ! min. expected cs				!
-	  sigma_max = 1.0d-41 ! max expected cs					!
+	  sigma_min = 1.0d-51 ! min. expected cs				!
+	  sigma_max = 1.0d-39 ! max expected cs					!
 	!-----------------------------------------------!
 	!-----------------------------------------------!
 
@@ -39,6 +39,8 @@ program runCYGNUS_Exposure
 	ex_max = 1.0e10*3.0*(0.16/1000.0d0) ! Convert m^3-years into ton-years
 	allocate(ex_vals(n_ex))
 	allocate(DL(n_ex))
+	allocate(Nsig(n_ex))
+	allocate(Nbg(n_ex))
 
 
 	lat = Boulby(1)
@@ -53,47 +55,59 @@ program runCYGNUS_Exposure
 	efficiency_on = .true.
 
 
-	m = 10.0
-
-	filename = '../data/CYGNUS1000-Exposure-Ideal.txt'
-	angres_on = .false.
-	headtail_on = .false.
-	call LoadReadout(readout,	fn_end)
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL)
-	open(unit=1000,file=trim(filename))
-	write(1000,*) ex_vals/(3*(0.16/1000.0))
-	write(1000,*) DL
-	close(1000)
-
-	filename = '../data/CYGNUS1000-Exposure-angres.txt'
-	angres_on = .true.
-	headtail_on = .false.
-	call LoadReadout(readout,	fn_end)
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL)
-	open(unit=1000,file=trim(filename))
-	write(1000,*) ex_vals/(3*(0.16/1000.0))
-	write(1000,*) DL
-	close(1000)
-
-	filename = '../data/CYGNUS1000-Exposure-angres-HT.txt'
-	angres_on = .true.
-	headtail_on = .true.
-	call LoadReadout(readout,	fn_end)
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL)
-	open(unit=1000,file=trim(filename))
-	write(1000,*) ex_vals/(3*(0.16/1000.0))
-	write(1000,*) DL
-	close(1000)
+	m = 9.0
 
 	nside = 0
 	filename = '../data/CYGNUS1000-Exposure-Nondirectional.txt'
 	angres_on = .true.
 	headtail_on = .true.
 	call LoadReadout(readout,	fn_end)
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL)
+	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL,Nsig,Nbg)
 	open(unit=1000,file=trim(filename))
 	write(1000,*) ex_vals/(3*(0.16/1000.0))
 	write(1000,*) DL
+	write(1000,*) Nsig
+	write(1000,*) Nbg
 	close(1000)
+
+	stop
+
+	nside = 4
+	filename = '../data/CYGNUS1000-Exposure-Ideal.txt'
+	angres_on = .false.
+	headtail_on = .false.
+	call LoadReadout(readout,	fn_end)
+	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL,Nsig,Nbg)
+	open(unit=1000,file=trim(filename))
+	write(1000,*) ex_vals/(3*(0.16/1000.0))
+	write(1000,*) DL
+	write(1000,*) Nsig
+	write(1000,*) Nbg
+	close(1000)
+
+	filename = '../data/CYGNUS1000-Exposure-angres.txt'
+	angres_on = .true.
+	headtail_on = .false.
+	call LoadReadout(readout,	fn_end)
+	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL,Nsig,Nbg)
+	open(unit=1000,file=trim(filename))
+	write(1000,*) ex_vals/(3*(0.16/1000.0))
+	write(1000,*) DL
+	write(1000,*) Nsig
+	write(1000,*) Nbg
+	close(1000)
+
+	filename = '../data/CYGNUS1000-Exposure-angres-HT.txt'
+	angres_on = .true.
+	headtail_on = .true.
+	call LoadReadout(readout,	fn_end)
+	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL,Nsig,Nbg)
+	open(unit=1000,file=trim(filename))
+	write(1000,*) ex_vals/(3*(0.16/1000.0))
+	write(1000,*) DL
+	write(1000,*) Nsig
+	write(1000,*) Nbg
+	close(1000)
+
 
 end program runCYGNUS_Exposure

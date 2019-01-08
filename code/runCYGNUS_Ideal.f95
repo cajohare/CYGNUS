@@ -33,71 +33,57 @@ program runCYGNUS_Ideal
 	!-----------------------------------------------!
 	!-----------------------------------------------!
 
-	!-----------------------------------------------!
-	! CYGNUS 1000 x 3 years of running
-	! 30 degrees angular res.
-	nside = 0
-	VolTime = 1000.0*3.0d0
-	filename = '../data/CYGNUS1000-Nondirectional.txt'
+	! ! NON-DIRECTIONAL
+	! nside = 0
+	! VolTime = 1000.0*3.0d0
+	! filename = '../data/CYGNUS1000-Nondirectional.txt'
+	! readout = 2
+	! energy_on = .true. ! energy info is currently turned on for best limits
+	! angres_on = .true.
+	! efficiency_on = .true.
+	! headtail_on = .false.
+	! energyres_on = .false.
+	! searchmode = .false.
+	! call LoadReadout(readout,	fn_end)
+	! call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	!
+	! ! JUST ANGULAR RES.
+	! nside = 4
+	! VolTime = 1000.0*3.0d0
+	! filename = '../data/CYGNUS1000-30deg.txt'
+	! readout = 2
+	! energy_on = .true. ! energy info is currently turned on for best limits
+	! angres_on = .true.
+	! efficiency_on = .true.
+	! headtail_on = .false.
+	! energyres_on = .false.
+	! searchmode = .false.
+	! call LoadReadout(readout,	fn_end)
+	! call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	!
+	! ! ANGULAR RES + HEAD-TAIL
+	! filename = '../data/CYGNUS1000-30deg-HT.txt'
+	! headtail_on = .true.
+	! call LoadReadout(readout,	fn_end)
+	! call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+
+	! IDEALISED
 	readout = 2
-	energy_on = .true. ! energy info is currently turned on for best limits
-	angres_on = .true.
-	efficiency_on = .true.
-	headtail_on = .false.
-	energyres_on = .false.
-	searchmode = .false.
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-
-stop
-	nside = 4
-
-	!-----------------------------------------------!
-	! CYGNUS 1000 x 3 years of running
-	! 30 degrees angular res.
-	VolTime = 1000.0*3.0d0
-	filename = '../data/CYGNUS1000-30deg.txt'
-	readout = 2
-	energy_on = .true. ! energy info is currently turned on for best limits
-	angres_on = .true.
-	efficiency_on = .true.
-	headtail_on = .false.
-	energyres_on = .false.
-	searchmode = .false.
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-
-	! 30 degrees angular res. + head-tail
-	filename = '../data/CYGNUS1000-30deg-HT.txt'
-	headtail_on = .true.
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-
-
-
-stop
-
-
-	readout = 0
-	energy_on = .true. ! energy info is currently turned on for best limits
+	energy_on = .true.
 	angres_on = .true.
 	efficiency_on = .true.
 	headtail_on = .true.
 	energyres_on = .false.
 	searchmode = .false.
+	! CYGNUS-1000 x 3 years
 	call LoadReadout(readout,	fn_end)
-
-
-	! NORMAL OPERATION
-	!-----------------------------------------------!
-	! CYGNUS 1000 x 3 years of running
 	VolTime = 1000.0*3.0d0
-	filename = '../data/CYGNUS1000-Final.txt'
+	filename = '../data/CYGNUS1000-Final-predrift.txt'
 	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 
 	! CYGNUS 100k x 3 years of running
 	VolTime = 100000.0*3.0d0
-	filename = '../data/CYGNUS100k-Final.txt'
+	filename = '../data/CYGNUS100k-Final-predrift.txt'
 	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	!-----------------------------------------------!
 
@@ -107,12 +93,12 @@ stop
 	nside = 0
 	!-----------------------------------------------!
 	VolTime = 1000.0*3.0d0
-	filename = '../data/CYGNUS1000-SearchMode.txt'
+	filename = '../data/CYGNUS1000-SearchMode-predrift.txt'
 	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 
 	! CYGNUS 100k x 3 years of running
 	VolTime = 100000.0*3.0d0
-	filename = '../data/CYGNUS100k-SearchMode.txt'
+	filename = '../data/CYGNUS100k-SearchMode-predrift.txt'
 	call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	!-----------------------------------------------!
 
