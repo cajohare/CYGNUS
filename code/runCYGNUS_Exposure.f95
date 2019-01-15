@@ -30,7 +30,7 @@ program runCYGNUS_Exposure
 	!----- Cross section range for limits ----------!
 	  ns = 1000 ! resolution of cs scan							!
 	  sigma_min = 1.0d-49 ! min. expected cs				!
-	  sigma_max = 1.0d-40 ! max expected cs					!
+	  sigma_max = 1.0d-38 ! max expected cs					!
 	!-----------------------------------------------!
 	!-----------------------------------------------!
 
