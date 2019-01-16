@@ -110,32 +110,206 @@ subroutine GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_val
 	double precision :: ex_min,ex_max,m,sigma_min,sigma_max,m_vals(1)
   double precision :: DL(n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex)
 	integer :: i,nf,ns,n_ex,si
-    write(*,*) 'Nucleus = ',nucleus,'Exposure = ',Exposure,'ton years'
-    write(*,*) '[E_th,E_max] = ',E_th,E_max,'keV'
-    write(*,*) '----------------------------------------------------'
-    Exposure = 1.0
-    call GetNuFluxes ! Load Neutrinos
-    call PreAllocate ! Allocate data size (readout dependent)
-    call BackgroundRecoilDistribution ! Load Background	model
-    call SHM ! Load halo model
-    ex_vals = logspace(ex_min,ex_max,n_ex)
-    do i=1,n_ex
-      Exposure = ex_vals(i)
-      RD_bg = RD_bg*Exposure
-      write(*,*) 'Exposure = ',Exposure
-      call DiscoveryLimit(m,m,1,sigma_min,sigma_max,ns,	m_vals,DL(i))
+  write(*,*) 'Nucleus = ',nucleus,'Exposure = ',Exposure,'ton years'
+  write(*,*) '[E_th,E_max] = ',E_th,E_max,'keV'
+  write(*,*) '----------------------------------------------------'
+  Exposure = 1.0
+  call GetNuFluxes ! Load Neutrinos
+  call PreAllocate ! Allocate data size (readout dependent)
+  call BackgroundRecoilDistribution ! Load Background	model
+  call SHM ! Load halo model
+  ex_vals = logspace(ex_min,ex_max,n_ex)
+  do i=1,n_ex
+    Exposure = ex_vals(i)
+    RD_bg = RD_bg*Exposure
+    write(*,*) 'Exposure = ',Exposure
+    call DiscoveryLimit(m,m,1,sigma_min,sigma_max,ns,	m_vals,DL(i))
 
-      ! numbers of events
-      Nsig(i) = sum(RD_wimp*DL(i))
-      Nbg(i) = 0.0d0
-      do si = 1,n_bg
-        Nbg(i) = Nbg(i) + sum(R_bg(si)*RD_bg(:,si))
-      end do
-
-      RD_bg = RD_bg/Exposure
+    ! numbers of events
+    Nsig(i) = sum(RD_wimp*DL(i))
+    Nbg(i) = 0.0d0
+    do si = 1,n_bg
+      Nbg(i) = Nbg(i) + sum(R_bg(si)*RD_bg(:,si))
     end do
-    call UnAllocate ! Reset
+
+    RD_bg = RD_bg/Exposure
+  end do
+  call UnAllocate ! Reset
 end subroutine
+
+
+
+!---------------------------------Abitrary limit-------------------------------!
+subroutine GetLimits_MassExposure(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+  integer :: i,j,k,k1,nm,nf,ns,n_ex,si,MAXFUNEVALS,IPRINT,NLOOP,IQUAD,ifault0,ii
+	double precision :: m_min,m_max,ex_min,ex_max,m,sigma_min,sigma_max,m_vals(nm),D_prev,s_prev
+  double precision :: DL(nm,n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
+  double precision,dimension(:),allocatable :: x_in0,x_in1,step0,N_exp,N_exp_bg
+  double precision :: D01,L1,L0,SIMP,STOPCR0,var(2)
+  write(*,*) 'Nucleus = ',nucleus,'Exposure = ',ex_min,ex_max
+  write(*,*) '[E_th,E_max] = ',E_th,E_max,'keV'
+  write(*,*) '----------------------------------------------------'
+  MAXFUNEVALS = 10000 ! Maximum function evaluations
+  IPRINT = -1 ! Print results from minimisaition
+  NLOOP = 1 ! Number of iterations before looping
+  IQUAD = 0 ! Can't remeber what this does
+  SIMP = 0.1 ! Nor this
+	STOPCR0 = 1.0d-12 ! Accuracy of max likelihood
+
+  Exposure = 1.0
+  call GetNuFluxes ! Load Neutrinos
+  call PreAllocate ! Allocate data size (readout dependent)
+  allocate(x_in0(n_bg))
+  allocate(x_in1(n_bg+1))
+  allocate(step0(n_bg))
+  allocate(N_exp_bg(nTot_bins))
+  allocate(N_exp(nTot_bins))
+  call BackgroundRecoilDistribution ! Load Background	model
+  call SHM ! Load halo model
+  ex_vals = logspace(ex_min,ex_max,n_ex)
+  m_vals = logspace(m_min,m_max,nm)
+  sigma_p_vals = logspace(sigma_min,sigma_max,ns)
+  DL = 0.0
+
+  do i = 1,nm
+    k1 = 1
+    m_chi = m_vals(i)
+    Exposure = 1.0
+    call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
+    if (sum(RD_wimp).gt.0.0) then
+      do j=1,n_ex
+
+        Exposure = ex_vals(n_ex+1-j)
+        RD_wimp = RD_wimp*Exposure
+        RD_bg = RD_bg*Exposure
+        N_exp_bg = 0.0d0
+        do si = 1,n_bg
+          N_exp_bg = N_exp_bg + R_bg(si)*RD_bg(:,si)
+        end do
+        N_tot_bg = sum(N_exp_bg)
+
+        do k = k1,ns
+          sigma_p = sigma_p_vals(k)
+          !write(*,*) i,j,k,sigma_p,N_tot_bg,sum(RD_wimp*sigma_p)
+          if (sum(RD_wimp*sigma_p).gt.1.0d0) then	! Generally need >0.5 events to see DM
+            N_exp = N_exp_bg + RD_wimp*sigma_p
+            N_obs = N_exp  ! Observed=Expected for Asimov data
+            X_in1= (/log10(sigma_p),R_bg/)
+            call llhood1(X_in1,L1) ! Asimov data maximises likelihood at correct value
+
+            X_in0 = R_bg
+            step0 = R_bg_err*R_bg
+            call llhood0(X_in0,L0)
+            call MINIM(X_in0,step0,n_bg,L0,MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,IQUAD,SIMP,VAR,llhood0,IFAULT0)
+
+            D01 = -2.0*(L1-L0)
+            if (D01.ge.9.0d0) then ! Median 3sigma detection -> D = 9
+              ! Do interpolation to find discovery limit cross section
+              DL(i,j) = 10.0d0**(interp1D((/D_prev,D01/),(/log10(s_prev),log10(sigma_p)/),2,9.0d0))
+              write(*,*) 'm = ',m_chi,'|| Exposure = ',Exposure,'|| DL = ',DL(i,j)
+              k1 = k-1
+              exit
+            end if
+            s_prev = sigma_p ! Reset for interpolation
+            D_prev = D01
+          end if
+        end do
+
+        RD_bg = RD_bg/Exposure
+        RD_wimp = RD_wimp/Exposure
+      end do
+    end if
+  end do
+  call UnAllocate ! Reset
+end subroutine
+
+subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+  integer :: i,j,k,k1,nm,nf,ns,n_ex,si,MAXFUNEVALS,IPRINT,NLOOP,IQUAD,ifault0,ii
+	double precision :: m_min,m_max,ex_min,ex_max,m,sigma_min,sigma_max,m_vals(nm),D_prev,ex_prev
+  double precision :: DL(nm,n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
+  double precision,dimension(:),allocatable :: x_in0,x_in1,step0,N_exp,N_exp_bg
+  double precision :: D01,L1,L0,SIMP,STOPCR0,var(2)
+  write(*,*) 'Nucleus = ',nucleus,'Exposure = ',ex_min,ex_max
+  write(*,*) '[E_th,E_max] = ',E_th,E_max,'keV'
+  write(*,*) '----------------------------------------------------'
+  MAXFUNEVALS = 10000 ! Maximum function evaluations
+  IPRINT = -1 ! Print results from minimisaition
+  NLOOP = 1 ! Number of iterations before looping
+  IQUAD = 0 ! Can't remeber what this does
+  SIMP = 0.1 ! Nor this
+	STOPCR0 = 1.0d-12 ! Accuracy of max likelihood
+
+  Exposure = 1.0
+  call GetNuFluxes ! Load Neutrinos
+  call PreAllocate ! Allocate data size (readout dependent)
+  allocate(x_in0(n_bg))
+  allocate(x_in1(n_bg+1))
+  allocate(step0(n_bg))
+  allocate(N_exp_bg(nTot_bins))
+  allocate(N_exp(nTot_bins))
+  call BackgroundRecoilDistribution ! Load Background	model
+  call SHM ! Load halo model
+  ex_vals = logspace(ex_min,ex_max,n_ex)
+  m_vals = logspace(m_min,m_max,nm)
+  sigma_p_vals = logspace(sigma_min,sigma_max,ns)
+  DL = 0.0
+
+  do i = 1,nm
+    k1 = 1
+    m_chi = m_vals(i)
+    Exposure = 1.0
+    call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
+    if (sum(RD_wimp).gt.0.0) then
+      do j=1,ns
+
+        sigma_p = sigma_p_vals(j)
+
+        do k = k1,n_ex
+          Exposure = ex_vals(n_ex+1-k)
+          RD_wimp = RD_wimp*Exposure
+          RD_bg = RD_bg*Exposure
+          N_exp_bg = 0.0d0
+          do si = 1,n_bg
+            N_exp_bg = N_exp_bg + R_bg(si)*RD_bg(:,si)
+          end do
+          N_tot_bg = sum(N_exp_bg)
+
+          !write(*,*) i,j,k,sigma_p,N_tot_bg,sum(RD_wimp*sigma_p)
+          if (sum(RD_wimp*sigma_p).gt.1.0d0) then	! Generally need >0.5 events to see DM
+            N_exp = N_exp_bg + RD_wimp*sigma_p
+            N_obs = N_exp  ! Observed=Expected for Asimov data
+            X_in1= (/log10(sigma_p),R_bg/)
+            call llhood1(X_in1,L1) ! Asimov data maximises likelihood at correct value
+
+            X_in0 = R_bg
+            step0 = R_bg_err*R_bg
+            call llhood0(X_in0,L0)
+            call MINIM(X_in0,step0,n_bg,L0,MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,IQUAD,SIMP,VAR,llhood0,IFAULT0)
+
+            D01 = -2.0*(L1-L0)
+            if (D01.ge.9.0d0) then ! Median 3sigma detection -> D = 9
+              ! Do interpolation to find discovery limit cross section
+              DL(i,j) = 10.0d0**(interp1D((/D_prev,D01/),(/log10(ex_prev),log10(Exposure)/),2,9.0d0))
+              write(*,*) 'm = ',m_chi,'|| sigma = ',sigma_p,'|| DL = ',DL(i,j)
+              k1 = k-1
+              exit
+            end if
+            ex_prev = Exposure ! Reset for interpolation
+            D_prev = D01
+            RD_bg = RD_bg/Exposure
+            RD_wimp = RD_wimp/Exposure
+          end if
+        end do
+
+
+      end do
+    end if
+  end do
+  call UnAllocate ! Reset
+end subroutine
+
+
+
 
 
 
@@ -221,6 +395,9 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 		!stop
 	end do
 end subroutine
+
+
+
 
 
 

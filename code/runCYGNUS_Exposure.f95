@@ -29,14 +29,14 @@ program runCYGNUS_Exposure
 	  m_max = 1000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
 	  ns = 1000 ! resolution of cs scan							!
-	  sigma_min = 1.0d-49 ! min. expected cs				!
+	  sigma_min = 1.0d-51 ! min. expected cs				!
 	  sigma_max = 1.0d-38 ! max expected cs					!
 	!-----------------------------------------------!
 	!-----------------------------------------------!
 
 	n_ex = 20
-	ex_min = 0.01*3.0*(0.16/1000.0d0) ! Convert m^3-years into ton-years
-	ex_max = 1.0e10*3.0*(0.16/1000.0d0) ! Convert m^3-years into ton-years
+	ex_min = 0.001*6.0*(0.16/1000.0d0) ! Convert m^3-years into ton-years
+	ex_max = 1.0e10*6.0*(0.16/1000.0d0) ! Convert m^3-years into ton-years
 	allocate(ex_vals(n_ex))
 	allocate(DL_He(n_ex))
 	allocate(DL_F(n_ex))
@@ -126,7 +126,7 @@ program runCYGNUS_Exposure
 
 		E_th = 1.8d0
 		nucleus = Helium
-		m = 3.0
+		m = 1000.0
 		call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL_He,Nsig_He,Nbg_He)
 
 		open(unit=1000,file=trim(filename))
