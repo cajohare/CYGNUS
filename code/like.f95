@@ -262,10 +262,10 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
     if (sum(RD_wimp).gt.0.0) then
       do j=1,ns
 
-        sigma_p = sigma_p_vals(j)
+        sigma_p = sigma_p_vals(ns+1-j)
 
         do k = k1,n_ex
-          Exposure = ex_vals(n_ex+1-k)
+          Exposure = ex_vals(k)
           RD_wimp = RD_wimp*Exposure
           RD_bg = RD_bg*Exposure
           N_exp_bg = 0.0d0
@@ -275,7 +275,7 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
           N_tot_bg = sum(N_exp_bg)
 
           !write(*,*) i,j,k,sigma_p,N_tot_bg,sum(RD_wimp*sigma_p)
-          if (sum(RD_wimp*sigma_p).gt.1.0d0) then	! Generally need >0.5 events to see DM
+          if (sum(RD_wimp*sigma_p).gt.0.5d0) then	! Generally need >0.5 events to see DM
             N_exp = N_exp_bg + RD_wimp*sigma_p
             N_obs = N_exp  ! Observed=Expected for Asimov data
             X_in1= (/log10(sigma_p),R_bg/)
@@ -292,13 +292,16 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
               DL(i,j) = 10.0d0**(interp1D((/D_prev,D01/),(/log10(ex_prev),log10(Exposure)/),2,9.0d0))
               write(*,*) 'm = ',m_chi,'|| sigma = ',sigma_p,'|| DL = ',DL(i,j)
               k1 = k-1
+              RD_bg = RD_bg/Exposure
+              RD_wimp = RD_wimp/Exposure
               exit
             end if
             ex_prev = Exposure ! Reset for interpolation
             D_prev = D01
-            RD_bg = RD_bg/Exposure
-            RD_wimp = RD_wimp/Exposure
+            !write(*,*) Exposure,D01
           end if
+          RD_bg = RD_bg/Exposure
+          RD_wimp = RD_wimp/Exposure
         end do
 
 

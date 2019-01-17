@@ -37,16 +37,16 @@ program runNuFloor
 	  nT_bins = 1	 ! Number of time bins					  !
 	  nside = 0  ! Order of pixelation (2,4 or 8)		!
 	!----- Mass range for limits -------------------!
-	  nm = 100 !  Number of mass points							!
-	  m_min = 0.5d0 ! Min mass											!
-	  m_max = 100000.0d0 ! Max mass										!
+	  nm = 300 !  Number of mass points							!
+	  m_min = 0.01d0 ! Min mass											!
+	  m_max = 1000.0d0 ! Max mass										!
 	!----- Cross section range for limits ----------!
-	  ns = 200 ! resolution of cs scan							!
+	  ns = 300 ! resolution of cs scan							!
 	  sigma_min = 1.0d-50 ! min. expected cs				!
-	  sigma_max = 1.0d-43 ! max expected cs					!
+	  sigma_max = 1.0d-42 ! max expected cs					!
 	!--------- Exposure range for limits -----------!
-		n_ex = 200																			!
-		ex_min = 0.001																!
+		n_ex = 400																			!
+		ex_min = 1.0e-10																!
 		ex_max = 1.0e13													!
 	!--------- Exposure range for limits -----------!
 	!	n_Eth = 20																			!
@@ -59,26 +59,27 @@ program runNuFloor
 	allocate(DL(nm,n_ex))
 	m_vals = logspace(m_min,m_max,nm)
 
-	E_th = 10.0
+
+	E_th = 1.0d-3
 	E_max = 200.0d0
 	nucleus = Fluorine
 	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
 	filename = 'nuTest-F.txt'
 	open(unit=1000,file=trim(filename))
-	write(1000,*) 0.0,logspace(ex_min,ex_max,n_ex)
+	write(1000,*) 0.0,logspace(sigma_min,sigma_max,n_ex)
 	do i = 1,nm
 		write(1000,*) m_vals(i),DL(i,:)
 	end do
 	close(1000)
 
 
-	E_th = 1.8
+	E_th = 1.0d-3
 	E_max = 200.0d0
 	nucleus = Helium
-	call GetLimits_MassExposure(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
 	filename = 'nuTest-He.txt'
 	open(unit=1000,file=trim(filename))
-	write(1000,*) 0.0,logspace(ex_min,ex_max,n_ex)
+	write(1000,*) 0.0,logspace(sigma_min,sigma_max,n_ex)
 	do i = 1,nm
 		write(1000,*) m_vals(i),DL(i,:)
 	end do
