@@ -226,7 +226,7 @@ end subroutine
 subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
   integer :: i,j,k,k1,nm,nf,ns,n_ex,si,MAXFUNEVALS,IPRINT,NLOOP,IQUAD,ifault0,ii
 	double precision :: m_min,m_max,ex_min,ex_max,m,sigma_min,sigma_max,m_vals(nm),D_prev,ex_prev
-  double precision :: DL(nm,n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
+  double precision :: DL(nm,ns),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
   double precision,dimension(:),allocatable :: x_in0,x_in1,step0,N_exp,N_exp_bg
   double precision :: D01,L1,L0,SIMP,STOPCR0,var(2)
   write(*,*) 'Nucleus = ',nucleus,'Exposure = ',ex_min,ex_max
