@@ -9,7 +9,7 @@ program runNuFloor
 
 	integer :: jj,ns,nm,readout_selection,loopmin,loopmax,i1,i2,i,n_ex,n_Eth
 	double precision :: m_min,m_max,sigma_min,sigma_max,Vol,Time,ex_min,ex_max
-	double precision,dimension(:),allocatable :: m_vals,ex_vals,Eth_vals
+	double precision,dimension(:),allocatable :: m_vals,ex_vals,Eth_vals,DL_ex
 	double precision,dimension(:,:),allocatable :: DL
 	double precision :: Eth_max,Eth_min,EB8
 	character(len=100) :: filename
@@ -41,6 +41,7 @@ program runNuFloor
 	allocate(m_vals(nm))
 	allocate(ex_vals(n_ex))
 	allocate(DL(nm,ns))
+	allocate(DL_ex(n_ex))
 
 	nucleus = Fluorine
 
@@ -53,15 +54,21 @@ program runNuFloor
 	sigma_max = 1.0d-43
 	ex_min = 1.0e-5
 	ex_max = 1.0e5
-	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+	call GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL_ex)
+	filename = 'nuTest-F-Low-Ex.txt'
 	m_vals = logspace(m_min,m_max,nm)
-	filename = 'nuTest-F-Low.txt'
 	open(unit=1000,file=trim(filename))
-	write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
-	do i = 1,nm
-		write(1000,*) m_vals(i),DL(i,:)
-	end do
-	close(1000)
+	write(1000,*) m_vals
+	write(1000,*) DL_ex
+	! call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+	! m_vals = logspace(m_min,m_max,nm)
+	! filename = 'nuTest-F-Low.txt'
+	! open(unit=1000,file=trim(filename))
+	! write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
+	! do i = 1,nm
+	! 	write(1000,*) m_vals(i),DL(i,:)
+	! end do
+	! close(1000)
 
 
 	! High mass Fluorine
@@ -74,16 +81,22 @@ program runNuFloor
 	sigma_max = 1.0d-45
 	ex_min = 0.1
 	ex_max = 1.0e10
-	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+	call GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL_ex)
+	filename = 'nuTest-F-High-Ex.txt'
 	m_vals = logspace(m_min,m_max,nm)
-	filename = 'nuTest-F-High.txt'
 	open(unit=1000,file=trim(filename))
-	write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
-	do i = 1,nm
-		write(1000,*) m_vals(i),DL(i,:)
-	end do
-	close(1000)
-	call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
+	write(1000,*) m_vals
+	write(1000,*) DL_ex
+	! call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+	! m_vals = logspace(m_min,m_max,nm)
+	! filename = 'nuTest-F-High.txt'
+	! open(unit=1000,file=trim(filename))
+	! write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
+	! do i = 1,nm
+	! 	write(1000,*) m_vals(i),DL(i,:)
+	! end do
+	! close(1000)
+	! call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 
 
 

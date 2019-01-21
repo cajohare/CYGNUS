@@ -140,10 +140,10 @@ end subroutine
 
 
 !---------------------------------Abitrary limit-------------------------------!
-subroutine GetLimits_MassExposure(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+subroutine GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL_ex)
   integer :: i,j,k,k1,nm,nf,ns,n_ex,si,MAXFUNEVALS,IPRINT,NLOOP,IQUAD,ifault0,ii
-	double precision :: m_min,m_max,ex_min,ex_max,m,sigma_min,sigma_max,m_vals(nm),D_prev,s_prev
-  double precision :: DL(nm,n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
+	double precision :: m_min,m_max,ex_min,ex_max,m,sigma_min,sigma_max,m_vals(nm),D_prev,s_prev,grad_ex,grad_ex_prev
+  double precision :: DL_ex(n_ex),DL(nm,n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
   double precision,dimension(:),allocatable :: x_in0,x_in1,step0,N_exp,N_exp_bg
   double precision :: D01,L1,L0,SIMP,STOPCR0,var(2)
   write(*,*) 'Nucleus = ',nucleus,'Exposure = ',ex_min,ex_max
@@ -170,6 +170,7 @@ subroutine GetLimits_MassExposure(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,si
   m_vals = logspace(m_min,m_max,nm)
   sigma_p_vals = logspace(sigma_min,sigma_max,ns)
   DL = 0.0
+  DL_ex = 0.0
 
   do i = 1,nm
     k1 = 1
@@ -177,6 +178,7 @@ subroutine GetLimits_MassExposure(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,si
     Exposure = 1.0
     call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
     if (sum(RD_wimp).gt.0.0) then
+      grad_ex_prev = 1.0
       do j=1,n_ex
 
         Exposure = ex_vals(n_ex+1-j)
@@ -217,6 +219,15 @@ subroutine GetLimits_MassExposure(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,si
 
         RD_bg = RD_bg/Exposure
         RD_wimp = RD_wimp/Exposure
+
+        if (j.gt.1) then
+          grad_ex = DL(i,j)-DL(i,j-1)
+          if (grad_ex.gt.grad_ex_prev) then
+            DL_ex(i) = DL(i,j)
+            exit
+          end if
+        end if
+
       end do
     end if
   end do
@@ -310,6 +321,10 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
   end do
   call UnAllocate ! Reset
 end subroutine
+
+
+
+
 
 
 
