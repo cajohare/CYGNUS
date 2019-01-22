@@ -143,7 +143,7 @@ end subroutine
 subroutine GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL_ex)
   integer :: i,j,k,k1,nm,nf,ns,n_ex,si,MAXFUNEVALS,IPRINT,NLOOP,IQUAD,ifault0,ii
 	double precision :: m_min,m_max,ex_min,ex_max,m,sigma_min,sigma_max,m_vals(nm),D_prev,s_prev,grad_ex,grad_ex_prev
-  double precision :: DL_ex(n_ex),DL(nm,n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
+  double precision :: DL_ex(nm),DL(nm,n_ex),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
   double precision,dimension(:),allocatable :: x_in0,x_in1,step0,N_exp,N_exp_bg
   double precision :: D01,L1,L0,SIMP,STOPCR0,var(2)
   write(*,*) 'Nucleus = ',nucleus,'Exposure = ',ex_min,ex_max
@@ -154,7 +154,7 @@ subroutine GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_mi
   NLOOP = 1 ! Number of iterations before looping
   IQUAD = 0 ! Can't remeber what this does
   SIMP = 0.1 ! Nor this
-	STOPCR0 = 1.0d-12 ! Accuracy of max likelihood
+	STOPCR0 = 1.0d-10 ! Accuracy of max likelihood
 
   Exposure = 1.0
   call GetNuFluxes ! Load Neutrinos
@@ -178,10 +178,10 @@ subroutine GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_mi
     Exposure = 1.0
     call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
     if (sum(RD_wimp).gt.0.0) then
-      grad_ex_prev = 1.0
+      grad_ex_prev = -1000.0
       do j=1,n_ex
 
-        Exposure = ex_vals(n_ex+1-j)
+        Exposure = ex_vals(j)
         RD_wimp = RD_wimp*Exposure
         RD_bg = RD_bg*Exposure
         N_exp_bg = 0.0d0
@@ -190,7 +190,7 @@ subroutine GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_mi
         end do
         N_tot_bg = sum(N_exp_bg)
 
-        do k = k1,ns
+        do k = 1,ns
           sigma_p = sigma_p_vals(k)
           !write(*,*) i,j,k,sigma_p,N_tot_bg,sum(RD_wimp*sigma_p)
           if (sum(RD_wimp*sigma_p).gt.1.0d0) then	! Generally need >0.5 events to see DM
@@ -222,10 +222,12 @@ subroutine GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_mi
 
         if (j.gt.1) then
           grad_ex = DL(i,j)-DL(i,j-1)
-          if (grad_ex.gt.grad_ex_prev) then
+          write(*,*) DL(i,j),DL(i,j-1),grad_ex,grad_ex_prev,j
+          if (grad_ex.lt.grad_ex_prev) then
             DL_ex(i) = DL(i,j)
             exit
           end if
+          grad_ex_prev = grad_ex
         end if
 
       end do
@@ -234,10 +236,10 @@ subroutine GetLimits_ExposureGradient(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_mi
   call UnAllocate ! Reset
 end subroutine
 
-subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL)
+subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
   integer :: i,j,k,k1,nm,nf,ns,n_ex,si,MAXFUNEVALS,IPRINT,NLOOP,IQUAD,ifault0,ii
 	double precision :: m_min,m_max,ex_min,ex_max,m,sigma_min,sigma_max,m_vals(nm),D_prev,ex_prev
-  double precision :: DL(nm,ns),ex_vals(n_ex),Nsig(n_ex),Nbg(n_ex),sigma_p_vals(ns),N_tot_bg
+  double precision :: DL(nm,ns),ex_vals(n_ex),Nsig(nm,ns),Nbg(nm,ns),sigma_p_vals(ns),N_tot_bg
   double precision,dimension(:),allocatable :: x_in0,x_in1,step0,N_exp,N_exp_bg
   double precision :: D01,L1,L0,SIMP,STOPCR0,var(2)
   write(*,*) 'Nucleus = ',nucleus,'Exposure = ',ex_min,ex_max
@@ -248,7 +250,7 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
   NLOOP = 1 ! Number of iterations before looping
   IQUAD = 0 ! Can't remeber what this does
   SIMP = 0.1 ! Nor this
-	STOPCR0 = 1.0d-12 ! Accuracy of max likelihood
+	STOPCR0 = 1.0d-8 ! Accuracy of max likelihood
 
   Exposure = 1.0
   call GetNuFluxes ! Load Neutrinos
@@ -263,13 +265,15 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
   ex_vals = logspace(ex_min,ex_max,n_ex)
   m_vals = logspace(m_min,m_max,nm)
   sigma_p_vals = logspace(sigma_min,sigma_max,ns)
-  DL = 0.0
-
+  DL = 0.0d0
+  Nsig = 0.0d0
+  Nbg = 0.0d0
   do i = 1,nm
     k1 = 1
     m_chi = m_vals(i)
     Exposure = 1.0
     call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
+
     if (sum(RD_wimp).gt.0.0) then
       do j=1,ns
 
@@ -300,9 +304,16 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
             D01 = -2.0*(L1-L0)
             if (D01.ge.9.0d0) then ! Median 3sigma detection -> D = 9
               ! Do interpolation to find discovery limit cross section
-              DL(i,j) = 10.0d0**(interp1D((/D_prev,D01/),(/log10(ex_prev),log10(Exposure)/),2,9.0d0))
+              if (k.eq.1) then
+                DL(i,j) = ex_min
+                k1 = 1
+              else
+                DL(i,j) = 10.0d0**(interp1D((/D_prev,D01/),(/log10(ex_prev),log10(Exposure)/),2,9.0d0))
+                k1 = k-1
+              end if
+              Nsig(i,j) = sum(RD_wimp*sigma_p)
+              Nbg(i,j) = N_tot_bg
               write(*,*) 'm = ',m_chi,'|| sigma = ',sigma_p,'|| DL = ',DL(i,j)
-              k1 = k-1
               RD_bg = RD_bg/Exposure
               RD_wimp = RD_wimp/Exposure
               exit
@@ -315,7 +326,10 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
           RD_wimp = RD_wimp/Exposure
         end do
 
-
+        if ((k-1).eq.n_ex) then
+          DL(i,j:ns) = ex_max
+          exit
+        end if
       end do
     end if
   end do
