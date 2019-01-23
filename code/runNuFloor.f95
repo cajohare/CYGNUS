@@ -37,7 +37,7 @@ program runNuFloor
 
 	nm = 300
 	ns = 300
-	n_ex = 1500
+	n_ex = 1000
 	allocate(m_vals(nm))
 	allocate(ex_vals(n_ex))
 	allocate(DL(nm,ns))
@@ -47,10 +47,9 @@ program runNuFloor
 
 	nucleus = Fluorine
 
-	! Low mass Fluorine
-	E_th = 1.0d-5
+	E_th = 1.0d-3
 	E_max = 200.0d0
-	m_min = 0.01
+	m_min = 0.1
 	m_max = 1.0d4
 	sigma_min = 1.0d-50
 	sigma_max = 1.0d-43
@@ -58,12 +57,8 @@ program runNuFloor
 	ex_max = 1.0e15
 	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
 	m_vals = logspace(m_min,m_max,nm)
-	filename1 = 'nuTest-F-Low.txt'
-	filename2 = 'nuTest-F-Low-Nsig.txt'
-	filename3 = 'nuTest-F-Low-Nbg.txt'
+	filename1 = 'nuTest-F.txt'
 	open(unit=1000,file=trim(filename1))
-	open(unit=2000,file=trim(filename2))
-	open(unit=3000,file=trim(filename3))
 	write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
 	do i = 1,nm
 		write(1000,*) m_vals(i),DL(i,:)
@@ -71,9 +66,24 @@ program runNuFloor
 		write(3000,*) Nbg(i,:)
 	end do
 	close(1000)
-	close(2000)
-	close(3000)
 	call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
+
+
+	nucleus = Helium
+	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
+	m_vals = logspace(m_min,m_max,nm)
+	filename1 = 'nuTest-He.txt'
+	open(unit=1000,file=trim(filename1))
+	write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
+	do i = 1,nm
+		write(1000,*) m_vals(i),DL(i,:)
+		write(2000,*) Nsig(i,:)
+		write(3000,*) Nbg(i,:)
+	end do
+	close(1000)
+	call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
+
+
 
 stop
 
@@ -105,19 +115,4 @@ stop
 	! call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 
 
-
-stop
-	E_th = 1.0d-3
-	E_max = 200.0d0
-	nucleus = Helium
-	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
-	filename1 = 'nuTest-He.txt'
-	open(unit=1000,file=trim(filename1))
-	write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
-	do i = 1,nm
-		write(1000,*) m_vals(i),DL(i,:)
-	end do
-	close(1000)
-
-	call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 end program runNuFloor

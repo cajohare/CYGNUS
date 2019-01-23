@@ -250,7 +250,7 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
   NLOOP = 1 ! Number of iterations before looping
   IQUAD = 0 ! Can't remeber what this does
   SIMP = 0.1 ! Nor this
-	STOPCR0 = 1.0d-8 ! Accuracy of max likelihood
+	STOPCR0 = 1.0d-12 ! Accuracy of max likelihood
 
   Exposure = 1.0
   call GetNuFluxes ! Load Neutrinos
@@ -294,12 +294,18 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
             N_exp = N_exp_bg + RD_wimp*sigma_p
             N_obs = N_exp  ! Observed=Expected for Asimov data
             X_in1= (/log10(sigma_p),R_bg/)
-            call llhood1(X_in1,L1) ! Asimov data maximises likelihood at correct value
-
             X_in0 = R_bg
             step0 = R_bg_err*R_bg
-            call llhood0(X_in0,L0)
-            call MINIM(X_in0,step0,n_bg,L0,MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,IQUAD,SIMP,VAR,llhood0,IFAULT0)
+
+            if (sum(N_obs).gt.1.0d6) then
+              call llhood1_bigN(X_in1,L1) ! Asimov data maximises likelihood at correct value
+              call llhood0_bigN(X_in0,L0)
+              call MINIM(X_in0,step0,n_bg,L0,MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,IQUAD,SIMP,VAR,llhood0_bigN,IFAULT0)
+            else
+              call llhood1(X_in1,L1) ! Asimov data maximises likelihood at correct value
+              call llhood0(X_in0,L0)
+              call MINIM(X_in0,step0,n_bg,L0,MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,IQUAD,SIMP,VAR,llhood0,IFAULT0)
+            end if
 
             D01 = -2.0*(L1-L0)
             if (D01.ge.9.0d0) then ! Median 3sigma detection -> D = 9
@@ -313,7 +319,7 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
               end if
               Nsig(i,j) = sum(RD_wimp*sigma_p)
               Nbg(i,j) = N_tot_bg
-              write(*,*) 'm = ',m_chi,'|| sigma = ',sigma_p,'|| DL = ',DL(i,j)
+              write(*,*) 'm = ',m_chi,'|| sigma = ',sigma_p,'|| DL = ',DL(i,j),'|| N_obs = ',sum(N_obs)
               RD_bg = RD_bg/Exposure
               RD_wimp = RD_wimp/Exposure
               exit
@@ -331,6 +337,12 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
           exit
         end if
       end do
+
+      !open(unit=1000,file='test2.dat')
+      !write(1000,*) DL(i,:)
+      !write(1000,*) sigma_p_vals
+      !close(1000)
+      !stop
     end if
   end do
   call UnAllocate ! Reset
@@ -488,6 +500,42 @@ function lnGF(Rob,Rex,Rer) ! SUM OF LOG(GAUSSIAN PDF)
 	lnGF = sum(-1.0d0*log(Rer)-0.5d0*log(2.0d0*pi)&
 	       	 -(Rob-Rex)**2.0d0/(2.0d0*Rer**2.0d0))
 end function
+
+
+!---------------------------------SIGNAL+BACKGROUND----------------------------!
+subroutine llhood1_bigN(X,  LL)
+   ! input: Parameters X = (log10(sigma_p),background rates(1:n_bg))
+ ! output: -1*LogLikelihood = LL
+ double precision :: X(n_bg+1),LL,N_exp0(nTot_bins),N_exp1(nTot_bins)
+ integer :: i
+ ! Background events
+ N_exp0 = 0.0d0 ! Expected number of events
+ do i = 1,n_bg
+   N_exp0 = N_exp0 + X(i+1)*RD_bg(:,i) ! Sum over backgrounds
+ end do
+
+ ! Signal events
+ N_exp1 = N_exp0 + RD_wimp*(10.0d0**X(1)) ! Add signal events sig
+
+ LL = 0.5*sum((N_obs-N_exp1)**2.0/N_exp1)
+ LL = LL-lnGF(X(2:n_bg+1),R_bg,R_bg_err*R_bg)
+
+end subroutine llhood1_bigN
+
+!---------------------------------SIGNAL+BACKGROUND----------------------------!
+subroutine llhood0_bigN(X,  LL)
+   ! input: Parameters X = background rates(1:n_bg)
+ ! output: -1*LogLikelihood = LL
+   double precision :: X(n_bg),LL,N_exp0(nTot_bins)
+ integer :: i
+ N_exp0 = 0.0d0 ! Expected number of events
+ do i = 1,n_bg
+   N_exp0 = N_exp0 + X(i)*RD_bg(:,i) ! Sum over backgrouds
+ end do
+
+ LL = -1.0*(-0.5*sum((N_obs-N_exp0)**2.0/N_exp0)+lnGF(X,R_bg,R_bg_err*R_bg))
+end subroutine llhood0_bigN
+
 
 
 
