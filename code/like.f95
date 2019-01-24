@@ -247,7 +247,7 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
   write(*,*) '----------------------------------------------------'
   MAXFUNEVALS = 10000 ! Maximum function evaluations
   IPRINT = -1 ! Print results from minimisaition
-  NLOOP = 1 ! Number of iterations before looping
+  NLOOP = 2 ! Number of iterations before looping
   IQUAD = 0 ! Can't remeber what this does
   SIMP = 0.1 ! Nor this
 	STOPCR0 = 1.0d-12 ! Accuracy of max likelihood
@@ -297,10 +297,10 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
             X_in0 = R_bg
             step0 = R_bg_err*R_bg
 
-            if (sum(N_obs).gt.1.0d6) then
-              call llhood1_bigN(X_in1,L1) ! Asimov data maximises likelihood at correct value
-              call llhood0_bigN(X_in0,L0)
-              call MINIM(X_in0,step0,n_bg,L0,MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,IQUAD,SIMP,VAR,llhood0_bigN,IFAULT0)
+            if (sum(RD_wimp*sigma_p).gt.1.0d3) then
+             call llhood1_bigN(X_in1,L1) ! Asimov data maximises likelihood at correct value
+             call llhood0_bigN(X_in0,L0)
+             call MINIM(X_in0,step0,n_bg,L0,MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,IQUAD,SIMP,VAR,llhood0_bigN,IFAULT0)
             else
               call llhood1(X_in1,L1) ! Asimov data maximises likelihood at correct value
               call llhood0(X_in0,L0)
@@ -319,7 +319,7 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
               end if
               Nsig(i,j) = sum(RD_wimp*sigma_p)
               Nbg(i,j) = N_tot_bg
-              write(*,*) 'm = ',m_chi,'|| sigma = ',sigma_p,'|| DL = ',DL(i,j),'|| N_obs = ',sum(N_obs)
+              write(*,*) 'm = ',m_chi,'|| sigma = ',sigma_p,'|| DL = ',DL(i,j),'|| N_obs = ',sum(N_obs),L0,L1
               RD_bg = RD_bg/Exposure
               RD_wimp = RD_wimp/Exposure
               exit
@@ -410,15 +410,15 @@ subroutine DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 				N_exp = N_exp_bg + RD_wimp*sigma_p
 				N_obs = N_exp  ! Observed=Expected for Asimov data
 
-			    !------ Signal + Background ------!
+			  !------ Signal + Background ------!
 				! X_in = (log10(sigma_p), background rates)
-			   X_in1(1) = log10(sigma_p)
+			  X_in1(1) = log10(sigma_p)
 				X_in1(2:n_bg+1) = R_bg
 			    call llhood1(X_in1,L1) ! Asimov data maximises likelihood at correct value
 
-			    !------ Background only ------!
-			    X_in0 = R_bg
-			   step0 = R_bg_err*R_bg
+			  !------ Background only ------!
+			  X_in0 = R_bg
+			  step0 = R_bg_err*R_bg
 				call llhood0(X_in0,L0)
 			    call MINIM(X_in0,step0,n_bg,L0,&
 				  MAXFUNEVALS,IPRINT,STOPCR0,NLOOP,&
@@ -502,7 +502,7 @@ function lnGF(Rob,Rex,Rer) ! SUM OF LOG(GAUSSIAN PDF)
 end function
 
 
-!---------------------------------SIGNAL+BACKGROUND----------------------------!
+!---------------------------------Large N limit----------------------------!
 subroutine llhood1_bigN(X,  LL)
    ! input: Parameters X = (log10(sigma_p),background rates(1:n_bg))
  ! output: -1*LogLikelihood = LL
@@ -522,7 +522,6 @@ subroutine llhood1_bigN(X,  LL)
 
 end subroutine llhood1_bigN
 
-!---------------------------------SIGNAL+BACKGROUND----------------------------!
 subroutine llhood0_bigN(X,  LL)
    ! input: Parameters X = background rates(1:n_bg)
  ! output: -1*LogLikelihood = LL
@@ -537,6 +536,38 @@ subroutine llhood0_bigN(X,  LL)
 end subroutine llhood0_bigN
 
 
+!---------------------------------Large N limit----------------------------!
+subroutine llhood1_hugeN(X,  LL)
+   ! input: Parameters X = (log10(sigma_p),background rates(1:n_bg))
+ ! output: -1*LogLikelihood = LL
+ double precision :: X(n_bg+1),LL,N_exp0(nTot_bins),N_exp1(nTot_bins)
+ integer :: i
+ ! Background events
+ N_exp0 = 0.0d0 ! Expected number of events
+ do i = 1,n_bg
+   N_exp0 = N_exp0 + X(i+1)*RD_bg(:,i) ! Sum over backgrounds
+ end do
+
+ ! Signal events
+ N_exp1 = N_exp0 + RD_wimp*(10.0d0**X(1)) ! Add signal events sig
+
+ LL = 0.5*sum((N_obs-N_exp1)**2.0/N_exp1)
+ LL = LL-lnGF(X(2:n_bg+1),R_bg,R_bg_err*R_bg)
+
+end subroutine llhood1_hugeN
+
+subroutine llhood0_hugeN(X,  LL)
+   ! input: Parameters X = background rates(1:n_bg)
+ ! output: -1*LogLikelihood = LL
+   double precision :: X(n_bg),LL,N_exp0(nTot_bins)
+ integer :: i
+ N_exp0 = 0.0d0 ! Expected number of events
+ do i = 1,n_bg
+   N_exp0 = N_exp0 + 10.0**X(i)*RD_bg(:,i) ! Sum over backgrouds
+ end do
+
+ LL = -1.0*(-0.5*sum((N_obs-N_exp0)**2.0/N_exp0)+lnGF(10.0**X,R_bg,R_bg_err*R_bg))
+end subroutine llhood0_hugeN
 
 
 end module like

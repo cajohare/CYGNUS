@@ -31,13 +31,13 @@ program runNuFloor
 	call LoadReadout(9,	fn_end)
 
 	!-----Set binning ------------------------------!
-	nE_bins = 20 ! Number of energy bins		  		!
+	nE_bins = 200 ! Number of energy bins		  		!
 	nT_bins = 1	 ! Number of time bins					  !
 	nside = 0  ! Order of pixelation (2,4 or 8)		!
 
 	nm = 300
 	ns = 300
-	n_ex = 1000
+	n_ex = 2000
 	allocate(m_vals(nm))
 	allocate(ex_vals(n_ex))
 	allocate(DL(nm,ns))
@@ -54,7 +54,7 @@ program runNuFloor
 	sigma_min = 1.0d-50
 	sigma_max = 1.0d-43
 	ex_min = 1.0e-3
-	ex_max = 1.0e15
+	ex_max = 1.0e19
 	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
 	m_vals = logspace(m_min,m_max,nm)
 	filename1 = 'nuTest-F.txt'
@@ -70,6 +70,8 @@ program runNuFloor
 
 
 	nucleus = Helium
+	sigma_min = 1.0d-50
+	sigma_max = 1.0d-42
 	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
 	m_vals = logspace(m_min,m_max,nm)
 	filename1 = 'nuTest-He.txt'
