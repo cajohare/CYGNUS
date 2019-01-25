@@ -250,7 +250,7 @@ subroutine GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,s
   NLOOP = 2 ! Number of iterations before looping
   IQUAD = 0 ! Can't remeber what this does
   SIMP = 0.1 ! Nor this
-	STOPCR0 = 1.0d-12 ! Accuracy of max likelihood
+	STOPCR0 = 1.0d-6 ! Accuracy of max likelihood
 
   Exposure = 1.0
   call GetNuFluxes ! Load Neutrinos

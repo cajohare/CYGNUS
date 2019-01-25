@@ -37,7 +37,7 @@ program runNuFloor
 
 	nm = 300
 	ns = 300
-	n_ex = 2000
+	n_ex = 1000
 	allocate(m_vals(nm))
 	allocate(ex_vals(n_ex))
 	allocate(DL(nm,ns))
@@ -45,7 +45,7 @@ program runNuFloor
 	allocate(Nsig(nm,ns))
 	allocate(Nbg(nm,ns))
 
-	nucleus = Fluorine
+	nucleus = Argon40
 
 	E_th = 1.0d-3
 	E_max = 200.0d0
@@ -57,7 +57,7 @@ program runNuFloor
 	ex_max = 1.0e19
 	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
 	m_vals = logspace(m_min,m_max,nm)
-	filename1 = 'nuTest-F.txt'
+	filename1 = 'nuTest-Ar.txt'
 	open(unit=1000,file=trim(filename1))
 	write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
 	do i = 1,nm
@@ -67,14 +67,14 @@ program runNuFloor
 	end do
 	close(1000)
 	call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
+stop
 
-
-	nucleus = Helium
+	nucleus = Germanium74
 	sigma_min = 1.0d-50
-	sigma_max = 1.0d-42
+	sigma_max = 1.0d-43
 	call GetLimits_MassExposure2(m_min,m_max,nm,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,DL,Nsig,Nbg)
 	m_vals = logspace(m_min,m_max,nm)
-	filename1 = 'nuTest-He.txt'
+	filename1 = 'nuTest-Ge.txt'
 	open(unit=1000,file=trim(filename1))
 	write(1000,*) 0.0,logspace(sigma_min,sigma_max,ns)
 	do i = 1,nm
