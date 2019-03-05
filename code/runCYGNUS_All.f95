@@ -36,7 +36,7 @@ program runCYGNUS_All
 
 
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	Vol = 1000.0
+	Vol = 10000.0
 	Time = 6.0d0
 	VolTime = Vol*Time
 	energy_on = .true. ! energy info is currently turned on for best limits
@@ -106,6 +106,8 @@ program runCYGNUS_All
 			filename = '../data/CYGNUS1000-'//trim(fn_end)//'.txt'
 		elseif (Vol.eq.100000.0) then
 			filename = '../data/CYGNUS100k-'//trim(fn_end)//'.txt'
+		elseif (Vol.eq.10000.0) then
+			filename = '../data/CYGNUS10k-'//trim(fn_end)//'.txt'
 		end if
 
 		call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
