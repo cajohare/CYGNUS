@@ -85,6 +85,27 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 end subroutine
 
 !---------------------------------Abitrary limit-------------------------------!
+subroutine NwimpEvents(Nwimp,m_min,m_max,nm,m_vals,DL)
+	! Limits from m_chi = m_min to m_max, with nm values
+	! Cross section scan from sigma_min to sigma_max with ns values
+	! DL = Discovery Limit
+	double precision :: Nwimp,m_min,m_max,sigma_min,sigma_max,m_vals(nm),DL(nm)
+	integer :: i,nm,nf,ns
+
+    call GetNuFluxes ! Load Neutrinos
+    call PreAllocate ! Allocate data size (readout dependent)
+    call BackgroundRecoilDistribution ! Load Background	model
+    call SHM ! Load halo model
+    DL = 0.0
+    m_vals = logspace(m_min,m_max,nm)
+    do i = 1,nm
+      m_chi = m_vals(i)
+      call WIMPRecoilDistribution	! Call WIMP recoil distribution for each new mass
+      DL(i) = (Nwimp*1.0)/sum(RD_wimp)
+    end do
+    call UnAllocate ! Reset
+end subroutine
+
 subroutine GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
 	! Limits from m_chi = m_min to m_max, with nm values
 	! Cross section scan from sigma_min to sigma_max with ns values
@@ -101,6 +122,74 @@ subroutine GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
     call DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
     call UnAllocate ! Reset
 end subroutine
+
+subroutine GetNuFloor_Simple(N_nu_events,m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
+	double precision :: N_nu_events,N_tot_bg,EB8,m_min,m_max,sigma_min,sigma_max,m_vals(nm)
+  double precision :: DL_low(nm),DL_high(nm),DL(nm)
+	integer :: i,nm,nf,ns,si
+  character(len=100) :: fn_end
+
+
+  ! Set all directional stuff to something, not relevant for this file
+	lat = Boulby(1)
+	long = Boulby(2)
+	energy_on = .true. ! energy info is currently turned on for best limits
+	searchmode = .false.
+	angres_on = .false.
+	efficiency_on = .false.
+	headtail_on = .false.
+	energyres_on = .false.
+	call LoadReadout(9,	fn_end)
+  E_max = 200.0
+
+  ! LOW NU FLOOR
+  E_th = 1.0d-5
+  Exposure = 1.0
+  call GetNuFluxes ! Load Neutrinos
+  call PreAllocate ! Allocate data size (readout dependent)
+  call BackgroundRecoilDistribution ! Load Background	model
+  N_tot_bg = 0.0d0
+  do si = 1,n_bg
+    N_tot_bg = N_tot_bg + sum(R_bg(si)*RD_bg(:,si))
+  end do
+  Exposure = N_nu_events/N_tot_bg ! Choose right exposure for N_nu events
+  RD_bg = RD_bg*Exposure
+  call SHM ! Load halo model
+  call DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL_low)
+  call UnAllocate ! Reset
+
+
+  ! HIGH NU FLOOR
+  E_th = MaxNuRecoilEnergy(6)+0.1d0 ! For there to be no solar nu
+  Exposure = 1.0
+  call GetNuFluxes ! Load Neutrinos
+  call PreAllocate ! Allocate data size (readout dependent)
+  call BackgroundRecoilDistribution ! Load Background	model
+  N_tot_bg = 0.0d0
+  do si = 1,n_bg
+    N_tot_bg = N_tot_bg + sum(R_bg(si)*RD_bg(:,si))
+  end do
+  Exposure = N_nu_events/N_tot_bg
+  RD_bg = RD_bg*Exposure
+  call SHM ! Load halo model
+  call DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL_high)
+  call UnAllocate ! Reset
+
+  where (DL_low.eq.0.0)
+    Dl_low = 100.0
+  end where
+
+  where (DL_high.eq.0.0)
+    DL_high = 100.0
+  end where
+
+  do i = 1,nm
+      DL(i) = min(DL_high(i),DL_low(i))
+  end do
+
+end subroutine
+
+
 
 !---------------------------------Abitrary limit-------------------------------!
 subroutine GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL,Nsig,Nbg)

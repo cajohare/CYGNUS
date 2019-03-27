@@ -151,21 +151,21 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 	    ! Solar neutrinos (set each pixel to energy only spectrum/npixels*ntimes)
 	    dpix = 4*pi/(npix*1.0d0)
 	    do si = 1,n_nu-2
-			ii = 1
-			do i = 1,nT_bins
-			    do k = 1,npix
-		 	       fE_r1 =  eff_HT(1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
-		 		   			(1.0-eff_HT(1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
-					do j = 1,nE_bins
-	 		 	       fE_r2 =  eff_HT(j+1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
-	 		 		   			(1.0-eff_HT(j+1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
-						RD(ii,si) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
-						fE_r1 = fE_r2
-						ii = ii+1
-					end do
-				end do
-			end do
-		end do
+  			ii = 1
+  			do i = 1,nT_bins
+  			    do k = 1,npix
+  		 	       fE_r1 =  eff_HT(1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
+  		 		   			(1.0-eff_HT(1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
+    					do j = 1,nE_bins
+    	 		 	       fE_r2 =  eff_HT(j+1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
+    	 		 		   			(1.0-eff_HT(j+1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
+    						RD(ii,si) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
+    						fE_r1 = fE_r2
+    						ii = ii+1
+    					end do
+  				  end do
+  			end do
+		  end do
 
 	    ! Isotropic neutrinos (set each pixel to energy only spectrum/npixels*ntimes)
 	    do si = (n_nu-1),(n_nu) ! last two background are always isotropic (DSNB+Atm)
@@ -357,10 +357,15 @@ function NeutrinoRecoilSpectrum_Solar(E3,tbin,E_nu,Flux_in) result(dR)
 	m_N_GeV = 0.93141941*(N+Z)
 	m_N_keV = m_N_GeV*1.0e6
 	m_N_keV = 0.9315*1.0d6*(N+Z) ! keV
-	E_r_max = 2*m_N_keV*(1000.0*E_nu(nn))**2.0/(m_N_keV+1000.0*E_nu(nn))**2.0
+
+  if (Flux(2).gt.0.0) then
+	   E_r_max = 2*m_N_keV*(1000.0*E_nu(nn))**2.0/(m_N_keV+1000.0*E_nu(nn))**2.0
+  else
+     E_r_max = 2*m_N_keV*(1000.0*E_nu(1))**2.0/(m_N_keV+1000.0*E_nu(1))**2.0
+  end if
+
 	costh = sum(-(x_sun*x_r)) ! Angle between sun and recoil
 	Eps = 0.0
-
 	if (E_r.le.E_r_max) then ! recoil energy is permitted
 	  E_nu_min = sqrt(m_N_keV*E_r/2.0)	! Min nu energy to create
 	  if (Flux(2).gt.0.0d0)	 then
