@@ -86,8 +86,8 @@ program runCYGNUS_thresholds
 	E_th_F_edisc = 8.0
 	E_th_He_edisc = 8.0
 
-	E_th_F_predrift = 0.1
-	E_th_He_predrift = 0.1
+	E_th_F_predrift = 8.0
+	E_th_He_predrift = 8.0
 
 	m1 = 2.0
 	m2 = 10.0
@@ -105,6 +105,9 @@ program runCYGNUS_thresholds
 	energyres_on = .false.
 	searchmode = .false.
 	call LoadReadout(readout,	fn_end)
+	
+	
+
 
 
 	write(*,*) '----------------------------------------------------'
@@ -130,7 +133,7 @@ program runCYGNUS_thresholds
 	close(123)
 	write(*,*) 'writing to: ',trim(filename)
 	write(*,*) '----------------------------------------------------'
-
+	
 
 	write(*,*) '----------------------------------------------------'
 	filename = '../data/CYGNUS10k-Exposure-predrift.txt'
@@ -170,16 +173,16 @@ program runCYGNUS_thresholds
 
 
 	! NON-DIRECTIONAL
-	nside = 0
-	readout = 2
-	energy_on = .true. ! energy info is currently turned on for best limits
-	angres_on = .true.
-	efficiency_on = .true.
-	headtail_on = .true.
-	energyres_on = .false.
-	searchmode = .false.
-	call LoadReadout(readout,	fn_end)
-
+! 	nside = 0
+! 	readout = 2
+! 	energy_on = .true. ! energy info is currently turned on for best limits
+! 	angres_on = .true.
+! 	efficiency_on = .true.
+! 	headtail_on = .true.
+! 	energyres_on = .false.
+! 	searchmode = .false.
+! 	call LoadReadout(readout,	fn_end)
+	efficiency_on = .false.
 
 	write(*,*) '----------------------------------------------------'
 	Exposure = VolTime*(0.16/1000.0d0)
@@ -214,7 +217,7 @@ program runCYGNUS_thresholds
 	nucleus = Helium
 	E_th = E_th_He_edisc
 	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
-  call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLHe_1wimp)
+  	call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLHe_1wimp)
 
 	nucleus = Fluorine
 	E_th = E_th_F_edisc
