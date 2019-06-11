@@ -20,3 +20,4 @@ Contact me to complain about why the code won't work or whatever (ciaran.aj.ohar
 * **plots:** all plots get put here
 * **python:** plotting the outputs of the main code, as well as some copy-able functions in a more useful format
 * **readouts:** readout technology performance data
+ 
