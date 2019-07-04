@@ -17,7 +17,6 @@ program runMollweide
   
   ! EXPT FIXED PARAMS
   E_th = 3.0d0
-  E_max = 100.0d0
   
   energyres_on = .false.
   angres_on = .false.

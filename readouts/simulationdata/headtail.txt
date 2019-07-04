@@ -1,0 +1,14 @@
+FIT: head_tail_summary_helium_gem max= 14.208120900601134 inv_width= 0.03763394317266893 threshold= -136.67101638879643 min= -13.64
+FIT: head_tail_summary_helium_wir max= 0.08149647806031271 inv_width= 0.11422696305447086 threshold= 35.05559152584596 min= 0.5093
+FIT: head_tail_summary_helium_pad max= 0.10133978379797974 inv_width= 0.12230263793108864 threshold= 38.65214702792588 min= 0.4888
+FIT: head_tail_summary_helium_str max= 0.8819897100318862 inv_width= 0.07731566554931575 threshold= 5.056613730501081 min= 0.06475
+FIT: head_tail_summary_helium_pix max= 0.8321271737038712 inv_width= 0.09354485158211684 threshold= 6.441306954811006 min= 0.1554
+FIT: head_tail_summary_helium_3d_noquant max= 0.6549638556853498 inv_width= 0.13329874410599601 threshold= 10.106092894813226 min= 0.3388
+FIT: head_tail_summary_helium_3d_noquant_before max= 1.1764833813524236 inv_width= 0.18147530659309674 threshold= -4.042135943241144 min= -0.1861
+FIT: head_tail_summary_fluorine_gem max= 1.4297776214191582 inv_width= 0.015600252957096952 threshold= 298.16145825356074 min= 0.4788
+FIT: head_tail_summary_fluorine_wir max= 1.803742221598475 inv_width= 0.03277826520991797 threshold= 234.10093613766824 min= 0.506
+FIT: head_tail_summary_fluorine_pad max= 0.09296008606182549 inv_width= 0.010000000099236041 threshold= 66.12623197115386 min= 0.4666
+FIT: head_tail_summary_fluorine_str max= 0.6278216218382838 inv_width= 0.02528404971938307 threshold= -1.2182144805577193 min= 0.1379
+FIT: head_tail_summary_fluorine_pix max= 0.3598115004920871 inv_width= 0.05066686275604524 threshold= 31.688458242447123 min= 0.4338
+FIT: head_tail_summary_fluorine_3d_noquant max= 0.5920897378321903 inv_width= 0.03685432205578629 threshold= 25.998621575288023 min= 0.3278
+FIT: head_tail_summary_fluorine_3d_noquant_before max= 73.47771577516465 inv_width= 0.04013892345393262 threshold= -153.27729445524287 min= -72.5

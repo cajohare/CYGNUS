@@ -48,11 +48,10 @@ program runCYGNUS_thresholds
 	Time = 6.0
 	lat = Boulby(1)
 	long = Boulby(2)
-	E_max = 200.0d0
-
+	
 
 	nside = 4
-	readout = 2
+	readout = 1 ! Predrift
 	energy_on = .true. ! energy info is currently turned on for best limits
 	angres_on = .true.
 	efficiency_on = .true.
@@ -67,11 +66,13 @@ program runCYGNUS_thresholds
 	write(123,*) m_vals
 	do j = 1,n_expts
 		write(*,*) '----------------------------------------------------'
-		Exposure = Vol(j)*Time*(0.16/1000.0d0)
 		
+		Exposure = Vol(j)*Time*(0.16/1000.0d0)*(755.0/740.0)
 		nucleus = Helium
 		E_th = E_th_He(j)
 		call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
+		
+		Exposure = Vol(j)*Time*(0.16/1000.0d0)*(5.0/20.0)
 		nucleus = Fluorine
 		E_th = E_th_F(j)
 		call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)

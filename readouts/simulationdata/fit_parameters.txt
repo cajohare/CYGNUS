@@ -1,0 +1,9 @@
+    efficiency  = TF1("efficiency", "([0]/(1+ TMath::Exp(-[1]*(x-[2]))))", 0, 100)
+    angres      = TF1("angres", "([0]/(1+ TMath::Exp(-[1]*([2]-x)))+[3])", 0, max)
+    headtail    = TF1("headtail", "([0]/(1+ TMath::Exp(-[1]*(x-[2])))+[3])", 0, 100)
+    eres        = TF1("eres", "TMath::Sqrt([0]**2/x**2+[1]**2/x+[2])", 0, 99)
+
+    efficiency.SetParNames("max","inv_width","threshold")
+    angres.SetParNames    ("max","inv_width","threshold","min")
+    headtail.SetParNames  ("max","inv_width","threshold","min")
+    eres.SetParNames      ("a","b","c")

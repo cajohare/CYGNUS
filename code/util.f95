@@ -180,7 +180,6 @@ subroutine interp1(E_full,dRdE_full_s,nbins_full,E_rec,   y)
 	double precision :: x,xa,xb,ya,yb,y,E_rec
 	integer :: ia,ib,iaa(1)
 	iaa = minloc(abs(E_full(:)-E_rec))
-	write(*,*) E_rec,iaa
 	ia = iaa(1)
 	if (abs(E_full(ia+1)-E_rec).gt.abs(E_full(ia-1)-E_rec)) then
 	ia = ia-1

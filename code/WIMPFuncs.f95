@@ -125,35 +125,62 @@ end subroutine WIMPRecoilDistribution
 !-------------------- Directional recoil distribution --------------------------------!
 subroutine WIMPRD_3D(RD,tbin)
 	double precision :: fE_r1,fE_r2,E_r1(3),E_r2(3)
-	double precision :: dpix,RD(nE_bins*npix),eff(nE_bins+1),eff_HT(nE_bins+1)
-	integer :: i,j,k,ii,tbin
+	double precision :: dpix,RD(nE_bins*npix),E_r
+	integer, parameter :: nbins_full=300
+	double precision :: E_lower,E_upper,wid
+	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,R,R_s,eff,eff_HT,sig_E
+	integer :: i,j,k,ii,tbin,ia
+	
 	RD = 0.0
 	dpix = 4*pi/(npix*1.0d0)
-
-	! correct for efficiencies
-	eff = Efficiency(E_bin_edges,nE_bins+1)
-	eff_HT = HeadTailEfficiency(E_bin_edges,nE_bins+1)
+	
+    ! Energy res correction
+    E_lower = 1.0 ! keV <- energy below which the efficiency can't be trusted, or is 0
+    E_upper = 150.0d0 ! keV
+    wid = (log10(E_upper)-log10(E_lower))/(1.0d0*nbins_full-1.0d0)
+    do i = 1,nbins_full
+       E_full(i) = E_lower*10.0d0**((i-1)*wid)
+    end do
+	eff = Efficiency(E_full,nbins_full)
+	sig_E = EnergyResolution(E_full,nbins_full)
+	eff_HT = HeadTailEfficiency(E_full,nbins_full)
 
 	ii = 1
-	do k = 1,npix
-		E_r1 = E_bin_edges(1)*x_pix(k,:)
-		fE_r1 = eff_HT(1)*WIMPRate_Direction(E_r1,tbin)+(1.0-eff_HT(1))*WIMPRate_Direction(-1.0*E_r1,tbin)
-		do j = 1,nE_bins
-			E_r2 = E_bin_edges(j+1)*x_pix(k,:)
-			fE_r2 = eff_HT(j+1)*WIMPRate_Direction(E_r2,tbin)+(1.0-eff_HT(j+1))*WIMPRate_Direction(-1.0*E_r2,tbin)
-
-			RD(ii) = dpix*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
-
-			E_r1 = E_r2
-			fE_r1 = fE_r2
-			ii = ii+1
-		end do
+	do i = 1,nT_bins
+	    do k = 1,npix
+		
+			! Correct for energy resolution
+			do ia = 1,nbins_full
+				dRdE_full(ia) = eff(ia)*(eff_HT(ia)*WIMPRate_Direction(E_full(ia)*x_pix(k,:),tbin) + &
+ 		   			(1.0-eff_HT(1))*WIMPRate_Direction(-1.0d0*E_full(ia)*x_pix(k,:),tbin))
+			end do
+			if ((sum(sig_E).gt.0.0).and.(sum(dRdE_full).gt.0.0)) then
+				do ia = 1,nbins_full
+				   E_r = E_full(ia)
+				   f_s = 1.0d0/(sqrt(2.0d0*pi)*sig_E)&
+				        *exp(-0.5d0*((E_r-E_full)**2.0/sig_E**2.0d0))
+				   dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
+				        *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
+				end do
+			else
+				dRdE_full_s = dRdE_full
+			end if
+	
+			call interp1(E_full,dRdE_full_s,nbins_full,E_bin_edges(1),fE_r1)
+			do j = 1,nE_bins
+				call interp1(E_full,dRdE_full_s,nbins_full,E_bin_edges(j+1),fE_r2)
+				RD(ii) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1 + fE_r2)/2.0
+				fE_r1 = fE_r2
+				ii = ii+1
+			end do
+		  end do
 	end do
+	
 end subroutine WIMPRD_3D
 
 !-------------------- Non-directional recoil distribution-------------------------------------!
 subroutine WIMPRD_Energy(RD,tbin)
-	integer, parameter :: nbins_full=1000
+	integer, parameter :: nbins_full=300
 	double precision :: E_lower,E_upper,wid
 	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,R,R_s,eff_full
 	double precision :: fE_r1,fE_r2,E_r1,E_r2,RD(nE_bins),E_r,eff(nE_bins+1),sig_E(nbins_full)
@@ -161,8 +188,8 @@ subroutine WIMPRD_Energy(RD,tbin)
 	eff = Efficiency(E_bin_edges,nE_bins+1)
 	if (energyres_on) then
 	    ! Correct for energy resolution first
-	    E_lower = 1.0d-8 ! keV
-	    E_upper = 120.0d0 ! keV
+	    E_lower = 1.0 ! keV
+	    E_upper = 150.0d0 ! keV
 	    wid = (log10(E_upper)-log10(E_lower))/(1.0d0*nbins_full-1.0d0)
 	    do i = 1,nbins_full
 	       E_full(i) = E_lower*10.0d0**((i-1)*wid)
@@ -171,20 +198,15 @@ subroutine WIMPRD_Energy(RD,tbin)
 		sig_E = EnergyResolution(E_full,nbins_full)
 
 	    do ia = 1,nbins_full
-			dRdE_full(ia) = WIMPRate_Energy(E_full(ia),tbin)
+			dRdE_full(ia) = eff_full(ia)*WIMPRate_Energy(E_full(ia),tbin)
 	    end do
 	    do ia = 1,nbins_full
 	       E_r = E_full(ia)
-	       f_s = eff_full(ia)*(1.0d0/(sqrt(2.0d0*pi)*sig_E*sqrt(E_full)))&
-	            *exp(-0.5d0*((E_r-E_full)/(sig_E*sqrt(E_full)))**2.0d0)
+	       f_s = 1.0d0/(sqrt(2.0d0*pi)*sig_E)&
+	            *exp(-0.5d0*((E_r-E_full)**2.0/sig_E**2.0d0))
 	       dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
 	            *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
 	    end do
-	    R = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
-	         *0.5d0*(dRdE_full(1:nbins_full-1) + dRdE_full(2:nbins_full)))
-	    R_s = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
-	         *0.5d0*(dRdE_full_s(1:nbins_full-1) + dRdE_full_s(2:nbins_full)))
-	    dRdE_full_s = dRdE_full_s*R/R_s
 
 		! Compute actual RD
 	    RD = 0.0d0
@@ -195,6 +217,7 @@ subroutine WIMPRD_Energy(RD,tbin)
 		do j = 1,nE_bins
 	  		E_r2 = E_bin_edges(j+1)
 		  	!fE_r2 = WIMPRate_Energy(E_r2,sig,v_lab)
+			!write(*,*) j,E_r2
 	        call interp1(E_full,dRdE_full_s,nbins_full,E_r2,   fE_r2)
 		  	RD(ii) = (E_r2-E_r1)*(fE_r1 + fE_r2)/2.0d0
 		  	E_r1 = E_r2

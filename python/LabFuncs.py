@@ -336,3 +336,30 @@ def gal2lab(v,t_lab, lat): # Galactic (x_g,y_g,z_g) to Laboratory (N,W,Z)
     vp = gal2eqt(v)
     return eqt2lab(vp, t_lab, lat)
 #==============================================================================#
+
+
+
+
+
+#==============================================================================#
+#----------------------Inverse Coordinate trans.-------------------------------#
+def lab2eqt(vp,t_lab,lat):
+    t = t_lab*pi/180.0
+    latr = lat*pi/180.0
+    v = vp*0.0
+    v[0] = -cos(t)*sin(latr)*vp[0] + sin(t)*vp[1] + cos(latr)*cos(t)*vp[2]
+    v[1] = -sin(latr)*sin(t)*vp[0] + -cos(t)*vp[1] + cos(latr)*sin(t)*vp[2]
+    v[2] = cos(latr)*vp[0] + 0*vp[1] + sin(latr)*vp[2]
+    return v
+
+def eqt2gal(vp): 
+    v = 0.0*vp
+    v[0] = -0.066945*vp[0] - 0.872755*vp[1] - 0.483505*vp[2]
+    v[1] = +0.492754*vp[0] - 0.450313*vp[1] + 0.744620*vp[2]
+    v[2] = -0.867607*vp[0] - 0.188340*vp[1] + 0.460194*vp[2]
+    return v
+
+def lab2gal(v,t_lab, lat): 
+    vp = lab2eqt(v,t_lab,lat)
+    return eqt2gal(vp)
+#==============================================================================#

@@ -1,0 +1,14 @@
+FIT: angular_resolution_summary_helium_gem max= 1.1357933643798268 inv_width= 0.2753957483443731 threshold= -58.483782556409835 min= 57.16
+FIT: angular_resolution_summary_helium_wir max= 30.51055974100699 inv_width= 0.10085048959941738 threshold= 12.160732526832362 min= 32.26
+FIT: angular_resolution_summary_helium_pad max= 56.886112173797486 inv_width= 0.07456940275859124 threshold= 19.24695675887631 min= 13.69
+FIT: angular_resolution_summary_helium_str max= 64834.229206822005 inv_width= 0.08437729165874495 threshold= -84.5775711677843 min= 12.75
+FIT: angular_resolution_summary_helium_pix max= 479358.635284779 inv_width= 0.10963798047786254 threshold= -83.86253169561792 min= 10.6
+FIT: angular_resolution_summary_helium_3d_noquant max= 371148.0465370353 inv_width= 0.10823019755757333 threshold= -82.68264806962219 min= 10.3
+FIT: angular_resolution_summary_helium_3d_noquant_before max= 7845.084198431263 inv_width= 0.04365270714335347 threshold= -138.27827949325564 min= 8.314
+FIT: angular_resolution_summary_fluorine_gem max= 2392.700876539553 inv_width= 0.0725006593404894 threshold= -399.9528424480116 min= 57.12
+FIT: angular_resolution_summary_fluorine_wir max= 135.06977946229685 inv_width= 0.004612694386351757 threshold= -54.719143759364044 min= 0.006269
+FIT: angular_resolution_summary_fluorine_pad max= 70.13475557275116 inv_width= 0.01454485805466242 threshold= 98.20134194819462 min= 3.05
+FIT: angular_resolution_summary_fluorine_str max= 60.24038412529139 inv_width= 0.04627522106241467 threshold= 18.40822130483548 min= 19.46
+FIT: angular_resolution_summary_fluorine_pix max= 58.93406289778485 inv_width= 0.07707163291757366 threshold= 15.241809079900634 min= 16.36
+FIT: angular_resolution_summary_fluorine_3d_noquant max= 52.8324662778466 inv_width= 0.08240635088478665 threshold= 17.793040708856438 min= 15.69
+FIT: angular_resolution_summary_fluorine_3d_noquant_before max= 17.3498769588281 inv_width= 0.04951763976797757 threshold= 24.70483249958403 min= 14.69

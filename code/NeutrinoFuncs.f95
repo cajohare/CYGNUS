@@ -91,32 +91,63 @@ end subroutine BackgroundRecoilDistribution
 
 
 
+
+
 !===============================Neutrino Recoil distributions=================================!
 subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
-	double precision :: RD(n1,n_bg),fE_r1,fE_r2,E_r1,E_r2,fEmin_r1,fEmin_r2,dpix
-	double precision :: dRdE(nE_bins),eff(nE_bins+1),eff_HT(nE_bins+1),R_tot,Flux_t
-	integer :: i,j,si,n1,i1,i2,ii,k,n_nu
+	double precision :: RD(n1,n_bg),fE_r1,fE_r2,E_r1,E_r2,fEmin_r1,fEmin_r2,dpix,E_r
+	double precision :: dRdE(nE_bins),R_tot,Flux_t
+	integer :: i,j,si,n1,i1,i2,ii,k,n_nu,ia
+	
+	integer, parameter :: nbins_full=300
+	double precision :: E_lower,E_upper,wid
+	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,R,R_s,eff,eff_HT,sig_E
+	
 	RD = 0.0D0
 	n_nu = n_bg
 
-	! Load efficiency curve
-	eff = Efficiency(E_bin_edges,nE_bins+1)
+    ! Energy res correction
+    E_lower = 1.0 ! keV 
+    E_upper = 150.0d0 ! keV
+    wid = (log10(E_upper)-log10(E_lower))/(1.0d0*nbins_full-1.0d0)
+    do i = 1,nbins_full
+       E_full(i) = E_lower*10.0d0**((i-1)*wid)
+    end do
+	eff = Efficiency(E_full,nbins_full)
+	sig_E = EnergyResolution(E_full,nbins_full)
 
 	!---------------------------  NON-DIRECTIONAL ----------------------!
 	if (nside.eq.0) then
-	    do si = 1,n_nu
-	       E_r1 = E_bin_edges(1)
-	       fE_r1 =  NeutrinoRecoilEnergySpectrum(E_r1,E_nu_all(:,si),Flux_all(:,si))
-	       do j = 1,nE_bins
-	          E_r2 = E_bin_edges(j+1)
-			  fE_r2 =  NeutrinoRecoilEnergySpectrum(E_r2,E_nu_all(:,si),Flux_all(:,si))
-	          dRdE(j) = (E_r2-E_r1)*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0d0
-	          E_r1 = E_r2
-	          fE_r1 = fE_r2
-	       end do
-		   RD(1:nE_bins,si) = dRdE
+		do si = 1,n_nu			
+			! Correct for energy resolution
+		    do ia = 1,nbins_full
+				dRdE_full(ia) = eff(ia)*NeutrinoRecoilEnergySpectrum(E_full(ia),E_nu_all(:,si),Flux_all(:,si))
+		    end do
+			if (sum(sig_E).gt.0.0) then
+			    do ia = 1,nbins_full
+			       E_r = E_full(ia)
+			       f_s = 1.0d0/(sqrt(2.0d0*pi)*sig_E)&
+			            *exp(-0.5d0*((E_r-E_full)**2.0/sig_E**2.0d0))
+			       dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
+			            *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
+			    end do
+			else
+				dRdE_full_s = dRdE_full
+			end if
+			
+			E_r1 = E_bin_edges(1)
+		    call interp1(E_full,dRdE_full_s,nbins_full,E_r1,   fE_r1)
+			ii = 1
+			do j = 1,nE_bins
+		  		E_r2 = E_bin_edges(j+1)
+		        call interp1(E_full,dRdE_full_s,nbins_full,E_r2,   fE_r2)
+			  	dRdE(ii) = (E_r2-E_r1)*(fE_r1 + fE_r2)/2.0d0
+			  	E_r1 = E_r2
+			  	fE_r1 = fE_r2
+			  	ii = ii+1
+			end do		   
 
-		   ! Correct for annual modulation correction
+			! Correct for annual modulation
 			ii = 1
 			do i = 1,nT_bins
 				i1 = ii
@@ -136,17 +167,18 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 				end if
 				ii = i2+1
 			end do
-
-
-			RD(:,si) = RD(:,si)/(1.0d0*nT_bins)
+		RD(:,si) = RD(:,si)/(1.0d0*nT_bins)
 	    end do
 	end if
+
+
+
+
 
 	!---------------------------  DIRECTIONAL ---------------------------!
 	if (nside.gt.0) then
 		! Load Head-tail efficiency
-		eff_HT = HeadTailEfficiency(E_bin_edges,nE_bins+1)
-
+		eff_HT = HeadTailEfficiency(E_full,nbins_full)
 
 	    ! Solar neutrinos (set each pixel to energy only spectrum/npixels*ntimes)
 	    dpix = 4*pi/(npix*1.0d0)
@@ -154,30 +186,67 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
   			ii = 1
   			do i = 1,nT_bins
   			    do k = 1,npix
-  		 	       fE_r1 =  eff_HT(1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
-  		 		   			(1.0-eff_HT(1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
-    					do j = 1,nE_bins
-    	 		 	       fE_r2 =  eff_HT(j+1)*NeutrinoRecoilSpectrum_Solar(E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
-    	 		 		   			(1.0-eff_HT(j+1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_bin_edges(j+1)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si))
-    						RD(ii,si) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0
-    						fE_r1 = fE_r2
-    						ii = ii+1
-    					end do
+					
+					! Correct for energy resolution
+					do ia = 1,nbins_full
+						dRdE_full(ia) = eff(ia)*(eff_HT(ia)*NeutrinoRecoilSpectrum_Solar(E_full(ia)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
+  		 		   			(1.0-eff_HT(1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_full(ia)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)))
+					end do
+					if ((sum(sig_E).gt.0.0).and.(sum(dRdE_full).gt.0.0)) then
+						do ia = 1,nbins_full
+						   E_r = E_full(ia)
+						   f_s = 1.0d0/(sqrt(2.0d0*pi)*sig_E)&
+						        *exp(-0.5d0*((E_r-E_full)**2.0/sig_E**2.0d0))
+						   dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
+						        *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
+						end do
+					else
+						dRdE_full_s = dRdE_full
+					end if
+				
+					call interp1(E_full,dRdE_full_s,nbins_full,E_bin_edges(1),fE_r1)
+					do j = 1,nE_bins
+						call interp1(E_full,dRdE_full_s,nbins_full,E_bin_edges(j+1),fE_r2)
+						RD(ii,si) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1 + fE_r2)/2.0
+						fE_r1 = fE_r2
+						ii = ii+1
+					end do
   				  end do
   			end do
 		  end do
+		  
+		  
+		  
 
 	    ! Isotropic neutrinos (set each pixel to energy only spectrum/npixels*ntimes)
 	    do si = (n_nu-1),(n_nu) ! last two background are always isotropic (DSNB+Atm)
-	       E_r1 = E_bin_edges(1)
-	       fE_r1 = NeutrinoRecoilEnergySpectrum(E_r1,E_nu_all(:,si),Flux_all(:,si))
-	       do j = 1,nE_bins
-	          E_r2 = E_bin_edges(j+1)
-	          fE_r2 =  NeutrinoRecoilEnergySpectrum(E_r2,E_nu_all(:,si),Flux_all(:,si))
-	          dRdE(j) = (E_r2-E_r1)*(fE_r1*eff(j) + fE_r2*eff(j+1))/2.0d0
-	          E_r1 = E_r2
-	          fE_r1 = fE_r2
-	       end do
+		    do ia = 1,nbins_full
+				dRdE_full(ia) = eff(ia)*NeutrinoRecoilEnergySpectrum(E_full(ia),E_nu_all(:,si),Flux_all(:,si))
+		    end do
+			if ((sum(sig_E).gt.0.0).and.(sum(dRdE_full).gt.0.0)) then
+			    do ia = 1,nbins_full
+			       E_r = E_full(ia)
+			       f_s = 1.0d0/(sqrt(2.0d0*pi)*sig_E)&
+			            *exp(-0.5d0*((E_r-E_full)**2.0/sig_E**2.0d0))
+			       dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
+			            *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
+			    end do
+			else
+				dRdE_full_s = dRdE_full
+			end if
+			
+			E_r1 = E_bin_edges(1)
+		    call interp1(E_full,dRdE_full_s,nbins_full,E_r1,   fE_r1)
+			ii = 1
+			do j = 1,nE_bins
+		  		E_r2 = E_bin_edges(j+1)
+		        call interp1(E_full,dRdE_full_s,nbins_full,E_r2,   fE_r2)
+			  	dRdE(ii) = (E_r2-E_r1)*(fE_r1 + fE_r2)/2.0d0
+			  	E_r1 = E_r2
+			  	fE_r1 = fE_r2
+			  	ii = ii+1
+			end do	
+			
 		   ii = 1
 			do i = 1,nT_bins
 				do k = 1,npix
@@ -189,8 +258,6 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 			end do
 	    end do
 	end if
-
-
 
 end subroutine NeutrinoRD
 !---------------------------------------------------------------------------------------------!

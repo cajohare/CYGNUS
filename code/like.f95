@@ -29,16 +29,17 @@ contains
 
 !==================================Generate limits=============================!
 !---------------------------------------CYGNUS---------------------------------!
-subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+subroutine CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 	! Limits from m_chi = m_min to m_max, with nm values
 	! Cross section scan from sigma_min to sigma_max with ns values
 	! DL = Discovery Limit
-	double precision :: m_min,m_max,sigma_min,sigma_max,m_vals(nm),DLF(nm),DLHe(nm)
+	double precision :: E_th_F,E_th_He
+	double precision :: m_min,m_max,sigma_min,sigma_max,m_vals(nm),DL(nm),DLF(nm),DLHe(nm)
 	integer :: i,nm,nf,ns
 	character(len=*) :: filename
 
-  write(*,*) '----------------------------------------------------'
-  write(*,*) 'Start Limits:'
+  	write(*,*) '----------------------------------------------------'
+ 	write(*,*) 'Start Limits:'
 	write(*,*) 'Filename:',trim(filename)
 
 	! CYGNUS is at Boubly
@@ -47,31 +48,32 @@ subroutine CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 
 	! Calculate exposure for specified TPC Volume x Time
 	! 1000 m^3 of SF6 at 20 torr or He at 740 torr is 0.16 tons
-  if (searchmode) then
-    ! 1000 m^3 of SF6 at 200 torr or He at 740 torr is 1.6 tons
-	  Exposure = 10.0*VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
-    nside = 0 ! switch off directionality in search mode
-  else
-    ! 1000 m^3 of SF6 at 20 torr or He at 740 torr is 0.16 tons
-    Exposure = VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
-  end if
+  	if (searchmode) then
+    !	 1000 m^3 of SF6 at 200 torr or He at 740 torr is 1.6 tons
+	  	Exposure = 10.0*VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
+   		nside = 0 ! switch off directionality in search mode
+  	else
+   	 ! 1000 m^3 of SF6 at 20 torr or He at 740 torr is 0.16 tons
+   	 	Exposure = VolTime*(0.16/1000.0d0) ! Convert m^3-years into ton-years
+  	end if
 
  	! Calculate Helium limits
-  if (searchmode) then
-    DLHe = 0.0d0 ! No helium used in search mode
-  else
-    nucleus = Helium
-    E_th = 1.8d0
-  	E_max = 200.0d0
-  	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
-  end if
+  	if (searchmode) then
+    	DLHe = 0.0d0 ! No helium used in search mode
+  	else
+    	nucleus = Helium
+    	E_th = E_th_He
+		Exposure = Exposure*(755.0/740.0)
+  		call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
+		Exposure = Exposure/(755.0/740.0)
+  	end if
 
 
 	! Calculate Fluorine limits
-  nucleus = Fluorine
-  E_th = 3.0d0
-	E_max = 200.0d0
-  call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
+  	nucleus = Fluorine
+  	E_th = E_th_F
+	Exposure = Exposure*(5.0/20.0)
+  	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
 
 
 	! Save Data
@@ -140,7 +142,6 @@ subroutine GetNuFloor_Simple(N_nu_events,m_min,m_max,nm,sigma_min,sigma_max,ns,	
 	headtail_on = .false.
 	energyres_on = .false.
 	call LoadReadout(9,	fn_end)
-  E_max = 200.0
 
   ! LOW NU FLOOR
   E_th = 1.0d-5

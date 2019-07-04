@@ -53,7 +53,7 @@ double precision :: lat  ! latitude of experiment in degrees
 double precision :: long ! longitude of experiment in degrees
 double precision :: Exposure ! Exposure in ton-years
 double precision :: E_th ! Min analysis energy
-double precision :: E_max ! Max analysis energy
+double precision,parameter :: E_max = 100.0! Max analysis energy
 double precision :: VolTime ! TPC Volume x Time
 double precision,dimension(1000) :: E_vals ! Energy values for detector performance
 double precision,dimension(1000,2) :: energyres_data ! energy resolution (He,F)

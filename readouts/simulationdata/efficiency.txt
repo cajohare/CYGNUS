@@ -1,0 +1,10 @@
+FIT: eff_summary_helium_gem max= 1.0 inv_width= 1.7345024426259128 threshold= 3.4131419735614066
+FIT: eff_summary_helium_wir max= 1.0 inv_width= 3.2787807291441173 threshold= 0.3482610057058133
+FIT: eff_summary_helium_pad max= 1.0 inv_width= 2.5301963163588956 threshold= 0.10871409639067187
+FIT: eff_summary_helium_str max= 1.0 inv_width= 2.7118749378212486 threshold= 1.121821595363548
+FIT: eff_summary_helium_pix max= 1.0 inv_width= 5.4727403844745055 threshold= 0.058725512461149654
+FIT: eff_summary_fluorine_gem max= 1.0 inv_width= 0.9915316928014463 threshold= 6.631773732775159
+FIT: eff_summary_fluorine_wir max= 1.0 inv_width= 2.8428269581967927 threshold= 1.2633039061237084
+FIT: eff_summary_fluorine_pad max= 1.0 inv_width= 3.006854249394842 threshold= 1.1060306952699217
+FIT: eff_summary_fluorine_str max= 1.0 inv_width= 1.6864502457877901 threshold= 2.650926619852212
+FIT: eff_summary_fluorine_pix max= 1.0 inv_width= 3.825826132867649 threshold= 0.7453994719800294

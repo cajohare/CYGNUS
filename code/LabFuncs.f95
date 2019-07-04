@@ -8,7 +8,8 @@ contains
 
 
 !================================LabFuncs.f95==================================!
-! Contains all functions needed to compute lab dependent and detector dependent effects
+! Contains all functions needed to compute lab dependent 
+! and detector dependent effects
 
 ! Contents:
 
@@ -85,7 +86,7 @@ function EnergyResolution(E_r,ni) result(sig_E)
 			sig_E(i) = E_vals(i)*interp1D(E_vals,energyres_data(:,nuc),1000,E_r(i))
 		end do
 	else
-		sig_E = 1.0d0
+		sig_E = 0.0d0
 	end if
 end function
 
@@ -152,28 +153,24 @@ subroutine LoadReadout(ro, ReadoutName)
 	integer :: ro,i
 	character(len=100) :: ReadoutName
 	double precision :: Ei
-
+	
 	! Set readout name
 	if (ro.eq.0) then
 		ReadoutName = 'Ideal'
 	elseif (ro.eq.1) then
-		ReadoutName = 'Pixel'
-	elseif (ro.eq.2) then
 		ReadoutName = 'Predrift'
-	elseif (ro.eq.3) then
+	elseif (ro.eq.2) then
 		ReadoutName = 'Postdrift'
+	elseif (ro.eq.3) then
+		ReadoutName = 'Gem'
 	elseif (ro.eq.4) then
-		ReadoutName = 'Strip'
-	elseif (ro.eq.5) then
-		ReadoutName = 'Optical'
-	elseif (ro.eq.6) then
 		ReadoutName = 'Wire'
-	elseif (ro.eq.7) then
+	elseif (ro.eq.5) then
 		ReadoutName = 'Pad'
-	elseif (ro.eq.8) then
-		ReadoutName = 'Planar'
-	elseif (ro.eq.9) then
-		ReadoutName = 'Nondirectional'
+	elseif (ro.eq.6) then
+		ReadoutName = 'Strip'
+	elseif (ro.eq.7) then
+		ReadoutName = 'Pixel'
 	end if
 
 	! Load all the data files needed
