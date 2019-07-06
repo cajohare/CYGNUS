@@ -96,23 +96,17 @@ end subroutine BackgroundRecoilDistribution
 !===============================Neutrino Recoil distributions=================================!
 subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 	double precision :: RD(n1,n_bg),fE_r1,fE_r2,E_r1,E_r2,fEmin_r1,fEmin_r2,dpix,E_r
-	double precision :: dRdE(nE_bins),R_tot,Flux_t
+	double precision :: dRdE(nE_bins),R_tot,Flux_t,wid,R,R_s
 	integer :: i,j,si,n1,i1,i2,ii,k,n_nu,ia
-	
-	integer, parameter :: nbins_full=300
-	double precision :: E_lower,E_upper,wid
-	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,R,R_s,eff,eff_HT,sig_E
+	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,eff,eff_HT,sig_E
+	wid = (log10(E_upper)-log10(E_lower))/(1.0d0*nbins_full-1.0d0)
+	do i = 1,nbins_full
+	   E_full(i) = E_lower*10.0d0**((i-1)*wid)
+	end do
 	
 	RD = 0.0D0
 	n_nu = n_bg
 
-    ! Energy res correction
-    E_lower = 1.0 ! keV 
-    E_upper = 150.0d0 ! keV
-    wid = (log10(E_upper)-log10(E_lower))/(1.0d0*nbins_full-1.0d0)
-    do i = 1,nbins_full
-       E_full(i) = E_lower*10.0d0**((i-1)*wid)
-    end do
 	eff = Efficiency(E_full,nbins_full)
 	sig_E = EnergyResolution(E_full,nbins_full)
 
@@ -123,7 +117,8 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 		    do ia = 1,nbins_full
 				dRdE_full(ia) = eff(ia)*NeutrinoRecoilEnergySpectrum(E_full(ia),E_nu_all(:,si),Flux_all(:,si))
 		    end do
-			if (sum(sig_E).gt.0.0) then
+			R = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))*0.5d0*(dRdE_full(1:nbins_full-1) + dRdE_full(2:nbins_full)))
+			if ((sum(sig_E).gt.0.0).and.(R.gt.0.0)) then
 			    do ia = 1,nbins_full
 			       E_r = E_full(ia)
 			       f_s = 1.0d0/(sqrt(2.0d0*pi)*sig_E)&
@@ -131,6 +126,8 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 			       dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
 			            *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
 			    end do
+				R_s = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))*0.5d0*(dRdE_full_s(1:nbins_full-1) + dRdE_full_s(2:nbins_full)))
+				dRdE_full_s = dRdE_full_s*R/R_s
 			else
 				dRdE_full_s = dRdE_full
 			end if
@@ -192,7 +189,9 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 						dRdE_full(ia) = eff(ia)*(eff_HT(ia)*NeutrinoRecoilSpectrum_Solar(E_full(ia)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)) + &
   		 		   			(1.0-eff_HT(1))*NeutrinoRecoilSpectrum_Solar(-1.0d0*E_full(ia)*x_pix(k,:),i,E_nu_all(:,si),Flux_all(:,si)))
 					end do
-					if ((sum(sig_E).gt.0.0).and.(sum(dRdE_full).gt.0.0)) then
+					R = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))*0.5d0*(dRdE_full(1:nbins_full-1) + dRdE_full(2:nbins_full)))
+					
+					if ((sum(sig_E).gt.0.0).and.(R.gt.0.0)) then
 						do ia = 1,nbins_full
 						   E_r = E_full(ia)
 						   f_s = 1.0d0/(sqrt(2.0d0*pi)*sig_E)&
@@ -200,6 +199,8 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 						   dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
 						        *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
 						end do
+						R_s = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))*0.5d0*(dRdE_full_s(1:nbins_full-1) + dRdE_full_s(2:nbins_full)))
+						dRdE_full_s = dRdE_full_s*R/R_s
 					else
 						dRdE_full_s = dRdE_full
 					end if
@@ -223,6 +224,8 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 		    do ia = 1,nbins_full
 				dRdE_full(ia) = eff(ia)*NeutrinoRecoilEnergySpectrum(E_full(ia),E_nu_all(:,si),Flux_all(:,si))
 		    end do
+			R = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))*0.5d0*(dRdE_full(1:nbins_full-1) + dRdE_full(2:nbins_full)))
+			
 			if ((sum(sig_E).gt.0.0).and.(sum(dRdE_full).gt.0.0)) then
 			    do ia = 1,nbins_full
 			       E_r = E_full(ia)
@@ -231,6 +234,8 @@ subroutine NeutrinoRD(n1,RD) ! Generates an RD for all neutrinos
 			       dRdE_full_s(ia) = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))&
 			            *0.5d0*(dRdE_full(1:nbins_full-1)*f_s(1:nbins_full-1) + dRdE_full(2:nbins_full)*f_s(2:nbins_full)))
 			    end do
+				R_s = sum((E_full(2:nbins_full)-E_full(1:nbins_full-1))*0.5d0*(dRdE_full_s(1:nbins_full-1) + dRdE_full_s(2:nbins_full)))
+				dRdE_full_s = dRdE_full_s*R/R_s
 			else
 				dRdE_full_s = dRdE_full
 			end if

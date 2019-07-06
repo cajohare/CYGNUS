@@ -11,6 +11,7 @@ program runCYGNUS_All
 	double precision :: m_min,m_max,sigma_min,sigma_max,Vol,Time,E_th_F,E_th_He
 	character(len=100) :: filename
 	character(len=100) :: fn_end
+	logical :: saveNwimp
 
 	! Seed rand and random
 	call itime(mytime)
@@ -32,13 +33,12 @@ program runCYGNUS_All
 	  sigma_max = 1.0d-40 ! max expected cs					
 	!-----------------------------------------------!
 	!-----------------------------------------------!
-
-
+	saveNwimp = .false.
 
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
-	E_th_F = 2.5
-	E_th_He = 1.8
-	Vol = 1000.0
+	E_th_F = 8.0
+	E_th_He = 8.0
+	Vol = 100000.0
 	Time = 6.0d0
 	VolTime = Vol*Time
 	energy_on = .true. ! energy info is currently turned on for best limits
@@ -96,7 +96,7 @@ program runCYGNUS_All
 			filename = '../data/CYGNUS10k-'//trim(fn_end)//'.txt'
 		end if
 
-		call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+		call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 	end do
 

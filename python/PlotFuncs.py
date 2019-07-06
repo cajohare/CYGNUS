@@ -85,7 +85,10 @@ froot = "../data/CYGNUS"
 
 
 def getlimSI(Vstr,fname,RS,maxy):
-    m,F,He = loadtxt(froot+Vstr+'-'+fname+'.txt')
+    dat = loadtxt(froot+Vstr+'-'+fname+'.txt')
+    m = dat[0,:]
+    F = dat[1,:]
+    He = dat[2,:]
     He[He==0] = 1.0e-34
     F[F==0] = 1.0e-34
     sig1 = minimum(He,F)
@@ -93,13 +96,36 @@ def getlimSI(Vstr,fname,RS,maxy):
     return m,sig1/RS
 
 def getlimSD(Vstr,fname,RS,maxy):
-    m,F,He = loadtxt(froot+Vstr+'-'+fname+'.txt')
+    dat = loadtxt(froot+Vstr+'-'+fname+'.txt')
+    m = dat[0,:]
+    F = dat[1,:]
     sig1 = F
     sig1[sig1==0] = 1.0
     sig1[sig1>=maxy] = nan
     return m,sig1/RS
 
 
+def get1wimpSI(Vstr,fname,RS,maxy):
+    dat = loadtxt(froot+Vstr+'-'+fname+'.txt')
+    m = dat[0,:]
+    F = dat[3,:]
+    He = dat[4,:]
+    He[He==0] = 1.0e-34
+    F[F==0] = 1.0e-34
+    sig1 = minimum(He,F)
+    sig1[sig1>=maxy] = nan
+    return m,sig1/RS
+
+def get1wimpSD(Vstr,fname,RS,maxy):
+    dat = loadtxt(froot+Vstr+'-'+fname+'.txt')
+    m = dat[0,:]
+    F = dat[3,:]
+    sig1 = F
+    sig1[sig1==0] = 1.0
+    sig1[sig1>=maxy] = nan
+    return m,sig1/RS
+    
+    
 def MakeLimitPlot_SI(NuFloor=True,NuLabels=False,Annotations=True,Collected=False,\
                      xmin=0.1,xmax=1.0e4,ymax=1.0e-36,ymin=1.0e-51):
     plt.rcParams['axes.linewidth'] = 2.5
@@ -113,7 +139,7 @@ def MakeLimitPlot_SI(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
         nu_Xe = loadtxt("../data/WIMPLimits/SI/nufloor-Xe.txt")
         nu_F = loadtxt("../data/WIMPLimits/SI/nufloor-F.txt")
         plt.fill_between(nu_F[:,0], nu_F[:,1], y2=ymin,facecolor='dimgrey',alpha=0.4)
-        #plt.fill_between(nu_Xe[:,0], nu_Xe[:,1], y2=ymin,facecolor='dimgrey',alpha=0.4)
+        plt.fill_between(nu_Xe[:,0], nu_Xe[:,1], y2=ymin,facecolor='dimgrey',alpha=0.4)
         #plt.text(0.14,8e-46,r"$\nu$-{\bf floor}: F",fontsize=19,rotation=22,color="k")
         #plt.text(0.11,2e-45,r"$\nu$-{\bf floor}: He",fontsize=19,rotation=22,color="k")
 
@@ -243,7 +269,7 @@ def MakeLimitPlot_SD(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
 
     if Collected==False:
         if Annotations:
-            plt.text(200.0,3.0e-37,r"{\bf PICASSO}",color=[0.0, 0.19, 0.33],fontsize=20,rotation=20)
+            plt.text(200.0,3.0e-37,r"{\bf PICASSO}",color='orange',fontsize=20,rotation=20)
             plt.text(2500.0,5e-39,r"{\bf PICO60}",color=[ 0.775 ,  0.55  ,  0.6085],fontsize=20,rotation=20)
             plt.text(2500.0,7.5e-38,r"{\bf PICO2L}",color=[ 0.775 ,  0.55  ,  0.6085],fontsize=20,rotation=20)
             plt.text(200.0,1e-38,r"{\bf COUPP}",color=[1.0, 0.55, 0.41],fontsize=20,rotation=18)
@@ -254,8 +280,8 @@ def MakeLimitPlot_SD(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
 
         # Expt limits
         PICASSO = loadtxt("../data/WIMPLimits/SD/PICASSO.txt")
-        plt.fill_between(PICASSO[:,0], PICASSO[:,1],edgecolor=None,y2=ymax,facecolor= [0.64, 0.68, 0.82])
-        plt.plot(PICASSO[:,0], PICASSO[:,1],color=[0.0, 0.19, 0.33],linewidth=3)
+        plt.fill_between(PICASSO[:,0], PICASSO[:,1],edgecolor=None,y2=ymax,facecolor='orange')
+        plt.plot(PICASSO[:,0], PICASSO[:,1],color='orangered',linewidth=3)
 
         PICO60 = loadtxt("../data/WIMPLimits/SD/PICO60.txt")
         plt.fill_between(PICO60[:,0], PICO60[:,1],edgecolor=None,y2=ymax,facecolor=[0.66, 0.11, 0.03])

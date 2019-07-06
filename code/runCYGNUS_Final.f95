@@ -7,8 +7,11 @@ program runCYGNUS_Ideal
 	use NeutrinoFuncs
 	implicit none
 
-	integer :: jj,ns,nm,readout_selection,loopmin,loopmax
-	double precision :: m_min,m_max,sigma_min,sigma_max,Vol,Time,E_th_F,E_th_He
+	integer,parameter :: n_expts = 6
+	integer :: i,jj,ns,nm,readout_selection,loopmin,loopmax
+	double precision :: m_min,m_max,sigma_min,sigma_max,Time
+	double precision :: E_th_F(n_expts),E_th_He(n_expts),Vol(n_expts)
+	logical :: saveNwimp
 	character(len=100) :: filename
 	character(len=100) :: fn_end
 
@@ -33,139 +36,106 @@ program runCYGNUS_Ideal
 	!-----------------------------------------------!
 	!-----------------------------------------------!
 
-	! ! NON-DIRECTIONAL
-	! nside = 0
-	! VolTime = 1000.0*3.0d0
-	! filename = '../data/CYGNUS1000-Nondirectional.txt'
-	! readout = 2
-	! energy_on = .true. ! energy info is currently turned on for best limits
-	! angres_on = .true.
-	! efficiency_on = .true.
-	! headtail_on = .false.
-	! energyres_on = .false.
-	! searchmode = .false.
-	! call LoadReadout(readout,	fn_end)
-	! call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	!
-	! ! JUST ANGULAR RES.
-	! nside = 4
-	! VolTime = 1000.0*3.0d0
-	! filename = '../data/CYGNUS1000-30deg.txt'
-	! readout = 2
-	! energy_on = .true. ! energy info is currently turned on for best limits
-	! angres_on = .true.
-	! efficiency_on = .true.
-	! headtail_on = .false.
-	! energyres_on = .false.
-	! searchmode = .false.
-	! call LoadReadout(readout,	fn_end)
-	! call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	!
-	! ! ANGULAR RES + HEAD-TAIL
-	! filename = '../data/CYGNUS1000-30deg-HT.txt'
-	! headtail_on = .true.
-	! call LoadReadout(readout,	fn_end)
-	! call CYGNUSLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
 
-	! PREDRIFT (NORMAL MODE)
-	readout = 1
+	! POSTDRIFT (NORMAL MODE)
+	readout = 2
 	energy_on = .true.
 	angres_on = .true.
 	efficiency_on = .true.
 	headtail_on = .true.
 	energyres_on = .true.
 	searchmode = .false.
-	E_th_F = 2.5
-	E_th_He = 1.8
+	saveNwimp = .false.
 	Time = 6.0 ! Years
-
-	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d1*Time
-	filename = '../data/CYGNUS10-predrift_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	
-	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d2*Time
-	filename = '../data/CYGNUS100-predrift_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	
-	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d3*Time
-	filename = '../data/CYGNUS1000-predrift_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	
-	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d4*Time
-	filename = '../data/CYGNUS10k-predrift_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	
-	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d5*Time
-	filename = '../data/CYGNUS100k-predrift_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	
 	
 
 
+	Vol = (/1.0,10.0,100.0,1000.0,10000.0,100000.0/)
+	E_th_He = (/0.25,1.0,3.0,8.0,8.0,8.0/)
+	E_th_F = (/0.25,1.0,3.0,8.0,8.0,8.0/)
 
-	! PREDRIFT SEARCH MODE OPERATION
-	searchmode = .true.
-	nside = 0
-	
+	i = 1
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d1*Time
-	filename = '../data/CYGNUS10-SearchMode-predrift.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS1-Postdrift_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 2
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d2*Time
-	filename = '../data/CYGNUS100-SearchMode-predrift.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS10-Postdrift_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 3
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d3*Time
-	filename = '../data/CYGNUS1000-SearchMode-predrift.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS100-Postdrift_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 4
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d4*Time
-	filename = '../data/CYGNUS10k-SearchMode-predrift.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS1000-Postdrift_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 5
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d5*Time
-	filename = '../data/CYGNUS100k-SearchMode-predrift.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS10k-Postdrift_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
+
+	i = 6
+	call LoadReadout(readout,	fn_end)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS100k-Postdrift_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
 	
+	
+	
+	!!!!!!!!!!!
+		
 	
 	! NONDIRECTIONAL COMPARISON
-	searchmode = .false.
+	nside = 0
+	
+	
 
+	i = 1
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d1*Time
-	filename = '../data/CYGNUS10-NonDirectional_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS1-Nondirectional_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 2
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d2*Time
-	filename = '../data/CYGNUS100-NonDirectional_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS10-Nondirectional_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 3
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d3*Time
-	filename = '../data/CYGNUS1000-NonDirectional_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS100-Nondirectional_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 4
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d4*Time
-	filename = '../data/CYGNUS10k-NonDirectional_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS1000-Nondirectional_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
+	i = 5
 	call LoadReadout(readout,	fn_end)
-	VolTime = 1.0d5*Time
-	filename = '../data/CYGNUS100k-NonDirectional_Final.txt'
-	call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS10k-Nondirectional_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
+
+	i = 6
+	call LoadReadout(readout,	fn_end)
+	VolTime = Vol(i)*Time
+	filename = '../data/CYGNUS100k-Nondirectional_Final.txt'
+	call CYGNUSLimit(E_th_F(i),E_th_He(i),m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	
 	
 

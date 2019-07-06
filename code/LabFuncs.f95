@@ -83,7 +83,7 @@ function EnergyResolution(E_r,ni) result(sig_E)
 			nuc = 2
 		end if
 		do i = 1,ni
-			sig_E(i) = E_vals(i)*interp1D(E_vals,energyres_data(:,nuc),1000,E_r(i))
+			sig_E(i) = E_r(i)*interp1D(E_vals,energyres_data(:,nuc),1000,E_r(i))
 		end do
 	else
 		sig_E = 0.0d0

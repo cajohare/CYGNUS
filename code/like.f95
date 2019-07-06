@@ -29,13 +29,15 @@ contains
 
 !==================================Generate limits=============================!
 !---------------------------------------CYGNUS---------------------------------!
-subroutine CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+subroutine CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 	! Limits from m_chi = m_min to m_max, with nm values
 	! Cross section scan from sigma_min to sigma_max with ns values
 	! DL = Discovery Limit
 	double precision :: E_th_F,E_th_He
 	double precision :: m_min,m_max,sigma_min,sigma_max,m_vals(nm),DL(nm),DLF(nm),DLHe(nm)
+	double precision :: DLF_1wimp(nm),DLHe_1wimp(nm)
 	integer :: i,nm,nf,ns
+	logical :: saveNwimp
 	character(len=*) :: filename
 
   	write(*,*) '----------------------------------------------------'
@@ -60,11 +62,15 @@ subroutine CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,file
  	! Calculate Helium limits
   	if (searchmode) then
     	DLHe = 0.0d0 ! No helium used in search mode
+		DLHe_1wimp = 0.0d0
   	else
     	nucleus = Helium
     	E_th = E_th_He
 		Exposure = Exposure*(755.0/740.0)
   		call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
+		if (saveNwimp) then
+			call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLHe_1wimp)
+		end if
 		Exposure = Exposure/(755.0/740.0)
   	end if
 
@@ -74,6 +80,10 @@ subroutine CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,file
   	E_th = E_th_F
 	Exposure = Exposure*(5.0/20.0)
   	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
+	if (saveNwimp) then
+		call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLF_1wimp)
+	end if
+
 
 
 	! Save Data
@@ -81,6 +91,12 @@ subroutine CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,file
 	write(123,*) m_vals
 	write(123,*) DLF
 	write(123,*) DLHe
+	if (saveNwimp) then
+		write(123,*) DLF_1wimp
+		write(123,*) DLHe_1wimp
+	end if
+	
+	
 	close(123)
 	write(*,*) 'writing to: ',trim(filename)
   write(*,*) '----------------------------------------------------'

@@ -33,7 +33,6 @@ program runCYGNUS_Exposure
 	  ex_max = 1.0e10*6.0*((5.0/20.0)*0.16/1000.0d0) ! Convert m^3-years into ton-years
 	!-----------------------------------------------!
 
-
 	allocate(ex_vals(n_ex))
 	allocate(DL_F(n_ex))
 	allocate(Nsig_F(n_ex))
@@ -44,10 +43,10 @@ program runCYGNUS_Exposure
 	long = Boulby(2)
 	energy_on = .true. ! energy info is currently turned on for best limits
 	searchmode = .false.
-	
+	ex_vals = logspace(ex_min,ex_max,n_ex)
 
 	write(*,*) '----------------------------------------------------'
-	readout = 1
+	readout = 2
 	call LoadReadout(readout,	fn_end)
 	write(*,*) 'Readout = ',fn_end
 	efficiency_on = .true.
@@ -55,7 +54,7 @@ program runCYGNUS_Exposure
 	angres_on = .true.
 	headtail_on = .true.
 
-	filename = '../data/CYGNUS-Exposure-Predrift.txt'
+	filename = '../data/CYGNUS-Exposure-Postdrift.txt'
 	open(unit=1000,file=trim(filename))
 	write(1000,*) ex_vals/(6.0*(5.0/20.0)*(0.16/1000.0)) ! Volume (F)
 
@@ -75,7 +74,7 @@ program runCYGNUS_Exposure
 	
 	
 	write(*,*) '----------------------------------------------------'
-	readout = 1
+	readout = 2
 	nside = 0
 	call LoadReadout(readout,	fn_end)
 	write(*,*) 'Readout = ',fn_end

@@ -10,8 +10,9 @@ program runCYGNUS_thresholds
 	integer :: jj,ns,nm,readout_selection,loopmin,loopmax,n_ex
 	double precision :: m_min,m_max,sigma_min,sigma_max,ex_min,ex_max,Vol,Time,m,m1,m2,m3
 	double precision,dimension(:),allocatable :: m_vals,DLHe,DLF
-	double precision :: E_th_F_edisc,E_th_He_edisc,E_th_F_1e,E_th_He_1e,E_th_F_predrift,E_th_He_predrift
+	double precision :: E_th_F_edisc,E_th_He_edisc,E_th_F_1e,E_th_He_1e,E_th_He_dir,E_th_F_dir
 	double precision,dimension(:),allocatable :: ex_vals,DL1_Ex,DL2_Ex,DL3_Ex,Nbg1,Nsig1,Nbg2,Nsig2,Nbg3,Nsig3,DLHe_1wimp,DLF_1wimp
+	logical :: saveNwimp
 	character(len=100) :: filename
 	character(len=100) :: fn_end
 
@@ -40,11 +41,11 @@ program runCYGNUS_thresholds
 	  nT_bins = 1	 ! Number of time bins					  
 	  nside = 4  ! Order of pixelation (2,4 or 8)		
 	!----- Mass range for limits -------------------!
-	  nm = 200 !  Number of mass points							
+	  nm = 70 !  Number of mass points							
 	  m_min = 0.1d0 ! Min mass											
 	  m_max = 10000.0d0 ! Max mass										
 	!----- Cross section range for limits ----------!
-	  ns = 500 ! resolution of cs scan							
+	  ns = 100 ! resolution of cs scan							
 	  sigma_min = 1.0d-50 ! min. expected cs				
 	  sigma_max = 1.0d-38 ! max expected cs					
 
@@ -52,267 +53,70 @@ program runCYGNUS_thresholds
 	VolTime = 10000.0*Time
 	lat = Boulby(1)
 	long = Boulby(2)
-	ex_min = ex_min*Time
-	ex_max = ex_max*Time
 
-	! Predrift
-	nside = 4
-	readout = 1 ! Predrift
+	E_th_F_1e = 0.26
+	E_th_He_1e = 0.26
+	E_th_F_dir = 8.0
+	E_th_He_dir = 8.0
+	
 	energy_on = .true. ! energy info is currently turned on for best limits
 	angres_on = .true.
 	efficiency_on = .true.
 	headtail_on = .true.
-	energyres_on = .false.
+	energyres_on = .true.
 	searchmode = .false.
+	saveNwimp = .true.
 	
+	
+	
+	! Pixel
+	fn_end = 'Pixel'
+	readout = 7 ! Predrift
 	call LoadReadout(readout,	fn_end)
-	filename = '../data/CYGNUS10k-predrift_8keV.txt'
-	call CYGNUSLimit(8.0d0,8.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	
+	call CYGNUSLimit(1.0d0,1.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_1keV.txt',saveNwimp)
 	call LoadReadout(readout,	fn_end)
-	filename = '../data/CYGNUS10k-edisc_3keV.txt'
-	call CYGNUSLimit(3.0d0,1.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
-	
-	nside = 0
+	call CYGNUSLimit(2.0d0,2.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_2keV.txt',saveNwimp)
 	call LoadReadout(readout,	fn_end)
-	filename = '../data/CYGNUS10k-1e_250eV.txt'
-	call CYGNUSLimit(0.25d0,0.25d0,m_min,m_max,nm,sigma_min,sigma_max,ns,filename)
+	call CYGNUSLimit(3.0d0,3.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_3keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(4.0d0,4.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_4keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(5.0d0,5.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_5keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(6.0d0,6.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_6keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(7.0d0,7.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_7keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(8.0d0,8.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
 	
-
-
-
-
-
-
-
-
-
-
-
 	stop
-	
-	
-  	n_ex = 20
-  	ex_min = 0.1*(0.16/1000.0d0) ! Convert m^3-years into ton-years
-  	ex_max = 1.0e10*(0.16/1000.0d0) ! Convert m^3-years into ton-years
-	!-----------------------------------------------!
-	!-----------------------------------------------!
-	allocate(m_vals(nm))
-	allocate(DLF(nm))
-	allocate(DLHe(nm))
-	allocate(DLF_1wimp(nm))
-	allocate(DLHe_1wimp(nm))
 
-	allocate(ex_vals(n_ex))
-	allocate(DL1_ex(n_ex))
-	allocate(DL2_ex(n_ex))
-	allocate(DL3_ex(n_ex))
-	allocate(Nsig1(n_ex))
-	allocate(Nbg1(n_ex))
-	allocate(Nsig2(n_ex))
-	allocate(Nbg2(n_ex))
-	allocate(Nsig3(n_ex))
-	allocate(Nbg3(n_ex))
+	! Predrift
+	fn_end = 'Predrift'
+	readout = 1 ! Predrift	
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(E_th_F_dir,E_th_He_dir,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
 
-	E_th_F_1e = 0.25
-	E_th_He_1e = 0.25
+	! Postdrift
+	fn_end = 'Postdrift'
+	readout = 2 ! Predrift
+	nside = 4
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(E_th_F_dir,E_th_He_dir,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
 
-	E_th_F_edisc = 4.0
-	E_th_He_edisc = 4.0
-
-	E_th_F_predrift = 8.0
-	E_th_He_predrift = 8.0
-
-	m1 = 2.0
-	m2 = 10.0
-	m3 = 100.0
-	
-	write(*,*) '----------------------------------------------------'
-	filename = '../data/CYGNUS10k-predrift_8keV.txt'
-	open(unit=123,file=trim(filename))
-
-	nucleus = Helium
-	Exposure = VolTime*(0.16/1000.0d0)*(755.0/740.0)
-	E_th = E_th_He_predrift
-	call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLHe_1wimp)
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
-
-	nucleus = Fluorine
-	Exposure = VolTime*(0.16/1000.0d0)*(5.0/20.0)
-	E_th = E_th_F_predrift
-	call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLF_1wimp)
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
-
-	write(123,*) m_vals
-	write(123,*) DLF
-	write(123,*) DLHe
-	write(123,*) DLF_1wimp
-	write(123,*) DLHe_1wimp
-	close(123)
-	write(*,*) 'writing to: ',trim(filename)
-	write(*,*) '----------------------------------------------------'
-	
-
-	write(*,*) '----------------------------------------------------'
-	filename = '../data/CYGNUS10k-Exposure-predrift_8keV.txt'
-	E_th = E_th_He_predrift
-	nucleus = Helium
-	m = m1
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL1_Ex,Nsig1,Nbg1)
-
-	E_th = E_th_F_predrift
-	nucleus = Fluorine
-	m = m2
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL2_Ex,Nsig2,Nbg2)
-
-	E_th = E_th_F_predrift
-	nucleus = Fluorine
-	m = m3
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL3_Ex,Nsig3,Nbg3)
-
-
-	open(unit=1000,file=trim(filename))
-	write(1000,*) ex_vals/(Time*(0.16/1000.0))
-	write(1000,*) DL1_Ex
-	write(1000,*) Nsig1
-	write(1000,*) Nbg1
-	write(1000,*) DL2_Ex
-	write(1000,*) Nsig2
-	write(1000,*) Nbg2
-	write(1000,*) DL3_Ex
-	write(1000,*) Nsig3
-	write(1000,*) Nbg3
-	close(1000)
-	write(*,*) '----------------------------------------------------'
-
-
-
-
-
-
-	! 1-electron
-	efficiency_on = .false.
-
-	write(*,*) '----------------------------------------------------'
-	filename = '../data/CYGNUS10k-1e.txt'
-	open(unit=123,file=trim(filename))
-
-	nucleus = Helium
-	Exposure = VolTime*(0.16/1000.0d0)*(755.0/740.0)
-	E_th = E_th_He_1e
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
-	call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLHe_1wimp)
-
-	nucleus = Fluorine
-	Exposure = VolTime*(0.16/1000.0d0)*(5.0/20.0)
-	E_th = E_th_F_1e
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
-	call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLF_1wimp)
-
-	write(123,*) m_vals
-	write(123,*) DLF
-	write(123,*) DLHe
-	write(123,*) DLF_1wimp
-	write(123,*) DLHe_1wimp
-	close(123)
-	write(*,*) 'writing to: ',trim(filename)
-	write(*,*) '----------------------------------------------------'
-
-
-	write(*,*) '----------------------------------------------------'
-	filename = '../data/CYGNUS10k-edisc.txt'
-	open(unit=123,file=trim(filename))
-
-	nucleus = Helium
-	Exposure = VolTime*(0.16/1000.0d0)*(755.0/740.0)
-	E_th = E_th_He_edisc
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLHe)
-  	call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLHe_1wimp)
-
-	nucleus = Fluorine
-	Exposure = VolTime*(0.16/1000.0d0)*(5.0/20.0)
-	E_th = E_th_F_edisc
-	call GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DLF)
-	call NwimpEvents(1.0d0,m_min,m_max,nm,m_vals,DLF_1wimp)
-
-	write(123,*) m_vals
-	write(123,*) DLF
-	write(123,*) DLHe
-	write(123,*) DLF_1wimp
-	write(123,*) DLHe_1wimp
-	close(123)
-	write(*,*) 'writing to: ',trim(filename)
-	write(*,*) '----------------------------------------------------'
-
-
-	write(*,*) '----------------------------------------------------'
-	filename = '../data/CYGNUS10k-Exposure-1e.txt'
-	E_th = E_th_He_1e
-	nucleus = Helium
-	m = m1
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL1_Ex,Nsig1,Nbg1)
-
-	E_th = E_th_F_1e
-	nucleus = Fluorine
-	m = m2
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL2_Ex,Nsig2,Nbg2)
-
-	E_th = E_th_F_1e
-	nucleus = Fluorine
-	m = m3
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL3_Ex,Nsig3,Nbg3)
-
-	open(unit=1000,file=trim(filename))
-	write(1000,*) ex_vals/(Time*(0.16/1000.0))
-	write(1000,*) DL1_Ex
-	write(1000,*) Nsig1
-	write(1000,*) Nbg1
-	write(1000,*) DL2_Ex
-	write(1000,*) Nsig2
-	write(1000,*) Nbg2
-	write(1000,*) DL3_Ex
-	write(1000,*) Nsig3
-	write(1000,*) Nbg3
-	close(1000)
-	write(*,*) '----------------------------------------------------'
-
-
-
-
-
-
-	write(*,*) '----------------------------------------------------'
-	filename = '../data/CYGNUS10k-Exposure-edisc.txt'
-	E_th = E_th_He_edisc
-	nucleus = Helium
-	m = m1
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL1_Ex,Nsig1,Nbg1)
-
-	E_th = E_th_F_edisc
-	nucleus = Fluorine
-	m = m2
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL2_Ex,Nsig2,Nbg2)
-
-	E_th = E_th_F_edisc
-	nucleus = Fluorine
-	m = m3
-	call GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_vals,DL3_Ex,Nsig3,Nbg3)
-
-	open(unit=1000,file=trim(filename))
-	write(1000,*) ex_vals/(Time*(0.16/1000.0))
-	write(1000,*) DL1_Ex
-	write(1000,*) Nsig1
-	write(1000,*) Nbg1
-	write(1000,*) DL2_Ex
-	write(1000,*) Nsig2
-	write(1000,*) Nbg2
-	write(1000,*) DL3_Ex
-	write(1000,*) Nsig3
-	write(1000,*) Nbg3
-	close(1000)
-	write(*,*) '----------------------------------------------------'
-
-
+	! Strip
+	fn_end = 'Strip'
+	readout = 6 ! Predrift
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(E_th_F_dir,E_th_He_dir,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
 
 
 

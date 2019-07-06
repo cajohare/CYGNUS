@@ -45,9 +45,6 @@ double precision,dimension(11),parameter :: NuUnc_B17GS98 = (/0.006d0, 0.01d0, 0
 
 
 
-
-
-
 !------------------------------Experimental stuff---------------------------------------!
 double precision :: lat  ! latitude of experiment in degrees
 double precision :: long ! longitude of experiment in degrees
@@ -155,6 +152,10 @@ real :: clock_start,clock_stop
 !------------------------------------------------------------------------------------------!
 
 
+
+integer, parameter :: nbins_full=1000
+double precision, parameter :: E_lower = 0.2 ! keV <- energy below which the efficiency etc. can't be trusted, or is 0
+double precision, parameter :: E_upper = 150.0
 
 
 end module params
