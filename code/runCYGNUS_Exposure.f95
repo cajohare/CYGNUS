@@ -37,7 +37,7 @@ program runCYGNUS_Exposure
 	allocate(DL_F(n_ex))
 	allocate(Nsig_F(n_ex))
 	allocate(Nbg_F(n_ex))
-	E_th = 2.5d0
+	E_th = 8.0
 	nucleus = Fluorine
 	lat = Boulby(1)
 	long = Boulby(2)

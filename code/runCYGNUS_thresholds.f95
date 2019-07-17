@@ -41,16 +41,16 @@ program runCYGNUS_thresholds
 	  nT_bins = 1	 ! Number of time bins					  
 	  nside = 4  ! Order of pixelation (2,4 or 8)		
 	!----- Mass range for limits -------------------!
-	  nm = 70 !  Number of mass points							
+	  nm = 100 !  Number of mass points							
 	  m_min = 0.1d0 ! Min mass											
 	  m_max = 10000.0d0 ! Max mass										
 	!----- Cross section range for limits ----------!
-	  ns = 100 ! resolution of cs scan							
+	  ns = 200 ! resolution of cs scan							
 	  sigma_min = 1.0d-50 ! min. expected cs				
 	  sigma_max = 1.0d-38 ! max expected cs					
 
 	Time = 6.0
-	VolTime = 10000.0*Time
+	VolTime = 1000.0*Time
 	lat = Boulby(1)
 	long = Boulby(2)
 
@@ -69,54 +69,73 @@ program runCYGNUS_thresholds
 	
 	
 	
-	! Pixel
-	fn_end = 'Pixel'
-	readout = 7 ! Predrift
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(1.0d0,1.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_1keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(2.0d0,2.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_2keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(3.0d0,3.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_3keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(4.0d0,4.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_4keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(5.0d0,5.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_5keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(6.0d0,6.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_6keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(7.0d0,7.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_7keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(8.0d0,8.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
 	
-	stop
-
-	! Predrift
 	fn_end = 'Predrift'
-	readout = 1 ! Predrift	
+	readout = 1 ! 
 	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(E_th_F_dir,E_th_He_dir,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
-	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
+	call CYGNUSLimit(0.25d0,0.25d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_250eV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(1.0d0,1.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_1keV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(2.0d0,2.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_2keV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(3.0d0,3.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_3keV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(4.0d0,4.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_4keV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(5.0d0,5.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_5keV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(6.0d0,6.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_6keV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(7.0d0,7.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_7keV.txt',saveNwimp)
+! 	call LoadReadout(readout,	fn_end)
+! 	call CYGNUSLimit(8.0d0,8.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_8keV.txt',saveNwimp)
+!
 
-	! Postdrift
+	
 	fn_end = 'Postdrift'
-	readout = 2 ! Predrift
-	nside = 4
+	readout = 2 ! 
 	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(E_th_F_dir,E_th_He_dir,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
+	call CYGNUSLimit(0.25d0,0.25d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_250eV.txt',saveNwimp)
 	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
+	call CYGNUSLimit(1.0d0,1.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_1keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(2.0d0,2.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_2keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(3.0d0,3.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_3keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(4.0d0,4.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_4keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(5.0d0,5.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_5keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(6.0d0,6.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_6keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(7.0d0,7.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_7keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(8.0d0,8.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_8keV.txt',saveNwimp)
 
-	! Strip
+
+	
 	fn_end = 'Strip'
-	readout = 6 ! Predrift
+	readout = 6 ! 
 	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(E_th_F_dir,E_th_He_dir,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_8keV.txt',saveNwimp)
+	call CYGNUSLimit(0.25d0,0.25d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_250eV.txt',saveNwimp)
 	call LoadReadout(readout,	fn_end)
-	call CYGNUSLimit(E_th_F_1e,E_th_He_1e,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS10k-'//trim(fn_end)//'_250eV.txt',saveNwimp)
+	call CYGNUSLimit(1.0d0,1.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_1keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(2.0d0,2.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_2keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(3.0d0,3.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_3keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(4.0d0,4.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_4keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(5.0d0,5.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_5keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(6.0d0,6.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_6keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(7.0d0,7.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_7keV.txt',saveNwimp)
+	call LoadReadout(readout,	fn_end)
+	call CYGNUSLimit(8.0d0,8.0d0,m_min,m_max,nm,sigma_min,sigma_max,ns,'../data/CYGNUS1000-'//trim(fn_end)//'_8keV.txt',saveNwimp)
 
 
 

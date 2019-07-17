@@ -224,7 +224,7 @@ def MakeLimitPlot_SI(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
     else:
         # Expt limits
         AllLimits = loadtxt("../data/WIMPLimits/SI/AllLimits-2018.txt")
-        plt.fill_between(AllLimits[:,0], AllLimits[:,1],edgecolor=None,y2=ymax,facecolor=limSI_face)
+        plt.fill_between(AllLimits[:,0], AllLimits[:,1],edgecolor=None,y2=ymax,facecolor=col_alpha(limSI_face,0.5))
         plt.plot(AllLimits[:,0], AllLimits[:,1],color=limSI_edge,linewidth=3)
 
     
@@ -305,7 +305,7 @@ def MakeLimitPlot_SD(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
     else:
         # Expt limits
         AllLimits = loadtxt("../data/WIMPLimits/SD/AllLimits-2018.txt")
-        plt.fill_between(AllLimits[:,0], AllLimits[:,1],edgecolor=None,y2=ymax,facecolor=limSD_face)
+        plt.fill_between(AllLimits[:,0], AllLimits[:,1],edgecolor=None,y2=ymax,facecolor=col_alpha(limSD_face,0.5))
         plt.plot(AllLimits[:,0], AllLimits[:,1],color=limSD_edge,linewidth=3)
 
     
