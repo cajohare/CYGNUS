@@ -94,17 +94,13 @@ subroutine WIMPRecoilDistribution
 		end if
 	end if
 
-	! If direction only then integrate over energies
-  if (nside.gt.0) then
-  	if (Energy_on) then
-  		RD_wimp = RD
-  	else
-  		call IntegrateOverEnergies(RD,RD_red)
-  		RD_wimp = RD_red
-  	end if
-  else
-    RD_wimp = RD
-  end if
+  ! If direction only then integrate over energies
+	if (Energy_on) then
+		RD_wimp = RD
+	else
+		call IntegrateOverEnergies(RD,RD_red)
+		RD_wimp = RD_red
+	end if
 
 
 	! Multiply whole thing by Exposure so RD = Num events/sigma_p
@@ -125,7 +121,7 @@ end subroutine WIMPRecoilDistribution
 !-------------------- Directional recoil distribution --------------------------------!
 subroutine WIMPRD_3D(RD,tbin)
 	double precision :: fE_r1,fE_r2,E_r1(3),E_r2(3)
-	double precision :: dpix,RD(nE_bins*npix),E_r,wid,R,R_s
+	double precision :: dpix,RD(nE_bins*npix*nT_bins),E_r,wid,R,R_s
 	double precision,dimension(nbins_full) :: E_full,dRdE_full,dRdE_full_s,f_s,eff,eff_HT,sig_E
 	integer :: i,j,k,ii,tbin,ia
 	wid = (log10(E_upper)-log10(E_lower))/(1.0d0*nbins_full-1.0d0)
@@ -167,7 +163,7 @@ subroutine WIMPRD_3D(RD,tbin)
 			call interp1(E_full,dRdE_full_s,nbins_full,E_bin_edges(1),fE_r1)
 			do j = 1,nE_bins
 				call interp1(E_full,dRdE_full_s,nbins_full,E_bin_edges(j+1),fE_r2)
-				RD(ii) = (dpix/(1.0d0*nT_bins))*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1 + fE_r2)/2.0
+				RD(ii) = dpix*(E_bin_edges(j+1)-E_bin_edges(j))*(fE_r1 + fE_r2)/2.0
 				fE_r1 = fE_r2
 				ii = ii+1
 			end do

@@ -135,6 +135,9 @@ subroutine GetLimits(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
     write(*,*) '----------------------------------------------------'
     call GetNuFluxes ! Load Neutrinos
     call PreAllocate ! Allocate data size (readout dependent)
+	
+	write(*,*) 'number of bins = ',nTot_bins
+	
     call BackgroundRecoilDistribution ! Load Background	model
     call SHM ! Load halo model
     call DiscoveryLimit(m_min,m_max,nm,sigma_min,sigma_max,ns,	m_vals,DL)
@@ -233,10 +236,11 @@ subroutine GetLimits_Exposure(m,ex_min,ex_max,n_ex,sigma_min,sigma_max,ns,ex_val
 
     ! numbers of events
     Nsig(i) = sum(RD_wimp*DL(i))
-    Nbg(i) = 0.0d0
-    do si = 1,n_bg
-      Nbg(i) = Nbg(i) + sum(R_bg(si)*RD_bg(:,si))
-    end do
+    Nbg(i) = sum(R_bg(2)*RD_bg(:,2))
+	!Nbg(i) = 0.0
+    !do si = 1,n_bg
+    !  Nbg(i) = Nbg(i) + sum(R_bg(si)*RD_bg(:,si))
+    !end do
 
     RD_bg = RD_bg/Exposure
   end do

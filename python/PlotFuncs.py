@@ -161,22 +161,22 @@ def MakeLimitPlot_SI(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
         if Annotations:
             plt.text(0.14,2.0e-38,r"{\bf CRESST}",color=[0.8, 0.25, 0.33],fontsize=20,rotation=0)
             plt.text(0.35,1.0e-39,r"{\bf CDMSlite}",color="blue",fontsize=20,rotation=0)
-            plt.text(1.5,3.0e-42,r"{\bf DarkSide}",color="green",fontsize=20,rotation=-35)
-            plt.text(2300.0,5.0e-44,r"{\bf PandaX}",color="navy",fontsize=20,rotation=16)
-            plt.text(2300.0,1.5e-44,r"{\bf Xenon1T}",color="darkgreen",fontsize=20,rotation=16)
-            plt.text(10.0,1.0e-43,r"{\bf EDELWEISS}",color=[0.67, 0.31, 0.32],fontsize=13,rotation=-20)
-            plt.text(2000.0,2.0e-42,r"{\bf PICO60}",color=[0.5, 0.0, 0.13],fontsize=20,rotation=18)
-            plt.text(2000.0,2.3e-40,r"{\bf PICO2L}",color=[0.5, 0.0, 0.13],fontsize=20,rotation=18)
-            plt.text(22.0,1e-39,r"{\bf DAMA}",color='darkgreen',fontsize=20)
-            plt.text(1200.0,5.0e-41,r"{\bf COSINE-100}",color="gold",fontsize=20,rotation=18)
+            plt.text(2.,2.5e-42,r"{\bf DarkSide}",color="green",fontsize=15,rotation=-45)
+            plt.text(2300.0,2.0e-44,r"{\bf PandaX}",color="navy",fontsize=20,rotation=16)
+            plt.text(2300.0,4e-45,r"{\bf Xenon1T}",color="darkgreen",fontsize=20,rotation=16)
+            plt.text(10.0,2.2e-44,r"{\bf EDELWEISS}",color=[0.67, 0.31, 0.32],fontsize=13,rotation=-20)
+            plt.text(2000.0,5.0e-43,r"{\bf PICO60}",color=[0.5, 0.0, 0.13],fontsize=20,rotation=18)
+            plt.text(2000.0,5e-41,r"{\bf PICO2L}",color=[0.5, 0.0, 0.13],fontsize=20,rotation=18)
+            plt.text(22.0,1e-39,r"{\bf DAMA}",color='darkgreen',fontsize=22)
+            plt.text(1200.0,0.7e-41,r"{\bf COSINE-100}",color="gold",fontsize=20,rotation=18)
             plt.arrow(0.48, 0.79, -0.04, -0.04, transform=ax.transAxes,
                   length_includes_head=True,
                   head_width=0.01, head_length=0.01, overhang=0.4,
-                  edgecolor='k',facecolor='darkgreen')
+                  edgecolor='darkgreen',facecolor='darkgreen')
             plt.arrow(0.54, 0.79, 0.04, -0.08, transform=ax.transAxes,
                   length_includes_head=True,
                   head_width=0.01, head_length=0.01, overhang=0.4,
-                  edgecolor='k',facecolor='darkgreen')
+                  edgecolor='darkgreen',facecolor='darkgreen')
 
         # Expt limits
         CRESST = loadtxt("../data/WIMPLimits/SI/CRESST.txt")
@@ -269,22 +269,23 @@ def MakeLimitPlot_SD(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
 
     if Collected==False:
         if Annotations:
-            plt.text(200.0,3.0e-37,r"{\bf PICASSO}",color='orange',fontsize=20,rotation=20)
-            plt.text(2500.0,5e-39,r"{\bf PICO60}",color=[ 0.775 ,  0.55  ,  0.6085],fontsize=20,rotation=20)
-            plt.text(2500.0,7.5e-38,r"{\bf PICO2L}",color=[ 0.775 ,  0.55  ,  0.6085],fontsize=20,rotation=20)
-            plt.text(200.0,1e-38,r"{\bf COUPP}",color=[1.0, 0.55, 0.41],fontsize=20,rotation=18)
-            plt.text(3000.0,7e-37,r"{\bf KIMS}",color=[0.81, 0.44, 0.69],fontsize=20,rotation=18)
-            plt.text(2000.0,5e-40,r"{\bf IceCube} $\tau\bar{\tau}$",color=[0.55, 0.71, 0.0],fontsize=20,rotation=35)
-            plt.text(15.0,5e-41,r"{\bf SK} $\tau\bar{\tau}$",color=[0.24, 0.71, 0.54],fontsize=20,rotation=0)
+            plt.text(200.0,8.0e-38,r"{\bf PICASSO}",color='tomato',fontsize=22,rotation=20)
+            plt.text(2500.0,0.4e-39,r"{\bf PICO60}",color=[ 0.775 ,  0.55  ,  0.6085],fontsize=20,rotation=20)
+            plt.text(2500.0,7.5e-39,r"{\bf PICO2L}",color=[ 0.775 ,  0.55  ,  0.6085],fontsize=20,rotation=20)
+            plt.text(200.0,3e-39,r"{\bf COUPP}",color=[1.0, 0.55, 0.41],fontsize=20,rotation=18)
+            plt.text(3000.0,4e-37,r"{\bf KIMS}",color=[0.81, 0.44, 0.69],fontsize=20,rotation=18)
+            plt.text(2000.0,3e-41,r"{\bf IceCube} $\tau\bar{\tau}$",color=[0.55, 0.71, 0.0],fontsize=20,rotation=35)
+            plt.text(15.0,5e-41,r"{\bf SK} $\tau\bar{\tau}$",color=[0.24, 0.71, 0.54],fontsize=25,rotation=0)
+
 
 
         # Expt limits
         PICASSO = loadtxt("../data/WIMPLimits/SD/PICASSO.txt")
-        plt.fill_between(PICASSO[:,0], PICASSO[:,1],edgecolor=None,y2=ymax,facecolor='orange')
+        plt.fill_between(PICASSO[:,0], PICASSO[:,1],edgecolor=None,y2=ymax,facecolor='tomato')
         plt.plot(PICASSO[:,0], PICASSO[:,1],color='orangered',linewidth=3)
 
         PICO60 = loadtxt("../data/WIMPLimits/SD/PICO60.txt")
-        plt.fill_between(PICO60[:,0], PICO60[:,1],edgecolor=None,y2=ymax,facecolor=[0.66, 0.11, 0.03])
+        plt.fill_between(PICO60[:,0], PICO60[:,1],edgecolor=None,y2=ymax,facecolor=[0.66, 0.11, 0.03],alpha=0.85)
         plt.plot(PICO60[:,0], PICO60[:,1],color=[0.5, 0.0, 0.13],linewidth=3)
 
         PICO2L = loadtxt("../data/WIMPLimits/SD/PICO2L.txt")

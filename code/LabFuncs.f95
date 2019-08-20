@@ -204,16 +204,27 @@ end subroutine
 subroutine IntegrateOverEnergies(RD,RD_red)
 	double precision :: RD(nTot_bins_full),RD_red(nTot_bins)
 	integer :: ii,i1,i2,i,k
-	i1 = 1
-	ii = 1
-	do i = 1,nT_bins
-		do k = 1,npix
+	if (nside.gt.0) then
+		i1 = 1
+		ii = 1
+		do i = 1,nT_bins
+			do k = 1,npix
+				i2 = i1+nE_bins-1
+				RD_red(ii) = sum(RD(i1:i2))
+				i1 = i2+1
+				ii = ii+1
+			end do
+		end do
+	else
+		i1 = 1
+		ii = 1
+		do i = 1,nT_bins
 			i2 = i1+nE_bins-1
 			RD_red(ii) = sum(RD(i1:i2))
 			i1 = i2+1
 			ii = ii+1
 		end do
-	end do
+	end if
 end subroutine
 
 !-------------------------Smear the full Energy-Time-Direction RD--------------!

@@ -46,7 +46,7 @@ subroutine PreAllocate
 
 	if (nside.gt.0) then
 	   call pixels
-		   if (Energy_on) then
+		if (Energy_on) then
 			nTot_bins = nT_bins*nE_bins*npix
 			nTot_bins_full = nT_bins*nE_bins*npix
 		else
@@ -54,7 +54,13 @@ subroutine PreAllocate
 			nTot_bins_full = nT_bins*nE_bins*npix
 		end if
 	else
-		nTot_bins_full = nTot_bins
+		if (Energy_on) then
+			nTot_bins = nE_bins*nT_bins
+			nTot_bins_full = nE_bins*nT_bins
+		else
+			nTot_bins = nT_bins
+			nTot_bins_full = nE_bins*nT_bins
+		end if
 	end if
 	allocate(RD_wimp(nTot_bins))
 	allocate(RD_bg(nTot_bins,n_bg))

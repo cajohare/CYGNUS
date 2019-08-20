@@ -20,12 +20,12 @@ program runCYGNUS_All
 
 	!------------------Optimisation-----------------!
 	!-----Set binning ------------------------------!
-	  nE_bins = 50 ! Number of energy bins		  		
+	  nE_bins = 20 ! Number of energy bins		  		
 	  nT_bins = 1	 ! Number of time bins					  
 	  nside = 4  ! Order of pixelation (2,4 or 8)		
 	!----- Mass range for limits -------------------!
-	  nm = 50 !  Number of mass points							
-	  m_min = 0.5d0 ! Min mass											
+	  nm = 70 !  Number of mass points							
+	  m_min = 0.1d0 ! Min mass											
 	  m_max = 1000.0d0 ! Max mass										
 	!----- Cross section range for limits ----------!
 	  ns = 100 ! resolution of cs scan							
@@ -38,7 +38,7 @@ program runCYGNUS_All
 	! CYGNUS 1000 x 3 years of running (can be changed for whatever preference)
 	E_th_F = 8.0
 	E_th_He = 8.0
-	Vol = 100000.0
+	Vol = 1000.0
 	Time = 6.0d0
 	VolTime = Vol*Time
 	energy_on = .true. ! energy info is currently turned on for best limits
@@ -88,14 +88,24 @@ program runCYGNUS_All
 		end if
 
 
-		if (Vol.eq.1000.0) then
-			filename = '../data/CYGNUS1000-'//trim(fn_end)//'.txt'
-		elseif (Vol.eq.100000.0) then
-			filename = '../data/CYGNUS100k-'//trim(fn_end)//'.txt'
-		elseif (Vol.eq.10000.0) then
-			filename = '../data/CYGNUS10k-'//trim(fn_end)//'.txt'
+		if (E_th_F.eq.8.0d0) then
+			if (Vol.eq.1000.0) then
+				filename = '../data/CYGNUS1000-'//trim(fn_end)//'_maxth.txt'
+			elseif (Vol.eq.100000.0) then
+				filename = '../data/CYGNUS100k-'//trim(fn_end)//'_maxth.txt'
+			elseif (Vol.eq.10000.0) then
+				filename = '../data/CYGNUS10k-'//trim(fn_end)//'_maxth.txt'
+			end if
+		else if (E_th_F.eq.0.25d0) then
+			if (Vol.eq.1000.0) then
+				filename = '../data/CYGNUS1000-'//trim(fn_end)//'_minth.txt'
+			elseif (Vol.eq.100000.0) then
+				filename = '../data/CYGNUS100k-'//trim(fn_end)//'_minth.txt'
+			elseif (Vol.eq.10000.0) then
+				filename = '../data/CYGNUS10k-'//trim(fn_end)//'_minth.txt'
+			end if
 		end if
-
+		
 		call CYGNUSLimit(E_th_F,E_th_He,m_min,m_max,nm,sigma_min,sigma_max,ns,filename,saveNwimp)
 		call cpu_time(clock_stop); write(*,*) 'Time elapsed = ',clock_stop-clock_start
 	end do
