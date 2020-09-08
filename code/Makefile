@@ -1,10 +1,7 @@
 FC = gfortran
 FCFLAGS = -O3 -fopenmp -g -ffree-line-length-none -fbounds-check
-HEALPIX = /Users/ciaranohare/Work/Zaragoza/Healpix_3.40# if using healpix this will need to be linked
-FCFLAGS += -I$(HEALPIX)/include -L$(HEALPIX)/lib -lhealpix -lcfitsio # and this is how you link it
-
 OBJFILES = params.o neldermead.o util.o LabFuncs.o WIMPFuncs.o NeutrinoFuncs.o like.o
-PROGRAMS = runCYGNUS_All runCYGNUS_Final runCYGNUS_thresholds runCYGNUS_Exposure runCYGNUS_timeline runNuFloor
+PROGRAMS = runCYGNUS_All runCYGNUS_Final runCYGNUS_thresholds runCYGNUS_Exposure runCYGNUS_timeline runCYGNUS_Final2 runNuFloor
 
 
 all: clean $(OBJFILES) $(PROGRAMS)

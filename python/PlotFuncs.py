@@ -256,8 +256,8 @@ def MakeLimitPlot_SD(NuFloor=True,NuLabels=False,Annotations=True,Collected=Fals
     if NuFloor==True: 
         # Xe and F neutrino floors
         nu_Xe = loadtxt("../data/WIMPLimits/SD/nufloor-Xe.txt")
-        nu_F = loadtxt("../data/WIMPLimits/SD/nufloor-F.txt")
-        plt.fill_between(nu_F[:,0], nu_F[:,1], y2=ymin,facecolor='dimgrey',alpha=0.4)
+        nu_F = loadtxt("../data/WIMPLimits/SI/nufloor-F.txt")
+        plt.fill_between(nu_F[:,0], nu_F[:,1]/0.003797518005540166, y2=ymin,facecolor='dimgrey',alpha=0.4)
         plt.fill_between(nu_Xe[:,0], nu_Xe[:,1], y2=ymin,facecolor='dimgrey',alpha=0.4)
         #plt.text(0.12,3e-38,r"$\nu$-{\bf floor}: Xe",fontsize=20,rotation=22,color="k")
         #plt.text(0.12,1.5e-42,r"$\nu$-{\bf floor}: F",fontsize=20,rotation=25,color="k")
